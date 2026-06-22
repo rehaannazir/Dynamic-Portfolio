@@ -101,6 +101,7 @@ export default function Portfolio() {
         @keyframes xflash{0%,60%{opacity:0}70%,100%{opacity:1}}
         @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(12px,-9px) scale(1.02)}66%{transform:translate(-9px,7px) scale(0.98)}}
         @keyframes orb{0%,100%{opacity:.12;transform:scale(1)}50%{opacity:.22;transform:scale(1.08)}}
+        @keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
         .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
         .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08)}
@@ -271,40 +272,7 @@ function Home({ setPage, mounted }) {
       {/* SHOWREEL */}
       <ShowreelSection />
 
-      <section className="max-w-6xl mx-auto px-5 py-16">
-        <Reveal><SectionLabel num="01">About</SectionLabel></Reveal>
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          <Reveal>
-            <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">I live where <span className="grad-text">product meets AI</span>.</h2>
-            <p className="text-slate-400 mt-5 leading-relaxed">I take ideas from a blank repo to a deployed, self-running system — designing the data model, wiring the APIs and the agents, and delivering something a business can actually rely on.</p>
-            <p className="text-slate-400 mt-4 leading-relaxed">Lately that means <span className="text-slate-200">AI content APIs, n8n automations and chatbot agents</span> built on Python, FastAPI and the Gemini API — with a focus on clean handoff, not babysitting.</p>
-            <p className="mono text-sm text-indigo-300 mt-5">// currently — Founder @ Nexara</p>
-            <div className="mt-8 flex flex-col gap-3">
-              {[
-                { icon:"◈", label:"End-to-end delivery", desc:"From data model to deployed interface." },
-                { icon:"◎", label:"Self-running systems", desc:"Built to run without you babysitting them." },
-                { icon:"◉", label:"Clean handoff", desc:"Docs, runbooks and a kill switch you own." },
-              ].map(({icon,label,desc})=>(
-                <div key={label} className="flex items-start gap-4 px-5 py-4 rounded-xl transition-all duration-700 hover:bg-white/[0.03]" style={{border:"1px solid rgba(255,255,255,0.055)"}}>
-                  <span className="text-indigo-400 text-lg mt-0.5 shrink-0">{icon}</span>
-                  <div><div className="text-white text-sm font-medium">{label}</div><div className="text-slate-500 text-xs mt-0.5">{desc}</div></div>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-          <Reveal delay={0.12}>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {[["12","+","Projects shipped"],["8","","AI products built"],["10","+","Happy clients"],["100","%","Hands-off delivery"]].map(([v,s,l])=>(
-                <div key={l} className="glass glass-hover rounded-2xl p-6" data-cursor>
-                  <div className="text-4xl font-bold grad-text"><Counter to={parseInt(v)} suffix={s} /></div>
-                  <div className="text-sm text-slate-400 mt-1">{l}</div>
-                </div>
-              ))}
-            </div>
-            <WhoamiCard />
-          </Reveal>
-        </div>
-      </section>
+      <AboutSection />
 
       <section className="max-w-6xl mx-auto px-5 py-12">
         <Reveal><SectionLabel num="02">Tech stack</SectionLabel></Reveal>
@@ -614,46 +582,384 @@ function AIPipelineViz() {
   );
 }
 
-/* ===================== SHOWREEL ===================== */
-function ShowreelSection() {
+/* ===================== SLIDE VISUALIZATIONS ===================== */
+function AutomationViz() {
+  const nodes = [
+    {x:18,y:95,w:88,label:"Webhook",sub:"trigger",col:"#60a5fa"},
+    {x:148,y:95,w:88,label:"n8n Flow",sub:"filter",col:"#a78bfa"},
+    {x:278,y:95,w:88,label:"Claude",sub:"LLM call",col:"#c084fc"},
+    {x:420,y:58,w:80,label:"CRM",sub:"write",col:"#34d399"},
+    {x:420,y:132,w:80,label:"Slack",sub:"notify",col:"#fb923c"},
+  ];
+  const conns = [[0,1],[1,2],[2,3],[2,4]];
   return (
-    <section className="max-w-6xl mx-auto px-5 py-10">
-      <Reveal><SectionLabel num="✦">Showreel</SectionLabel></Reveal>
-      <Reveal delay={0.08}><h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Thirty seconds of <span className="grad-text">what I build</span>.</h2></Reveal>
-      <Reveal delay={0.16}><p className="text-slate-400 mb-6 max-w-xl leading-relaxed text-sm">End-to-end AI systems — from the first webhook to the final CRM entry — running without a human in the loop.</p></Reveal>
-      <Reveal delay={0.22}>
-        <div className="rounded-2xl overflow-hidden" style={{background:"rgba(5,5,12,0.97)",border:"1px solid rgba(255,255,255,0.06)"}}>
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
-            <span className="w-2.5 h-2.5 rounded-full" style={{background:"rgba(248,113,113,0.55)"}}/>
-            <span className="w-2.5 h-2.5 rounded-full" style={{background:"rgba(251,191,36,0.55)"}}/>
-            <span className="w-2.5 h-2.5 rounded-full" style={{background:"rgba(52,211,153,0.55)"}}/>
-            <span className="mono text-xs text-slate-500 ml-2">~/nexara — systems at work</span>
-            <span className="ml-auto flex items-center gap-1.5 mono text-[10px] text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{animation:"vpulse 3.5s ease-in-out infinite"}}/>live
-            </span>
+    <svg viewBox="0 0 560 210" className="w-full" style={{maxHeight:180}}>
+      <defs>
+        <filter id="av-g"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      {conns.map(([a,b],i)=>{
+        const n1=nodes[a],n2=nodes[b];
+        const x1=n1.x+n1.w,y1=n1.y+18,x2=n2.x,y2=n2.y+18;
+        const d=`M ${x1} ${y1} C ${x1+28} ${y1} ${x2-28} ${y2} ${x2} ${y2}`;
+        return(<g key={i}>
+          <path d={d} fill="none" stroke="rgba(99,102,241,0.22)" strokeWidth="1.4" strokeDasharray="5 8" style={{animation:`vdash ${3+i*0.3}s linear infinite`}}/>
+          <circle r="3.5" fill={n1.col} filter="url(#av-g)"><animateMotion dur={`${2.2+i*0.4}s`} begin={`${i*0.5}s`} repeatCount="indefinite" path={d}/></circle>
+        </g>);
+      })}
+      {nodes.map((n,i)=>(
+        <g key={i}>
+          <rect x={n.x} y={n.y} width={n.w} height="36" rx="8" fill="rgba(6,6,14,0.97)" stroke={n.col} strokeOpacity="0.5" strokeWidth="1.2" style={{animation:`vpulse ${3.5+i*0.4}s ease-in-out ${i*0.3}s infinite`}}/>
+          <circle cx={n.x+11} cy={n.y+18} r="3.2" fill={n.col} filter="url(#av-g)"/>
+          <text x={n.x+n.w/2+4} y={n.y+14} textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#e2e8f0" fontWeight="600">{n.label}</text>
+          <text x={n.x+n.w/2+4} y={n.y+26} textAnchor="middle" fontFamily="monospace" fontSize="7" fill={n.col} opacity="0.75">{n.sub}</text>
+        </g>
+      ))}
+      <path d="M 110 131 C 110 170 18 170 18 131" fill="none" stroke="rgba(99,102,241,0.13)" strokeWidth="1" strokeDasharray="3 6" style={{animation:"vdash 4s linear infinite"}}/>
+      <text x="64" y="188" textAnchor="middle" fontFamily="monospace" fontSize="8" fill="rgba(99,102,241,0.38)">↻ runs on schedule</text>
+    </svg>
+  );
+}
+
+function RAGViz() {
+  const top=[["Docs","#60a5fa",18],["Chunk","#a78bfa",130],["Embed","#c084fc",242],["Vector DB","#818cf8",354]];
+  const bot=[["Query","#34d399",18],["Retrieve","#60a5fa",130],["Context","#a78bfa",242],["Claude","#c084fc",354],["Answer ✓","#34d399",466]];
+  return (
+    <svg viewBox="0 0 570 210" className="w-full" style={{maxHeight:180}}>
+      <defs><filter id="rv-g"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      {top.map(([l,c,x],i)=>(
+        <g key={i}>
+          <rect x={x} y="14" width="90" height="36" rx="8" fill="rgba(6,6,14,0.97)" stroke={c} strokeOpacity="0.45" strokeWidth="1.1" style={{animation:`vpulse ${3+i*0.3}s ease-in-out ${i*0.4}s infinite`}}/>
+          <text x={x+45} y="36" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#e2e8f0">{l}</text>
+          {i<3&&<><path d={`M ${x+91} 32 L ${x+129} 32`} fill="none" stroke="rgba(99,102,241,0.22)" strokeWidth="1.4" strokeDasharray="4 6" style={{animation:"vdash 2.4s linear infinite"}}/><circle r="3" fill={c} filter="url(#rv-g)"><animateMotion dur="1.6s" begin={`${i*0.3}s`} repeatCount="indefinite" path={`M ${x+91} 32 L ${x+129} 32`}/></circle></>}
+        </g>
+      ))}
+      <path d="M 399 50 L 399 90" fill="none" stroke="rgba(99,102,241,0.28)" strokeWidth="1.4" strokeDasharray="4 6" style={{animation:"vdash 2s linear infinite"}}/>
+      <circle r="3" fill="#818cf8" filter="url(#rv-g)"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 399 50 L 399 90"/></circle>
+      {bot.map(([l,c,x],i)=>(
+        <g key={i}>
+          <rect x={x} y="92" width={l==="Answer ✓"?88:90} height="36" rx="8" fill="rgba(6,6,14,0.97)" stroke={c} strokeOpacity="0.45" strokeWidth="1.1" style={{animation:`vpulse ${3+i*0.3}s ease-in-out ${i*0.2}s infinite`}}/>
+          <text x={x+(l==="Answer ✓"?44:45)} y="114" textAnchor="middle" fontFamily="monospace" fontSize={l==="Answer ✓"?8.5:9} fill={i===4?"#34d399":"#e2e8f0"}>{l}</text>
+          {i<4&&<><path d={`M ${x+91} 110 L ${x+129} 110`} fill="none" stroke="rgba(99,102,241,0.22)" strokeWidth="1.4" strokeDasharray="4 6" style={{animation:"vdash 2.2s linear infinite"}}/><circle r="3" fill={c} filter="url(#rv-g)"><animateMotion dur="1.5s" begin={`${i*0.25}s`} repeatCount="indefinite" path={`M ${x+91} 110 L ${x+129} 110`}/></circle></>}
+        </g>
+      ))}
+      <text x="285" y="172" textAnchor="middle" fontFamily="monospace" fontSize="8" fill="rgba(148,163,184,0.4)">documents → semantic search → grounded answer</text>
+    </svg>
+  );
+}
+
+function AgentLoopViz() {
+  const cx=148,cy=158,ro=100,ri=60;
+  const pts=[[cx,cy-ro,"OBSERVE"],[cx-ro,cy,"REFLECT"],[cx,cy+ro,"ACT"]];
+  return (
+    <svg viewBox="0 0 600 320" className="w-full" style={{maxHeight:240}}>
+      <defs>
+        <filter id="al-g"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="al-s"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      {/* Circles */}
+      <circle cx={cx} cy={cy} r={ro} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1.2"/>
+      <circle cx={cx} cy={cy} r={ri} fill="rgba(99,102,241,0.05)" stroke="rgba(139,92,246,0.32)" strokeWidth="1.2"/>
+      {/* Orbit points + labels */}
+      {pts.map(([x,y,label])=>(
+        <g key={label}>
+          <circle cx={x} cy={y} r="4.5" fill="rgba(255,255,255,0.45)" style={{animation:"vpulse 3s ease-in-out infinite"}}/>
+          <text x={label==="REFLECT"?x-12:x} y={label==="OBSERVE"?y-13:label==="ACT"?y+17:y+4}
+            textAnchor={label==="REFLECT"?"end":"middle"} fontFamily="monospace" fontSize="8.5" fill="rgba(255,255,255,0.4)" letterSpacing="1.2">{label}</text>
+        </g>
+      ))}
+      {/* Center → orbit dashed lines */}
+      {[[cx,cy-ri,cx,cy-ro],[cx-ri,cy,cx-ro,cy],[cx,cy+ri,cx,cy+ro]].map(([x1,y1,x2,y2],i)=>(
+        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(99,102,241,0.18)" strokeWidth="1" strokeDasharray="3 5"/>
+      ))}
+      {/* Center text */}
+      <text x={cx} y={cy-5} textAnchor="middle" fontFamily="monospace" fontSize="11" fontWeight="600" fill="rgba(255,255,255,0.65)" letterSpacing="1">AGENT</text>
+      <text x={cx} y={cy+12} textAnchor="middle" fontFamily="monospace" fontSize="11" fontWeight="600" fill="rgba(255,255,255,0.65)" letterSpacing="1">LOOP</text>
+      {/* Orbiting REASON dot */}
+      <g><animateTransform attributeName="transform" type="rotate" from={`0 ${cx} ${cy}`} to={`360 ${cx} ${cy}`} dur="5.5s" repeatCount="indefinite"/>
+        <circle cx={cx+ro} cy={cy} r="10" fill="#818cf8" filter="url(#al-g)"/>
+      </g>
+      <text x={cx+ro+16} y={cy-8} textAnchor="start" fontFamily="monospace" fontSize="9" fontWeight="700" fill="#818cf8" opacity="0.85">REASON</text>
+      {/* Divider */}
+      <line x1="278" y1="28" x2="278" y2="292" stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
+      {/* LLM label + box */}
+      <text x="396" y="52" textAnchor="middle" fontFamily="monospace" fontSize="8" fill="rgba(139,92,246,0.65)" letterSpacing="1">LLM</text>
+      <rect x="328" y="58" width="136" height="48" rx="10" fill="rgba(6,6,14,0.97)" stroke="rgba(139,92,246,0.52)" strokeWidth="1.4"/>
+      <text x="396" y="90" textAnchor="middle" fontFamily="monospace" fontSize="17" fill="#c4b5fd" fontWeight="700">Claude</text>
+      {/* LLM → tool lines with particles */}
+      {[[335,192],[437,192],[539,192]].map(([tcx],i)=>{
+        const d=`M 396 106 L ${tcx} 182`;
+        return(<g key={i}>
+          <line x1="396" y1="106" x2={tcx} y2="182" stroke="rgba(99,102,241,0.2)" strokeWidth="1.1"/>
+          <circle r="3" fill="#818cf8" filter="url(#al-s)"><animateMotion dur={`${2+i*0.4}s`} begin={`${i*0.7}s`} repeatCount="indefinite" path={d}/></circle>
+        </g>);
+      })}
+      {/* Tool boxes */}
+      {[["search()",296],["db.query()",398],["fetch()",500]].map(([name,x],i)=>(
+        <g key={name}>
+          <text x={x+40} y="180" textAnchor="middle" fontFamily="monospace" fontSize="7" fill="rgba(255,255,255,0.28)" letterSpacing="1">TOOL</text>
+          <rect x={x} y="186" width="80" height="38" rx="7" fill="rgba(6,6,14,0.97)" stroke="rgba(255,255,255,0.1)" strokeWidth="1.1" style={{animation:`vpulse ${4+i*0.5}s ease-in-out ${i*0.4}s infinite`}}/>
+          <text x={x+40} y="210" textAnchor="middle" fontFamily="monospace" fontSize="10" fill="#e2e8f0">{name}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function VoiceViz() {
+  const nodes=[
+    {x:14,y:88,w:76,label:"Call In",col:"#60a5fa"},
+    {x:106,y:88,w:76,label:"Vapi",col:"#a78bfa"},
+    {x:198,y:88,w:82,label:"Transcribe",col:"#c084fc"},
+    {x:296,y:88,w:76,label:"Claude",col:"#818cf8"},
+    {x:388,y:88,w:76,label:"TTS",col:"#e879f9"},
+    {x:480,y:88,w:76,label:"Respond",col:"#34d399"},
+  ];
+  return (
+    <svg viewBox="0 0 570 190" className="w-full" style={{maxHeight:165}}>
+      <defs><filter id="vv-g"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      {Array.from({length:36}).map((_,i)=>{
+        const h=7+Math.abs(Math.sin(i*0.65)*18+Math.cos(i*1.1)*10);
+        return(<rect key={i} x={14+i*15} y={158-h/2} width="8" height={h} rx="3" fill="rgba(99,102,241,0.13)" style={{animation:`vpulse ${2+Math.abs(Math.sin(i))}s ease-in-out ${i*0.05}s infinite`}}/>);
+      })}
+      {nodes.map((n,i)=>(
+        <g key={i}>
+          <rect x={n.x} y={n.y} width={n.w} height="36" rx="8" fill="rgba(6,6,14,0.97)" stroke={n.col} strokeOpacity="0.5" strokeWidth="1.1" style={{animation:`vpulse ${3+i*0.4}s ease-in-out ${i*0.25}s infinite`}}/>
+          <text x={n.x+n.w/2} y={n.y+21} textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#e2e8f0">{n.label}</text>
+          {i<nodes.length-1&&<><path d={`M ${n.x+n.w+1} ${n.y+18} L ${nodes[i+1].x-1} ${n.y+18}`} fill="none" stroke="rgba(99,102,241,0.22)" strokeWidth="1.4" strokeDasharray="4 6" style={{animation:"vdash 1.8s linear infinite"}}/><circle r="3.2" fill={n.col} filter="url(#vv-g)"><animateMotion dur="0.8s" begin={`${i*0.22}s`} repeatCount="indefinite" path={`M ${n.x+n.w+1} ${n.y+18} L ${nodes[i+1].x-1} ${n.y+18}`}/></circle></>}
+        </g>
+      ))}
+      <circle cx="20" cy="95" r="4" fill="#34d399" filter="url(#vv-g)" style={{animation:"vpulse 1.4s ease-in-out infinite"}}/>
+      <text x="285" y="182" textAnchor="middle" fontFamily="monospace" fontSize="8" fill="rgba(148,163,184,0.38)">voice → text → intelligence → voice</text>
+    </svg>
+  );
+}
+
+function DeployViz() {
+  const steps=[
+    {label:"git push",col:"#60a5fa",x:16},
+    {label:"Build",col:"#a78bfa",x:124},
+    {label:"Test",col:"#c084fc",x:232},
+    {label:"Deploy",col:"#818cf8",x:340},
+    {label:"Monitor",col:"#34d399",x:448},
+  ];
+  return (
+    <svg viewBox="0 0 560 190" className="w-full" style={{maxHeight:165}}>
+      <defs>
+        <filter id="dv-g"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <linearGradient id="dv-bar" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stopColor="#3b82f6"/><stop offset="100%" stopColor="#34d399"/></linearGradient>
+      </defs>
+      {steps.map((s,i)=>(
+        <g key={i}>
+          <rect x={s.x} y="72" width="92" height="42" rx="10" fill="rgba(6,6,14,0.97)" stroke={s.col} strokeOpacity="0.5" strokeWidth="1.2" style={{animation:`vpulse ${3.5+i*0.4}s ease-in-out ${i*0.3}s infinite`}}/>
+          <text x={s.x+46} y="97" textAnchor="middle" fontFamily="monospace" fontSize="9.5" fill="#e2e8f0">{s.label}</text>
+          {i<4&&<g style={{animation:`xflash 3s ease ${i*0.5}s infinite`}}>
+            <circle cx={s.x+85} cy="68" r="9" fill={s.col} opacity="0.14"/>
+            <text x={s.x+85} y="71.5" textAnchor="middle" fontSize="9" fill={s.col} fontFamily="monospace">✓</text>
+          </g>}
+          {i===4&&<circle cx={s.x+85} cy="68" r="5" fill="#34d399" filter="url(#dv-g)" style={{animation:"vpulse 1.4s ease-in-out infinite"}}/>}
+          {i<steps.length-1&&<><path d={`M ${s.x+93} 93 L ${steps[i+1].x-1} 93`} fill="none" stroke="rgba(99,102,241,0.22)" strokeWidth="1.4" strokeDasharray="4 7" style={{animation:"vdash 2.4s linear infinite"}}/><circle r="3.5" fill={s.col} filter="url(#dv-g)"><animateMotion dur={`${2+i*0.3}s`} begin={`${i*0.4}s`} repeatCount="indefinite" path={`M ${s.x+93} 93 L ${steps[i+1].x-1} 93`}/></circle></>}
+        </g>
+      ))}
+      <rect x="16" y="140" width="528" height="5" rx="2.5" fill="rgba(255,255,255,0.05)"/>
+      <rect x="16" y="140" height="5" rx="2.5" fill="url(#dv-bar)">
+        <animate attributeName="width" from="0" to="528" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <text x="280" y="170" textAnchor="middle" fontFamily="monospace" fontSize="8" fill="rgba(148,163,184,0.38)">push → ci passes → live in 45s → monitored</text>
+    </svg>
+  );
+}
+
+/* ===================== SHOWREEL ===================== */
+const SLIDES = [
+  { num:"01", tag:"AUTOMATION · N8N & WEBHOOKS",         heading:"Workflows that run while you sleep.",      color:"#60a5fa", Viz:AutomationViz  },
+  { num:"02", tag:"RAG · KNOWLEDGE RETRIEVAL",           heading:"Context-aware answers at any scale.",      color:"#a78bfa", Viz:RAGViz         },
+  { num:"03", tag:"AI AGENTS · LLM IN A LOOP WITH TOOLS",heading:"Agents that think, call tools, ship work.",color:"#818cf8", Viz:AgentLoopViz   },
+  { num:"04", tag:"VOICE AI · VAPI ASSISTANTS",          heading:"Conversations that feel alive.",           color:"#c084fc", Viz:VoiceViz       },
+  { num:"05", tag:"DELIVERY · IDEA TO PRODUCTION",       heading:"Shipped. Monitored. Reliable.",            color:"#34d399", Viz:DeployViz      },
+];
+
+function ShowreelSection() {
+  const [idx, setIdx] = useState(0);
+  const [prog, setProg] = useState(0);
+  const DUR = 6000;
+  useEffect(() => {
+    setProg(0);
+    const adv = setTimeout(() => setIdx(i => (i+1) % SLIDES.length), DUR);
+    return () => clearTimeout(adv);
+  }, [idx]);
+  useEffect(() => {
+    setProg(0);
+    const tick = setInterval(() => setProg(p => p >= 100 ? 100 : p + 100/(DUR/100)), 100);
+    return () => clearInterval(tick);
+  }, [idx]);
+  const s = SLIDES[idx];
+  const V = s.Viz;
+  return (
+    <section className="max-w-6xl mx-auto px-5 py-16">
+      <Reveal>
+        <p className="mono text-[10px] text-slate-600 tracking-widest mb-4 uppercase">Agent loop · tool calling · automation &amp; more — in one breath.</p>
+        <h2 className="text-4xl md:text-5xl font-bold text-white mb-10">Thirty seconds of <span className="grad-text">what I do</span>.</h2>
+      </Reveal>
+      <Reveal delay={0.15}>
+        <div className="rounded-2xl overflow-hidden" style={{background:"#05050d",border:"1px solid rgba(255,255,255,0.07)",minHeight:460}}>
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/5">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-blue-400" style={{animation:"vpulse 2.4s ease-in-out infinite"}}/>
+              <span className="mono text-sm text-slate-400">rehan.nazir ()</span>
+            </div>
+            <span className="mono text-xs text-slate-700 tracking-wider">Loop 00:30</span>
           </div>
-          <div className="grid md:grid-cols-[1fr_180px] divide-y md:divide-y-0 md:divide-x divide-white/5">
-            <div className="relative flex items-stretch" style={{minHeight:200}}>
-              <div className="absolute inset-0 pointer-events-none" style={{background:"radial-gradient(400px 200px at 35% 55%,rgba(139,92,246,0.07),transparent 70%)"}}/>
-              <AIPipelineViz />
+          {/* Progress bar */}
+          <div className="h-px" style={{background:"rgba(255,255,255,0.04)"}}>
+            <div style={{height:"100%",width:prog+"%",background:`linear-gradient(90deg,${s.color}66,${s.color})`,transition:"width 0.1s linear"}}/>
+          </div>
+          {/* Slide content */}
+          <div className="px-8 pt-8 pb-6">
+            <p className="mono text-[10px] text-slate-600 tracking-widest mb-3 uppercase">{s.num} · {s.tag}</p>
+            <h3 key={idx} className="text-2xl md:text-3xl font-bold text-white mb-8" style={{animation:"slideIn 0.55s cubic-bezier(.16,1,.3,1) both"}}>{s.heading}</h3>
+            <div style={{minHeight:200}} key={"viz"+idx} className="overflow-hidden">
+              <V />
             </div>
-            <div className="p-4 flex flex-col justify-between" style={{background:"rgba(0,0,0,0.18)"}}>
-              <div>
-                <div className="mono text-[9px] text-slate-600 uppercase tracking-widest mb-2.5">// live activity</div>
-                <LiveLogs />
-              </div>
-              <div className="mt-3 space-y-2 border-t border-white/5 pt-3">
-                {[["142","commits"],["99.9%","uptime"],["12+","systems"],["10+","clients"]].map(([v,l])=>(
-                  <div key={l} className="flex items-center justify-between">
-                    <span className="mono text-[9px] text-slate-500">{l}</span>
-                    <span className="mono text-[11px] font-bold text-white">{v}</span>
-                  </div>
-                ))}
-              </div>
+          </div>
+          {/* Bottom navigation */}
+          <div className="px-8 py-5 border-t border-white/5 flex items-center justify-between">
+            <div className="flex gap-2 items-center">
+              {SLIDES.map((_,i)=>(
+                <button key={i} onClick={()=>setIdx(i)}
+                  style={{width:i===idx?32:8,height:4,borderRadius:4,background:i===idx?s.color:"rgba(255,255,255,0.13)",transition:"all 0.5s ease",border:"none",cursor:"pointer"}}
+                />
+              ))}
             </div>
+            <span className="mono text-xs text-slate-700">{String(SLIDES.length).padStart(2,"0")} — {s.num} · {s.tag.split("·")[0].trim()}</span>
           </div>
         </div>
       </Reveal>
+    </section>
+  );
+}
+
+/* ===================== ABOUT SECTION ===================== */
+function AboutSection() {
+  const [phase, setPhase] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setPhase(p => (p+1) % 3), 3800);
+    return () => clearTimeout(t);
+  }, [phase]);
+  const barH = [3,5,8,12,7,14,10,6,11,9,13,7,5,9];
+  return (
+    <section className="max-w-6xl mx-auto px-5 py-20">
+      <div className="grid lg:grid-cols-2 gap-14 items-center">
+        {/* Left: floating terminal panel */}
+        <Reveal>
+          <div className="relative" style={{height:400}}>
+            {/* GIT ACTIVITY — top left */}
+            <div className="absolute left-0 top-0 z-20 glass rounded-xl p-3" style={{width:162,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="mono text-[8.5px] text-slate-500 uppercase tracking-wider">Git Activity</span>
+                <span className="mono text-[8.5px] text-indigo-400">7D</span>
+              </div>
+              <div className="flex gap-px items-end" style={{height:34}}>
+                {barH.map((h,i)=>(
+                  <div key={i} style={{flex:1,height:h*2.4+"px",borderRadius:2,background:`rgba(139,92,246,${0.18+h/18})`,animation:`vpulse ${2+i*0.12}s ease-in-out ${i*0.08}s infinite`}}/>
+                ))}
+              </div>
+              <div className="mono text-[10px] text-white font-bold mt-2">142 <span className="text-slate-500 font-normal">commits</span></div>
+            </div>
+            {/* DEPLOYED — top right */}
+            <div className="absolute right-0 top-5 z-20 rounded-xl px-3 py-2.5" style={{width:192,background:"rgba(14,14,26,0.94)",border:"1px solid rgba(52,211,153,0.22)",boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
+              <div className="flex items-center gap-2 mb-0.5">
+                <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{background:"rgba(52,211,153,0.18)"}}>
+                  <span className="text-emerald-400 text-[9px] leading-none">✓</span>
+                </div>
+                <span className="mono text-[9.5px] text-white font-medium">Deployed to production</span>
+              </div>
+              <span className="mono text-[7.5px] text-slate-500 ml-6">vercel · 1m 24s · @nexara</span>
+            </div>
+            {/* Main terminal — center */}
+            <div className="absolute z-10 glass rounded-2xl overflow-hidden" style={{left:24,right:24,top:36,bottom:36,boxShadow:"0 24px 64px rgba(0,0,0,0.65)"}}>
+              <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-green-400/70"/>
+                <span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span>
+              </div>
+              <div className="p-4 mono text-xs leading-relaxed space-y-3 overflow-hidden">
+                <div>
+                  <div><span className="text-emerald-400">$ </span><span className="text-slate-300">whoami</span></div>
+                  <div className="mt-1 text-white font-bold ml-4">Rehan Nazir</div>
+                </div>
+                {phase >= 1 && (
+                  <div style={{animation:"slideIn 0.5s ease both"}}>
+                    <div><span className="text-emerald-400">$ </span><span className="text-slate-300">philosophy</span></div>
+                    <div className="mt-1 ml-4 space-y-0.5 text-slate-400">
+                      <div>Build fast. Ship clean.</div>
+                      <div>Build with AI. Deliver value.</div>
+                      <div>Own every layer.</div>
+                    </div>
+                  </div>
+                )}
+                {phase >= 2 && (
+                  <div style={{animation:"slideIn 0.5s ease both"}}>
+                    <div><span className="text-emerald-400">$ </span><span className="text-slate-300">status</span></div>
+                    <div className="flex items-center gap-2 mt-1 ml-4">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" style={{animation:"vpulse 1.5s ease-in-out infinite"}}/>
+                      <span className="text-emerald-300">Available for select projects</span>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-1">
+                  <span className="text-emerald-400">$ </span>
+                  <span className="inline-block w-2 h-3.5 ml-1 align-middle" style={{background:"#a78bfa",animation:"blink 1s step-end infinite"}}/>
+                </div>
+              </div>
+            </div>
+            {/* INFERENCE — bottom left */}
+            <div className="absolute left-0 bottom-0 z-20 glass rounded-xl p-3" style={{width:156,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="mono text-[8.5px] text-slate-500 uppercase tracking-wider">Inference</span>
+                <span className="mono text-[8.5px] text-purple-400">Claude</span>
+              </div>
+              <svg viewBox="0 0 120 44" className="w-full">
+                {[[18,10],[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]].map(([x,y],i)=>(
+                  <g key={i}>
+                    <circle cx={x} cy={y} r="3.5" fill={["#60a5fa","#a78bfa","#c084fc","#818cf8","#60a5fa","#a78bfa","#c084fc"][i]} style={{animation:`vpulse ${2+i*0.3}s ease-in-out ${i*0.22}s infinite`}}/>
+                    {i<6&&<line x1={x} y1={y} x2={[[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]][i][0]} y2={[[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]][i][1]} stroke="rgba(139,92,246,0.22)" strokeWidth="0.8"/>}
+                  </g>
+                ))}
+              </svg>
+            </div>
+            {/* API ROUTES — bottom right */}
+            <div className="absolute right-0 bottom-2 z-20 glass rounded-xl px-3 py-2.5" style={{width:184,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
+              {[["POST","/api/agent"],["GET","/api/rag","200"],["POST","/api/embed"]].map(([m,p,s],i)=>(
+                <div key={i} className="flex items-center gap-2 py-1 mono text-[8.5px]">
+                  <span style={{color:m==="GET"?"#a78bfa":"#60a5fa",width:30,flexShrink:0}}>{m}</span>
+                  <span className="text-slate-400 flex-1 truncate">{p}</span>
+                  {s&&<span className="text-emerald-400">{s}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+        {/* Right: bio text */}
+        <Reveal delay={0.15}>
+          <SectionLabel num="01">About</SectionLabel>
+          <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">I live where <span className="grad-text">product meets AI</span>.</h2>
+          <p className="text-slate-400 mt-5 leading-relaxed">I take ideas from a blank repo to a deployed, self-running system — designing the data model, wiring the APIs and the agents, and delivering something a business can actually rely on.</p>
+          <p className="text-slate-400 mt-4 leading-relaxed">Lately that means <span className="text-slate-200">AI content APIs, n8n automations and chatbot agents</span> built on Python, FastAPI and the Gemini API — with a focus on clean handoff, not babysitting.</p>
+          <p className="mono text-sm text-indigo-300 mt-5">// currently — Founder @ Nexara</p>
+          <div className="mt-8 flex flex-col gap-3">
+            {[
+              {icon:"◈",label:"End-to-end delivery",desc:"From data model to deployed interface."},
+              {icon:"◎",label:"Self-running systems",desc:"Built to run without you babysitting them."},
+              {icon:"◉",label:"Clean handoff",desc:"Docs, runbooks and a kill switch you own."},
+            ].map(({icon,label,desc})=>(
+              <div key={label} className="flex items-start gap-4 px-5 py-4 rounded-xl hover:bg-white/[0.03] transition-all duration-700" style={{border:"1px solid rgba(255,255,255,0.055)"}}>
+                <span className="text-indigo-400 text-lg mt-0.5 shrink-0">{icon}</span>
+                <div><div className="text-white text-sm font-medium">{label}</div><div className="text-slate-500 text-xs mt-0.5">{desc}</div></div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </div>
     </section>
   );
 }
