@@ -33,3 +33,5 @@ backend/*.db-wal
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
