@@ -546,12 +546,16 @@ function LiveLogs() {
 function AIPipelineViz() {
   const COL = { input:"#60a5fa", orch:"#a78bfa", llm:"#c084fc", agent:"#e879f9", output:"#34d399" };
   const W = 320;
+  const H = 196;
+  const NH = 22; // node height
+  const GAP = 27; // gap between stages
+  const ROW = NH + GAP; // 49px per stage row
   const stages = [
-    { label:"INPUT",       col:COL.input,  y:28,  nodes:["user query","webhook","CSV"] },
-    { label:"ORCHESTRATE", col:COL.orch,   y:110, nodes:["RAG","n8n","Vapi"] },
-    { label:"LLM",         col:COL.llm,    y:192, nodes:["Claude","OpenAI","Gemini"] },
-    { label:"AGENT",       col:COL.agent,  y:274, nodes:["AI Agent","CrewAI","custom"] },
-    { label:"OUTPUT",      col:COL.output, y:352, nodes:["CRM","Slack","API"] },
+    { label:"INPUT",       col:COL.input,  y:0,         nodes:["user query","webhook","CSV"] },
+    { label:"ORCHESTRATE", col:COL.orch,   y:ROW,       nodes:["RAG","n8n","Vapi"] },
+    { label:"LLM",         col:COL.llm,    y:ROW*2,     nodes:["Claude","OpenAI","Gemini"] },
+    { label:"AGENT",       col:COL.agent,  y:ROW*3,     nodes:["AI Agent","CrewAI","custom"] },
+    { label:"OUTPUT",      col:COL.output, y:ROW*4,     nodes:["CRM","Slack","API"] },
   ];
   const nx = (i, total) => 14 + i * ((W - 90) / Math.max(total - 1, 1));
   const conns = [
@@ -562,8 +566,9 @@ function AIPipelineViz() {
     [2,0,3,1,7.6],[2,2,3,1,8.2],
     [3,0,4,0,9],[3,1,4,1,9.6],[3,2,4,2,10.2],
   ];
+  const CP = 10; // bezier control point offset
   return (
-    <svg viewBox={`0 0 ${W} 396`} preserveAspectRatio="xMidYMid meet" className="w-full h-full">
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" style={{width:"100%",height:"100%",display:"block"}}>
       <defs>
         <filter id="pg" x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -575,16 +580,16 @@ function AIPipelineViz() {
           <path d="M 22 0 L 0 0 0 22" fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="0.5"/>
         </pattern>
       </defs>
-      <rect width={W} height="396" fill="url(#pgrid)"/>
+      <rect width={W} height={H} fill="url(#pgrid)"/>
       {conns.map(([si,ai,ti,bi,delay], idx) => {
         const a = stages[si], b = stages[ti];
-        const x1 = nx(ai, a.nodes.length)+30, y1 = a.y+26;
+        const x1 = nx(ai, a.nodes.length)+30, y1 = a.y+NH;
         const x2 = nx(bi, b.nodes.length)+30, y2 = b.y;
-        const d = `M ${x1} ${y1} C ${x1} ${y1+28} ${x2} ${y2-28} ${x2} ${y2}`;
+        const d = `M ${x1} ${y1} C ${x1} ${y1+CP} ${x2} ${y2-CP} ${x2} ${y2}`;
         return (
           <g key={idx}>
             <path d={d} fill="none" stroke={a.col} strokeOpacity="0.18" strokeWidth="1.4" strokeDasharray="4 7" style={{animation:`vdash ${3.5+idx*0.12}s linear ${delay*0.08}s infinite`}}/>
-            <circle r="2.6" fill={a.col} filter="url(#pgsm)">
+            <circle r="2.2" fill={a.col} filter="url(#pgsm)">
               <animateMotion dur={`${6+idx*0.5}s`} begin={`${delay*0.25}s`} repeatCount="indefinite" path={d}/>
             </circle>
           </g>
@@ -592,14 +597,14 @@ function AIPipelineViz() {
       })}
       {stages.map((st, si) => (
         <g key={si}>
-          <text x={W-5} y={st.y+16} textAnchor="end" fontFamily="'JetBrains Mono',monospace" fontSize="6.5" fill={st.col} opacity="0.45">{st.label}</text>
+          <text x={W-4} y={st.y+14} textAnchor="end" fontFamily="'JetBrains Mono',monospace" fontSize="5.5" fill={st.col} opacity="0.45">{st.label}</text>
           {st.nodes.map((n, ni) => {
             const x = nx(ni, st.nodes.length);
             return (
               <g key={ni}>
-                <rect x={x} y={st.y} width="60" height="26" rx="6" fill="rgba(9,9,18,0.97)" stroke={st.col} strokeOpacity="0.5" strokeWidth="1.1" style={{animation:`vpulse ${4+si*0.5+ni*0.25}s ease-in-out ${ni*0.5}s infinite`}}/>
-                <circle cx={x+9} cy={st.y+13} r="2.2" fill={st.col} filter="url(#pgsm)" style={{animation:`vpulse ${3+ni*0.4}s ease-in-out ${si*0.3}s infinite`}}/>
-                <text x={x+32} y={st.y+17} textAnchor="middle" fontFamily="'JetBrains Mono',monospace" fontSize="7.5" fill="#c7d2fe">{n}</text>
+                <rect x={x} y={st.y} width="60" height={NH} rx="5" fill="rgba(9,9,18,0.97)" stroke={st.col} strokeOpacity="0.5" strokeWidth="1.1" style={{animation:`vpulse ${4+si*0.5+ni*0.25}s ease-in-out ${ni*0.5}s infinite`}}/>
+                <circle cx={x+8} cy={st.y+NH/2} r="1.8" fill={st.col} filter="url(#pgsm)" style={{animation:`vpulse ${3+ni*0.4}s ease-in-out ${si*0.3}s infinite`}}/>
+                <text x={x+32} y={st.y+NH/2+3} textAnchor="middle" fontFamily="'JetBrains Mono',monospace" fontSize="6.5" fill="#c7d2fe">{n}</text>
               </g>
             );
           })}
@@ -628,7 +633,7 @@ function ShowreelSection() {
             </span>
           </div>
           <div className="grid md:grid-cols-[1fr_180px] divide-y md:divide-y-0 md:divide-x divide-white/5">
-            <div className="relative overflow-hidden" style={{height:200}}>
+            <div className="relative flex items-stretch" style={{minHeight:200}}>
               <div className="absolute inset-0 pointer-events-none" style={{background:"radial-gradient(400px 200px at 35% 55%,rgba(139,92,246,0.07),transparent 70%)"}}/>
               <AIPipelineViz />
             </div>
