@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import rehanPhoto from "./assets/rehan.jpg";
 import {
   Workflow, Cpu, MessageSquare, TrendingUp, Code, Zap, Star,
@@ -6,6 +7,8 @@ import {
   CircleCheck, Sparkles, Layers, Calendar, Clock, Camera, ExternalLink,
   GitBranch, Activity, List, Quote, ChevronRight, TriangleAlert, BookOpen, User, Send
 } from "lucide-react";
+
+const SITE_URL = "https://rehannazir.dev";
 
 /* ===================== CUSTOM GLOWING CURSOR ===================== */
 function CustomCursor() {
@@ -144,7 +147,7 @@ export default function Portfolio() {
               </div>
               <span className="mono text-sm text-white">rehan.nazir<span className="text-indigo-400">()</span></span>
             </button>
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
               {nav.map((n) => (
                 <button key={n.id} onClick={() => setPage(n.id)} className={"px-3 py-2 rounded-lg text-sm mono transition-all flex items-center gap-1.5 " + ((page === n.id || (page === "article" && n.id === "blog")) ? "text-white" : "text-slate-400 hover:text-white")} style={(page === n.id || (page === "article" && n.id === "blog")) ? { background: "rgba(99,102,241,0.14)", border: "1px solid rgba(139,92,246,0.4)" } : {}}>
                   <span className="text-indigo-400 text-xs">{n.num}</span>{n.label}
@@ -177,7 +180,6 @@ export default function Portfolio() {
 
 /* ===================== HOME ===================== */
 function Home({ setPage, mounted }) {
-  // 👇 Your profile photo. Paste a base64 data URL or an image URL here.
   const PROFILE_PIC = rehanPhoto;
   const projects = [
     { n: "01", cat: "FastAPI · Gemini", title: "AI Content Automation API", desc: "Production backend that generates, categorizes and schedules content via LLMs behind a clean REST interface.", role: "Full Stack · AI · 2026", stack: ["FastAPI", "Gemini", "SQLAlchemy"] },
@@ -188,6 +190,27 @@ function Home({ setPage, mounted }) {
   const stack = ["Python", "FastAPI", "n8n", "Gemini API", "AI Agents", "RAG", "SQLAlchemy", "React", "Vite", "Tailwind"];
   return (
     <>
+      <Helmet>
+        <title>Rehan Nazir — AI Engineer & Automation Specialist | Lahore, Pakistan</title>
+        <meta name="description" content="Rehan Nazir is an AI Engineer and Automation Specialist based in Lahore, Pakistan. I build AI agents, FastAPI backends, n8n workflows and RAG chatbots. Founder of Nexara. Available worldwide." />
+        <link rel="canonical" href={SITE_URL + "/"} />
+        <meta property="og:url" content={SITE_URL + "/"} />
+        <meta property="og:title" content="Rehan Nazir — AI Engineer & Automation Specialist" />
+        <meta property="og:description" content="I design and ship intelligent automation end to end — AI agents, chatbots and workflows that quietly do the work, so businesses scale without the busywork." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          "mainEntity": {
+            "@type": "Person",
+            "name": "Rehan Nazir",
+            "jobTitle": "AI Engineer & Automation Specialist",
+            "description": "Self-taught AI engineer building agentic systems and automations. Founder of Nexara.",
+            "url": SITE_URL,
+            "sameAs": ["https://github.com/rehaannazir","https://www.linkedin.com/in/rehan-nazir-530597332"],
+            "worksFor": { "@type": "Organization", "name": "Nexara" }
+          }
+        })}</script>
+      </Helmet>
       <section className="grid-bg relative">
         <div className="max-w-6xl mx-auto px-5 pt-20 pb-24 grid lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -208,7 +231,7 @@ function Home({ setPage, mounted }) {
                 <div className="block mx-auto w-36 h-36 rounded-full relative">
                   <div className="absolute -inset-1 rounded-full" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", animation: "spinSlow 8s linear infinite", filter: "blur(2px)", opacity: 0.8 }} />
                   <div className="absolute inset-0 rounded-full overflow-hidden border-2 border-white/10 flex items-center justify-center" style={{ background: "#0c0c16" }}>
-                    {PROFILE_PIC ? <img src={PROFILE_PIC} alt="Rehan Nazir" className="w-full h-full object-cover" /> : <div className="flex flex-col items-center text-slate-500 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
+                    {PROFILE_PIC ? <img src={PROFILE_PIC} alt="Rehan Nazir — AI Engineer and Automation Specialist, Lahore Pakistan" width="144" height="144" className="w-full h-full object-cover" fetchpriority="high" /> : <div className="flex flex-col items-center text-slate-500 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
                   </div>
                 </div>
                 <h3 className="text-white font-semibold text-lg mt-5">Rehan Nazir</h3>
@@ -301,6 +324,14 @@ function Services({ setPage }) {
   ];
   return (
     <>
+      <Helmet>
+        <title>AI Automation Services — Rehan Nazir | FastAPI, n8n, AI Agents</title>
+        <meta name="description" content="AI chatbots, B2B sales automation, content APIs, n8n workflows and agentic systems. Rehan Nazir builds self-running automation systems for businesses worldwide." />
+        <link rel="canonical" href={SITE_URL + "/#services"} />
+        <meta property="og:url" content={SITE_URL + "/#services"} />
+        <meta property="og:title" content="AI Automation Services — Rehan Nazir" />
+        <meta property="og:description" content="AI chatbots, B2B sales automation, content APIs, n8n workflows and agentic systems built to run themselves." />
+      </Helmet>
       <section className="grid-bg"><div className="max-w-6xl mx-auto px-5 pt-20 pb-6">
         <Reveal><SectionLabel num="02">Services</SectionLabel></Reveal>
         <Reveal><h1 className="fade-up text-4xl md:text-5xl font-bold text-white leading-tight">Services built to <span className="grad-text">run themselves</span>.</h1></Reveal>
@@ -327,6 +358,14 @@ function Reviews() {
   ];
   return (
     <>
+      <Helmet>
+        <title>Client Reviews — Rehan Nazir | AI Automation Projects</title>
+        <meta name="description" content="Real client testimonials for Rehan Nazir's AI automation work. 10+ clients, 4.9 average rating, 100% on-time delivery. AI chatbots, sales automation and workflow systems." />
+        <link rel="canonical" href={SITE_URL + "/#reviews"} />
+        <meta property="og:url" content={SITE_URL + "/#reviews"} />
+        <meta property="og:title" content="Client Reviews — Rehan Nazir" />
+        <meta property="og:description" content="Real client testimonials. 10+ clients, 4.9 average rating, 100% on-time delivery." />
+      </Helmet>
       <section className="grid-bg"><div className="max-w-6xl mx-auto px-5 pt-20 pb-6"><Reveal><SectionLabel num="03">Client trust</SectionLabel></Reveal><Reveal><h1 className="text-4xl md:text-5xl font-bold text-white">What clients <span className="grad-text">say</span>.</h1></Reveal><Reveal delay={0.1}><p className="max-w-2xl mt-5 text-slate-400">Real results, delivered as systems that keep working long after handoff.</p></Reveal></div></section>
       <section className="max-w-6xl mx-auto px-5 py-10"><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[["12", "+", "Projects"], ["10", "+", "Clients"], ["4", ".9", "Avg rating"], ["100", "%", "On-time"]].map(([v, s, l]) => (<Reveal key={l}><div className="glass glass-hover rounded-2xl py-7 text-center" data-cursor><div className="text-3xl font-bold grad-text"><Counter to={parseInt(v)} suffix={s} /></div><div className="text-xs text-slate-400 mt-1">{l}</div></div></Reveal>))}</div></section>
       <section className="max-w-6xl mx-auto px-5 py-8"><div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">{reviews.map((r, i) => (<Reveal key={r.name} delay={(i % 3) * 0.08}><div className="glass glass-hover rounded-2xl p-6 flex flex-col h-full" data-cursor><div className="flex gap-1 mb-4">{Array.from({ length: 5 }).map((_, j) => (<Star key={j} className="w-4 h-4" style={{ fill: j < r.rating ? "#a78bfa" : "transparent", color: j < r.rating ? "#a78bfa" : "#3f3f5a" }} />))}</div><p className="text-sm text-slate-300 leading-relaxed flex-1">"{r.text}"</p><div className="flex items-center gap-3 mt-5 pt-5 border-t border-white/5"><div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>{r.name.split(" ").map((w) => w[0]).join("")}</div><div><div className="text-sm font-medium text-white">{r.name}</div><div className="text-xs text-slate-400">{r.role}</div></div></div></div></Reveal>))}</div></section>
@@ -411,6 +450,30 @@ function Blog({ openArticle }) {
   const feat = POSTS[0];
   return (
     <>
+      <Helmet>
+        <title>Blog — AI Automation & Engineering | Rehan Nazir</title>
+        <meta name="description" content="Practical notes on AI engineering, workflow automation, n8n, RAG chatbots and building systems that run themselves. By Rehan Nazir, AI Engineer and Founder of Nexara." />
+        <link rel="canonical" href={SITE_URL + "/#blog"} />
+        <meta property="og:url" content={SITE_URL + "/#blog"} />
+        <meta property="og:title" content="Blog — AI Automation & Engineering | Rehan Nazir" />
+        <meta property="og:description" content="Practical notes on AI engineering, workflow automation, n8n, RAG chatbots and building systems that run themselves." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          "name": "Rehan Nazir — Notes on Building with AI",
+          "url": SITE_URL + "/#blog",
+          "author": { "@type": "Person", "name": "Rehan Nazir" },
+          "description": "Thoughts on AI, automation, building systems and the road to a real tech company.",
+          "blogPost": POSTS.map(p => ({
+            "@type": "BlogPosting",
+            "headline": p.title,
+            "description": p.excerpt,
+            "datePublished": p.date,
+            "url": `${SITE_URL}/blog/${p.slug}`,
+            "author": { "@type": "Person", "name": "Rehan Nazir" }
+          }))
+        })}</script>
+      </Helmet>
       <section className="grid-bg"><div className="max-w-6xl mx-auto px-5 pt-20 pb-6"><Reveal><SectionLabel num="04">Blog</SectionLabel></Reveal><Reveal><h1 className="text-4xl md:text-5xl font-bold text-white">Notes on building <span className="grad-text">with AI</span>.</h1></Reveal><Reveal delay={0.1}><p className="max-w-2xl mt-5 text-slate-400">Thoughts on AI, automation, building systems and the road to a real tech company.</p></Reveal></div></section>
       <section className="max-w-6xl mx-auto px-5 py-10">
         <Reveal><div className="group glass glass-hover rounded-3xl overflow-hidden grid md:grid-cols-2" data-cursor>
@@ -529,6 +592,30 @@ function BlogPost({ slug, back, openArticle }) {
   if (!isMain) {
     return (
       <div className="max-w-3xl mx-auto px-5 pt-12 pb-24">
+        <Helmet>
+          <title>{meta.title} — Rehan Nazir</title>
+          <meta name="description" content={meta.excerpt} />
+          <link rel="canonical" href={`${SITE_URL}/blog/${meta.slug}`} />
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content={`${SITE_URL}/blog/${meta.slug}`} />
+          <meta property="og:title" content={meta.title} />
+          <meta property="og:description" content={meta.excerpt} />
+          <meta property="article:author" content="Rehan Nazir" />
+          <meta property="article:published_time" content={meta.date} />
+          <meta property="article:section" content={meta.cat} />
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": meta.title,
+            "description": meta.excerpt,
+            "datePublished": meta.date,
+            "url": `${SITE_URL}/blog/${meta.slug}`,
+            "author": { "@type": "Person", "name": "Rehan Nazir", "url": SITE_URL },
+            "publisher": { "@type": "Organization", "name": "Nexara", "url": SITE_URL },
+            "articleSection": meta.cat,
+            "timeRequired": meta.read
+          })}</script>
+        </Helmet>
         <Back />
         <span className="text-xs mono px-3 py-1 rounded-full glass text-indigo-200">{meta.cat}</span>
         <h1 className="text-3xl md:text-4xl font-bold text-white mt-5 leading-tight">{meta.title}</h1>
@@ -544,17 +631,58 @@ function BlogPost({ slug, back, openArticle }) {
   }
 
   return (
-    <article className="max-w-6xl mx-auto px-5 pt-12 pb-24">
+    <article className="max-w-6xl mx-auto px-5 pt-12 pb-24" itemScope itemType="https://schema.org/BlogPosting">
+      <Helmet>
+        <title>{meta.title} — Rehan Nazir</title>
+        <meta name="description" content="A field note on the one shift that changed my work, my pricing, and how long clients stick around — moving from one-shot scripts to systems that run themselves." />
+        <link rel="canonical" href={`${SITE_URL}/blog/${meta.slug}`} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`${SITE_URL}/blog/${meta.slug}`} />
+        <meta property="og:title" content={meta.title + " — Rehan Nazir"} />
+        <meta property="og:description" content="The real value of AI automation isn't a clever script — it's a system a business can rely on without you. How I think about the difference." />
+        <meta property="article:author" content="Rehan Nazir" />
+        <meta property="article:published_time" content="2026-06-12" />
+        <meta property="article:section" content="Automation" />
+        <meta property="article:tag" content="automation" />
+        <meta property="article:tag" content="AI engineering" />
+        <meta property="article:tag" content="systems thinking" />
+        <meta property="article:tag" content="freelancing" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          "headline": meta.title,
+          "description": "A field note on the one shift that changed my work, my pricing, and how long clients stick around — moving from one-shot scripts to systems that run themselves.",
+          "datePublished": "2026-06-12",
+          "dateModified": "2026-06-23",
+          "url": `${SITE_URL}/blog/${meta.slug}`,
+          "author": {
+            "@type": "Person",
+            "name": "Rehan Nazir",
+            "url": SITE_URL,
+            "sameAs": ["https://github.com/rehaannazir","https://www.linkedin.com/in/rehan-nazir-530597332"]
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Nexara",
+            "url": SITE_URL
+          },
+          "articleSection": "Automation",
+          "timeRequired": "PT6M",
+          "keywords": ["automation","AI engineering","systems thinking","freelancing","n8n","FastAPI"],
+          "articleBody": "Every freelancer who learns to automate ships the same first thing: a script. The moment reality drifts the script fails — silently. A system is a script that grew up. It doesn't assume the happy path — it expects failure and is built to survive it.",
+          "mainEntityOfPage": { "@type": "WebPage", "@id": `${SITE_URL}/blog/${meta.slug}` }
+        })}</script>
+      </Helmet>
       <Back />
       {/* header */}
       <Reveal>
-        <span className="text-xs mono px-3 py-1 rounded-full glass text-indigo-200">{meta.cat}</span>
-        <h1 className="text-3xl md:text-5xl font-bold text-white mt-5 leading-tight max-w-3xl">{meta.title}</h1>
-        <p className="text-lg text-slate-400 mt-4 max-w-2xl leading-relaxed">A field note on the one shift that changed my work, my pricing, and how long my clients stick around — moving from one-shot scripts to systems that run themselves.</p>
+        <span className="text-xs mono px-3 py-1 rounded-full glass text-indigo-200" itemProp="articleSection">{meta.cat}</span>
+        <h1 className="text-3xl md:text-5xl font-bold text-white mt-5 leading-tight max-w-3xl" itemProp="headline">{meta.title}</h1>
+        <p className="text-lg text-slate-400 mt-4 max-w-2xl leading-relaxed" itemProp="description">A field note on the one shift that changed my work, my pricing, and how long my clients stick around — moving from one-shot scripts to systems that run themselves.</p>
         <div className="flex items-center gap-3 mt-6">
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-xs" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>RN</div>
-          <span className="text-sm text-slate-300">Rehan Nazir</span><span className="text-slate-600">·</span>
-          <span className="text-sm mono text-slate-500">{meta.date}</span><span className="text-slate-600">·</span><span className="text-sm mono text-slate-500">{meta.read} read</span>
+          <span className="text-sm text-slate-300" itemProp="author" itemScope itemType="https://schema.org/Person"><span itemProp="name">Rehan Nazir</span></span><span className="text-slate-600">·</span>
+          <time className="text-sm mono text-slate-500" itemProp="datePublished" dateTime="2026-06-12">{meta.date}</time><span className="text-slate-600">·</span><span className="text-sm mono text-slate-500">{meta.read} read</span>
         </div>
       </Reveal>
       {/* hero diagram */}

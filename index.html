@@ -1,15 +1,129 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>rehan-portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Primary SEO -->
+    <title>Rehan Nazir — AI Engineer & Automation Specialist | Lahore, Pakistan</title>
+    <meta name="description" content="Rehan Nazir is an AI Engineer and Automation Specialist based in Lahore, Pakistan. I build intelligent AI agents, FastAPI backends, n8n workflows, RAG chatbots and end-to-end automation systems that run themselves. Founder of Nexara." />
+    <meta name="keywords" content="AI engineer Pakistan, automation specialist Lahore, FastAPI developer, n8n automation, AI agents, RAG chatbot, LLM engineer, Nexara, Rehan Nazir, freelance AI developer, workflow automation, Python developer" />
+    <meta name="author" content="Rehan Nazir" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://rehannazir.dev/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rehannazir.dev/" />
+    <meta property="og:title" content="Rehan Nazir — AI Engineer & Automation Specialist" />
+    <meta property="og:description" content="I design and ship intelligent automation end to end — AI agents, chatbots and workflows that quietly do the work, so businesses scale without the busywork. Founder of Nexara." />
+    <meta property="og:image" content="https://rehannazir.dev/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Rehan Nazir Portfolio" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@rehaannazir" />
+    <meta name="twitter:creator" content="@rehaannazir" />
+    <meta name="twitter:title" content="Rehan Nazir — AI Engineer & Automation Specialist" />
+    <meta name="twitter:description" content="I build AI agents, n8n automations and self-running workflows. Founder of Nexara. Available for projects worldwide." />
+    <meta name="twitter:image" content="https://rehannazir.dev/og-image.jpg" />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#07070d" />
+    <meta name="msapplication-TileColor" content="#07070d" />
+
+    <!-- Geo targeting -->
+    <meta name="geo.region" content="PK-PB" />
+    <meta name="geo.placename" content="Lahore, Punjab, Pakistan" />
+
+    <!-- Fonts: preconnect first, then load with font-display swap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap&display=swap" rel="stylesheet" />
+
+    <!-- Preload LCP hero image -->
+    <link rel="preload" as="image" href="/src/assets/rehan.jpg" />
+
+    <!-- JSON-LD: Person -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Rehan Nazir",
+      "url": "https://rehannazir.dev",
+      "image": "https://rehannazir.dev/rehan.jpg",
+      "jobTitle": "AI Engineer & Automation Specialist",
+      "description": "Self-taught AI engineer building agentic systems and automations. Founder of Nexara.",
+      "email": "rehaan689nazir@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Lahore",
+        "addressRegion": "Punjab",
+        "addressCountry": "PK"
+      },
+      "sameAs": [
+        "https://github.com/rehaannazir",
+        "https://www.linkedin.com/in/rehan-nazir-530597332"
+      ],
+      "knowsAbout": ["AI Engineering", "Automation", "FastAPI", "n8n", "RAG", "LLMs", "Python", "React"]
+    }
+    </script>
+
+    <!-- JSON-LD: WebSite with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Rehan Nazir — Portfolio",
+      "url": "https://rehannazir.dev",
+      "description": "Portfolio and blog of Rehan Nazir, AI Engineer and Automation Specialist.",
+      "author": {
+        "@type": "Person",
+        "name": "Rehan Nazir"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://rehannazir.dev/blog?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD: ProfessionalService (Nexara) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "Nexara",
+      "founder": {
+        "@type": "Person",
+        "name": "Rehan Nazir"
+      },
+      "url": "https://rehannazir.dev",
+      "description": "AI automation agency building intelligent systems — AI agents, chatbots, n8n workflows and FastAPI backends.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Lahore",
+        "addressCountry": "PK"
+      },
+      "serviceType": ["AI Engineering", "Workflow Automation", "Chatbot Development", "Backend Development"],
+      "areaServed": "Worldwide"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Rehan Nazir — AI Engineer &amp; Automation Specialist</h1>
+      <p>I build AI agents, chatbots, n8n workflows and FastAPI backends for businesses worldwide. Founder of Nexara, based in Lahore, Pakistan.</p>
+      <p>Contact: <a href="mailto:rehaan689nazir@gmail.com">rehaan689nazir@gmail.com</a></p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,0 +1,17 @@
+{
+  "name": "Rehan Nazir — AI Engineer",
+  "short_name": "Rehan Nazir",
+  "description": "Portfolio of Rehan Nazir — AI Engineer & Automation Specialist. Founder of Nexara.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07070d",
+  "theme_color": "#07070d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
