@@ -33,7 +33,7 @@ function Reveal({ children, delay = 0, className = "" }) {
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); io.disconnect(); } }, { threshold: 0.12 });
     io.observe(el); return () => io.disconnect();
   }, []);
-  return <div ref={ref} className={className} style={{ opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(30px)", transition: `opacity .8s cubic-bezier(.16,1,.3,1) ${delay}s, transform .8s cubic-bezier(.16,1,.3,1) ${delay}s` }}>{children}</div>;
+  return <div ref={ref} className={className} style={{ opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(44px)", transition: `opacity 1.5s cubic-bezier(.16,1,.3,1) ${delay}s, transform 1.5s cubic-bezier(.16,1,.3,1) ${delay}s` }}>{children}</div>;
 }
 function Counter({ to, suffix = "" }) {
   const ref = useRef(null), [n, setN] = useState(0), done = useRef(false);
@@ -83,7 +83,7 @@ export default function Portfolio() {
 
   return (
     <div className="nocursor min-h-screen w-full text-slate-200 relative overflow-x-hidden"
-      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.16), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.18), transparent 60%), #07070d", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
+      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.1), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.12), transparent 60%), #020208", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
       <style>{`
         @keyframes floatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}}
         @keyframes floatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.05)}}
@@ -99,17 +99,20 @@ export default function Portfolio() {
         @keyframes vcandle{0%,100%{transform:scaleY(.72)}50%{transform:scaleY(1.12)}}
         @keyframes vdraw{to{stroke-dashoffset:0}}
         @keyframes xflash{0%,60%{opacity:0}70%,100%{opacity:1}}
-        .fade-up{animation:fadeUp .8s cubic-bezier(.16,1,.3,1) both}
+        @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(12px,-9px) scale(1.02)}66%{transform:translate(-9px,7px) scale(0.98)}}
+        @keyframes orb{0%,100%{opacity:.12;transform:scale(1)}50%{opacity:.22;transform:scale(1.08)}}
+        .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
         .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
         .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08)}
-        .glass-hover{transition:all .4s cubic-bezier(.16,1,.3,1)}
-        .glass-hover:hover{transform:translateY(-6px);border-color:rgba(139,92,246,0.55);box-shadow:0 0 45px -8px rgba(99,102,241,0.45);background:rgba(255,255,255,0.055)}
-        .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 6s linear infinite}
+        .glass-hover{transition:all .7s cubic-bezier(.16,1,.3,1)}
+        .glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(1.5deg);border-color:rgba(139,92,246,0.6);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.65);background:rgba(255,255,255,0.06)}
+        .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
         .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
-        .btn-glow{transition:all .3s}
-        .btn-glow:hover{box-shadow:0 0 32px -2px rgba(99,102,241,0.85);transform:translateY(-2px)}
+        .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
+        .btn-glow:hover{box-shadow:0 0 38px -2px rgba(99,102,241,0.9);transform:translateY(-3px)}
         .marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-        .marquee-track{display:flex;gap:.75rem;width:max-content;animation:scrollX 30s linear infinite}
+        .marquee-track{display:flex;gap:.75rem;width:max-content;animation:scrollX 70s linear infinite}
+        .faq-answer{overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1)}
         .prose-blog p{color:#cbd5e1;line-height:1.8;margin:1rem 0}
         .prose-blog h2{color:#fff;font-size:1.6rem;font-weight:700;margin:2.5rem 0 1rem;scroll-margin-top:96px}
         .prose-blog strong{color:#e9d5ff}
@@ -125,8 +128,9 @@ export default function Portfolio() {
       {page === "article" && <ReadingProgress />}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.2),transparent 70%)", animation: "floatA 18s ease-in-out infinite" }} />
-        <div className="absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.18),transparent 70%)", animation: "floatB 22s ease-in-out infinite" }} />
+        <div className="absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.2),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
+        <div className="absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.18),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
+        <div className="absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.1),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
       </div>
 
       {/* NAV */}
@@ -218,7 +222,7 @@ function Home({ setPage, mounted }) {
             <h1 className="fade-up text-5xl md:text-6xl font-bold tracking-tight text-white mt-6" style={{ animationDelay: ".05s", lineHeight: 1.05 }}>I'm Rehan</h1>
             <h1 className="fade-up text-5xl md:text-6xl font-bold tracking-tight mt-1" style={{ animationDelay: ".12s", lineHeight: 1.05 }}><span className="grad-text">I build AI systems</span></h1>
             <p className="fade-up grad-text text-lg md:text-xl font-semibold mt-4 mono" style={{ animationDelay: ".18s" }}>AI Engineer &amp; Automation Specialist</p>
-            <p className="fade-up max-w-lg mt-5 text-slate-400 leading-relaxed" style={{ animationDelay: ".24s" }}>I design and ship <span className="text-slate-200">intelligent automation end to end</span> — AI agents, chatbots and workflows that quietly do the work, so businesses scale without the busywork. Founder of <span className="text-indigo-300">Nexara</span>.</p>
+            <p className="fade-up max-w-lg mt-5 text-slate-400 leading-relaxed" style={{ animationDelay: ".24s" }}>I design and ship <span className="text-slate-200">intelligent automation end to end</span> — AI agents, chatbots and workflows that quietly do the work, so businesses scale without the busywork.</p>
             <div className="fade-up flex flex-wrap gap-3 mt-8" style={{ animationDelay: ".3s" }}>
               <button onClick={() => setPage("services")} className="btn-glow inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>View selected work <ArrowRight className="w-4 h-4" /></button>
               <button onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-slate-200 glass glass-hover">Get in touch</button>
@@ -227,53 +231,78 @@ function Home({ setPage, mounted }) {
           <div className="fade-up flex flex-col gap-5" style={{ animationDelay: ".2s" }}>
             <div className="glass rounded-3xl p-7 text-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-50" style={{ background: "radial-gradient(400px 160px at 50% 0%, rgba(139,92,246,0.25), transparent 70%)" }} />
-              <div className="relative">
+              <div className="relative text-center flex flex-col items-center">
                 <div className="block mx-auto w-36 h-36 rounded-full relative">
-                  <div className="absolute -inset-1 rounded-full" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", animation: "spinSlow 8s linear infinite", filter: "blur(2px)", opacity: 0.8 }} />
+                  <div className="absolute -inset-1 rounded-full" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", animation: "spinSlow 22s linear infinite", filter: "blur(2px)", opacity: 0.8 }} />
                   <div className="absolute inset-0 rounded-full overflow-hidden border-2 border-white/10 flex items-center justify-center" style={{ background: "#0c0c16" }}>
                     {PROFILE_PIC ? <img src={PROFILE_PIC} alt="Rehan Nazir — AI Engineer and Automation Specialist, Lahore Pakistan" width="144" height="144" className="w-full h-full object-cover" fetchpriority="high" /> : <div className="flex flex-col items-center text-slate-500 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
                   </div>
                 </div>
                 <h3 className="text-white font-semibold text-lg mt-5">Rehan Nazir</h3>
                 <p className="text-xs mono text-indigo-300 mt-0.5">// based in Lahore, Pakistan</p>
-                <p className="text-sm text-slate-400 mt-3 leading-relaxed max-w-xs mx-auto">Self-taught AI engineer building agentic systems and automations. On a mission to grow Nexara into a real AI company — one shipped system at a time.</p>
+                <p className="text-sm text-slate-400 mt-3 leading-relaxed max-w-xs mx-auto">Helping ideas become intelligent systems through AI engineering and automation.Design. Build. Deploy. AI.</p>
               </div>
             </div>
-            <div className="glass rounded-2xl overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5"><span className="w-3 h-3 rounded-full bg-red-400/70" /><span className="w-3 h-3 rounded-full bg-yellow-400/70" /><span className="w-3 h-3 rounded-full bg-green-400/70" /><span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span></div>
-              <div className="p-4 mono text-xs leading-relaxed">
-                <div className="text-slate-500">// whoami.ts</div>
-                <div className="mt-1"><span className="text-indigo-400">const</span> <span className="text-sky-300">engineer</span> <span className="text-slate-400">=</span> {"{"}</div>
-                <div className="pl-4 text-slate-300">name: <span className="text-emerald-300">"Rehan Nazir"</span>,</div>
-                <div className="pl-4 text-slate-300">role: <span className="text-emerald-300">"AI &amp; Automation Eng"</span>,</div>
-                <div className="pl-4 text-slate-300">stack: [<span className="text-emerald-300">"FastAPI"</span>, <span className="text-emerald-300">"n8n"</span>, <span className="text-emerald-300">"LLMs"</span>],</div>
-                <div className="pl-4 text-slate-300">shipping: <span className="text-purple-300">true</span>,</div>
-                <div>{"}"};</div>
-                <div className="mt-2 text-slate-500">// → ready to build something great <span className="inline-block w-2 h-3.5 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></div>
-              </div>
-            </div>
+            <WhoamiCard />
           </div>
         </div>
       </section>
 
       <section className="max-w-6xl mx-auto px-5 pb-8">
         <div className="grid sm:grid-cols-3 gap-4">
-          <Reveal className="glass rounded-2xl p-5"><div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">automation activity · 7d</span><GitBranch className="w-4 h-4 text-indigo-400" /></div><div className="text-2xl font-bold text-white mt-3">128 <span className="text-sm font-normal text-slate-500">flows run</span></div><div className="flex gap-1 mt-3">{Array.from({ length: 14 }).map((_, i) => (<span key={i} className="flex-1 h-7 rounded" style={{ background: `rgba(139,92,246,${0.15 + (i % 5) * 0.16})` }} />))}</div></Reveal>
-          <Reveal delay={0.08} className="glass rounded-2xl p-5"><div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">inference · gemini</span><Activity className="w-4 h-4 text-indigo-400" /></div><div className="mt-3 space-y-1.5 mono text-xs">{[["POST", "/api/generate", "200"], ["GET", "/api/agents", "200"], ["POST", "/api/embed", "200"]].map(([m, p, s]) => (<div key={p} className="flex items-center gap-2"><span className="text-purple-300 w-9">{m}</span><span className="text-slate-400 flex-1 truncate">{p}</span><span className="text-emerald-400">{s}</span></div>))}</div></Reveal>
-          <Reveal delay={0.16} className="glass rounded-2xl p-5"><div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">nexara roadmap</span><span className="mono text-xs text-indigo-300">71%</span></div><div className="mt-3 text-sm text-slate-400">10 / 14 shipped</div><div className="h-2 rounded-full bg-white/5 mt-3 overflow-hidden"><div className="h-full rounded-full" style={{ width: "71%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)" }} /></div></Reveal>
+          <Reveal className="glass glass-hover rounded-2xl p-5" style={{transformStyle:"preserve-3d"}}>
+            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">automation activity · 7d</span><GitBranch className="w-4 h-4 text-indigo-400" /></div>
+            <div className="text-2xl font-bold text-white mt-3">128 <span className="text-sm font-normal text-slate-500">flows run</span></div>
+            <div className="flex gap-1 mt-3">{Array.from({ length: 14 }).map((_, i) => (<span key={i} className="flex-1 rounded" style={{ height: 4+Math.round((i % 5)*8)+"px", marginTop:"auto", background: `rgba(139,92,246,${0.18 + (i % 5) * 0.18})`, transition:"height 1s ease" }} />))}</div>
+          </Reveal>
+          <Reveal delay={0.1} className="glass glass-hover rounded-2xl p-5">
+            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">inference · live</span><Activity className="w-4 h-4 text-indigo-400" /></div>
+            <div className="mt-3 space-y-1.5 mono text-xs">{[["POST","/api/generate","200"],["GET","/api/agents","200"],["POST","/api/embed","200"]].map(([m,p,s])=>(<div key={p} className="flex items-center gap-2"><span className="text-purple-300 w-9">{m}</span><span className="text-slate-400 flex-1 truncate">{p}</span><span className="text-emerald-400">{s}</span></div>))}</div>
+          </Reveal>
+          <Reveal delay={0.2} className="glass glass-hover rounded-2xl p-5">
+            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">nexara roadmap</span><span className="mono text-xs text-indigo-300">71%</span></div>
+            <div className="mt-3 text-sm text-slate-400">10 / 14 milestones shipped</div>
+            <div className="h-1.5 rounded-full bg-white/5 mt-3 overflow-hidden"><div className="h-full rounded-full" style={{ width:"71%", background:"linear-gradient(90deg,#3b82f6,#8b5cf6)", transition:"width 2s cubic-bezier(.16,1,.3,1)" }} /></div>
+            <div className="mt-3 flex gap-1.5 flex-wrap">{["AI Agents","RAG","n8n","Vapi","SaaS"].map(t=>(<span key={t} className="px-2 py-0.5 rounded text-[10px] mono" style={{background:"rgba(99,102,241,0.1)",color:"#a5b4fc"}}>{t}</span>))}</div>
+          </Reveal>
         </div>
       </section>
 
+      {/* SHOWREEL */}
+      <ShowreelSection />
+
       <section className="max-w-6xl mx-auto px-5 py-16">
         <Reveal><SectionLabel num="01">About</SectionLabel></Reveal>
-        <div className="grid lg:grid-cols-2 gap-10 items-start">
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
           <Reveal>
             <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">I live where <span className="grad-text">product meets AI</span>.</h2>
             <p className="text-slate-400 mt-5 leading-relaxed">I take ideas from a blank repo to a deployed, self-running system — designing the data model, wiring the APIs and the agents, and delivering something a business can actually rely on.</p>
             <p className="text-slate-400 mt-4 leading-relaxed">Lately that means <span className="text-slate-200">AI content APIs, n8n automations and chatbot agents</span> built on Python, FastAPI and the Gemini API — with a focus on clean handoff, not babysitting.</p>
             <p className="mono text-sm text-indigo-300 mt-5">// currently — Founder @ Nexara</p>
+            <div className="mt-8 flex flex-col gap-3">
+              {[
+                { icon:"◈", label:"End-to-end delivery", desc:"From data model to deployed interface." },
+                { icon:"◎", label:"Self-running systems", desc:"Built to run without you babysitting them." },
+                { icon:"◉", label:"Clean handoff", desc:"Docs, runbooks and a kill switch you own." },
+              ].map(({icon,label,desc})=>(
+                <div key={label} className="flex items-start gap-4 px-5 py-4 rounded-xl transition-all duration-700 hover:bg-white/[0.03]" style={{border:"1px solid rgba(255,255,255,0.055)"}}>
+                  <span className="text-indigo-400 text-lg mt-0.5 shrink-0">{icon}</span>
+                  <div><div className="text-white text-sm font-medium">{label}</div><div className="text-slate-500 text-xs mt-0.5">{desc}</div></div>
+                </div>
+              ))}
+            </div>
           </Reveal>
-          <Reveal delay={0.1}><div className="grid grid-cols-2 gap-4">{[["12", "+", "Projects shipped"], ["8", "", "AI products built"], ["10", "+", "Happy clients"], ["100", "%", "Hands-off delivery"]].map(([v, s, l]) => (<div key={l} className="glass glass-hover rounded-2xl p-6" data-cursor><div className="text-4xl font-bold grad-text"><Counter to={parseInt(v)} suffix={s} /></div><div className="text-sm text-slate-400 mt-1">{l}</div></div>))}</div></Reveal>
+          <Reveal delay={0.12}>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {[["12","+","Projects shipped"],["8","","AI products built"],["10","+","Happy clients"],["100","%","Hands-off delivery"]].map(([v,s,l])=>(
+                <div key={l} className="glass glass-hover rounded-2xl p-6" data-cursor>
+                  <div className="text-4xl font-bold grad-text"><Counter to={parseInt(v)} suffix={s} /></div>
+                  <div className="text-sm text-slate-400 mt-1">{l}</div>
+                </div>
+              ))}
+            </div>
+            <WhoamiCard />
+          </Reveal>
         </div>
       </section>
 
@@ -283,16 +312,19 @@ function Home({ setPage, mounted }) {
         <div className="marquee py-2"><div className="marquee-track">{[...stack, ...stack].map((s, i) => (<span key={i} className="px-5 py-2.5 rounded-full text-sm mono glass text-slate-200 whitespace-nowrap">{s}</span>))}</div></div>
       </section>
 
+      {/* SHIPPED TABLE */}
+      <ShippedSection />
+
       <section className="max-w-6xl mx-auto px-5 py-16">
         <Reveal><SectionLabel num="03">Selected work</SectionLabel></Reveal>
         <Reveal><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">Things I've shipped.</h2></Reveal>
         <div className="grid sm:grid-cols-2 gap-5">
           {projects.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.08}>
+            <Reveal key={p.title} delay={i * 0.1}>
               <div className="glass glass-hover rounded-2xl p-6 h-full group" data-cursor>
-                <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">[ {p.n} / 04 ]</span><span className="inline-flex items-center gap-1.5 text-xs text-emerald-300 mono"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />live</span></div>
+                <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">[ {p.n} / 04 ]</span><span className="inline-flex items-center gap-1.5 text-xs text-emerald-300 mono"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{animation:"vpulse 3s ease-in-out infinite"}}/>live</span></div>
                 <div className="mono text-[11px] uppercase tracking-wide text-indigo-300/80 mt-5">{p.cat}</div>
-                <h3 className="text-lg font-semibold text-white mt-1 flex items-center gap-2">{p.title}<ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-indigo-300 transition-colors" /></h3>
+                <h3 className="text-lg font-semibold text-white mt-1 flex items-center gap-2">{p.title}<ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-indigo-300 transition-colors duration-500" /></h3>
                 <p className="text-sm text-slate-400 mt-2 leading-relaxed">{p.desc}</p>
                 <div className="mono text-xs text-slate-500 mt-4">{p.role}</div>
                 <div className="flex flex-wrap gap-1.5 mt-3">{p.stack.map((s) => (<span key={s} className="px-2.5 py-1 rounded-md text-[11px] mono" style={{ background: "rgba(99,102,241,0.12)", color: "#c7d2fe" }}>{s}</span>))}</div>
@@ -341,7 +373,8 @@ function Services({ setPage }) {
         {services.map((s, i) => (<Reveal key={s.title} delay={(i % 3) * 0.08}><div className="glass glass-hover rounded-2xl p-6 h-full" data-cursor><div className="w-12 h-12 rounded-xl flex items-center justify-center text-white mb-5" style={{ background: "linear-gradient(135deg,rgba(59,130,246,0.9),rgba(139,92,246,0.9))" }}>{s.icon}</div><h3 className="text-lg font-semibold text-white">{s.title}</h3><p className="text-sm text-slate-400 mt-2 leading-relaxed">{s.desc}</p><div className="mt-4 space-y-2">{s.points.map((pt) => (<div key={pt} className="flex items-center gap-2 text-sm text-slate-300"><CircleCheck className="w-4 h-4 text-indigo-400 shrink-0" />{pt}</div>))}</div></div></Reveal>))}
       </div></section>
       <section className="max-w-6xl mx-auto px-5 py-12"><Reveal><SectionLabel num="03">How it works</SectionLabel></Reveal><div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">{process.map((p, i) => (<Reveal key={p.n} delay={i * 0.08}><div className="glass rounded-2xl p-6 h-full" data-cursor><div className="text-4xl font-bold grad-text mono">{p.n}</div><h3 className="text-white font-semibold mt-3">{p.t}</h3><p className="text-sm text-slate-400 mt-2">{p.d}</p></div></Reveal>))}</div></section>
-      <section className="max-w-6xl mx-auto px-5 py-16"><Reveal><div className="rounded-3xl p-10 md:p-14 text-center relative overflow-hidden" style={{ background: "linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.18))", border: "1px solid rgba(139,92,246,0.35)" }}><div className="absolute inset-0" style={{ background: "radial-gradient(500px 200px at 50% 0%,rgba(139,92,246,0.3),transparent 70%)" }} /><div className="relative"><Zap className="w-10 h-10 mx-auto text-indigo-300 mb-4" /><h2 className="text-3xl md:text-4xl font-bold text-white">Have a process worth automating?</h2><p className="text-slate-300 mt-3 max-w-lg mx-auto">Tell me about your bottleneck and I'll show you how AI can handle it.</p><button onClick={() => setPage("reviews")} className="btn-glow inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-medium text-white mt-7" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>Start a project <ArrowRight className="w-4 h-4" /></button></div></div></Reveal></section>
+      <ShippedSection />
+      <FAQSection />
     </>
   );
 }
@@ -387,7 +420,7 @@ function BlogVisual({ cat }) {
   if (cat === "Engineering") return wrap(
     <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 mono text-[10px]">
       <div className="text-slate-500">// content-api · live</div>
-      {[["POST", "/v1/generate"], ["GET", "/v1/content"], ["POST", "/v1/schedule"]].map((r, i) => (<div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-md border" style={{ animation: `vrow 3s ease-in-out ${i * 0.6}s infinite`, borderColor: "rgba(255,255,255,0.08)" }}><span className="text-purple-300 w-9">{r[0]}</span><span className="text-slate-300 flex-1 truncate">{r[1]}</span><span className="text-emerald-400">200</span></div>))}
+      {[["POST", "/v1/generate"], ["GET", "/v1/content"], ["POST", "/v1/schedule"]].map((r, i) => (<div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-md border" style={{ animation: `vrow 6s ease-in-out ${i * 1.2}s infinite`, borderColor: "rgba(255,255,255,0.08)" }}><span className="text-purple-300 w-9">{r[0]}</span><span className="text-slate-300 flex-1 truncate">{r[1]}</span><span className="text-emerald-400">200</span></div>))}
       <div className="text-slate-600">{"{ engine: gemini }"}<span className="inline-block w-1.5 h-3 ml-1 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></div>
     </div>
   );
@@ -436,6 +469,265 @@ function BlogVisual({ cat }) {
   );
 }
 
+/* ===================== WHOAMI CARD ===================== */
+function WhoamiCard() {
+  const [line, setLine] = useState(0);
+  const total = 8;
+  useEffect(() => {
+    const t = setInterval(() => setLine(l => (l + 1) % total), 1600);
+    return () => clearInterval(t);
+  }, []);
+  const hl = (i) => ({
+    display: "block",
+    background: line === i ? "rgba(99,102,241,0.18)" : "transparent",
+    boxShadow: line === i ? "inset 2px 0 0 #818cf8" : "inset 2px 0 0 transparent",
+    transition: "background 1s ease, box-shadow 1s ease",
+    borderRadius: 4,
+    paddingLeft: 6,
+    marginLeft: -6,
+    paddingRight: 4,
+  });
+  return (
+    <div className="glass rounded-2xl overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+        <span className="w-3 h-3 rounded-full bg-red-400/70"/><span className="w-3 h-3 rounded-full bg-yellow-400/70"/><span className="w-3 h-3 rounded-full bg-green-400/70"/>
+        <span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span>
+      </div>
+      <div className="p-4 mono text-xs space-y-1.5">
+        <span style={hl(0)} className="text-slate-500">// whoami.ts</span>
+        <span style={hl(1)}><span className="text-indigo-400">const</span> <span className="text-sky-300">engineer</span> <span className="text-slate-400">=</span> {"{"}</span>
+        <span style={hl(2)} className="pl-4 text-slate-300">name: <span className="text-emerald-300">"Rehan Nazir"</span>,</span>
+        <span style={hl(3)} className="pl-4 text-slate-300">role: <span className="text-emerald-300">"AI &amp; Automation Eng"</span>,</span>
+        <span style={hl(4)} className="pl-4 text-slate-300">stack: [<span className="text-emerald-300">"FastAPI"</span>, <span className="text-emerald-300">"n8n"</span>, <span className="text-emerald-300">"LLMs"</span>],</span>
+        <span style={hl(5)} className="pl-4 text-slate-300">shipping: <span className="text-purple-300">true</span>,</span>
+        <span style={hl(6)}>{"}"};
+        </span>
+        <span style={hl(7)} className="text-slate-500">{"// → ready to build "}<span className="inline-block w-2 h-3.5 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></span>
+      </div>
+    </div>
+  );
+}
+
+/* ===================== LIVE LOGS ===================== */
+function LiveLogs() {
+  const all = [
+    { m: "POST", p: "/agent/run",        s: "200", ms: "34ms",  c: "#34d399" },
+    { m: "GET",  p: "/rag/query",        s: "200", ms: "89ms",  c: "#34d399" },
+    { m: "POST", p: "/vapi/call",        s: "200", ms: "12ms",  c: "#34d399" },
+    { m: "TOOL", p: "crm.upsert(lead)", s: "✓",   ms: "",      c: "#a78bfa" },
+    { m: "POST", p: "/llm/generate",    s: "200", ms: "1.2s",  c: "#34d399" },
+    { m: "CREW", p: "task.complete()",  s: "✓",   ms: "",      c: "#c084fc" },
+    { m: "POST", p: "/embed/batch",     s: "200", ms: "234ms", c: "#34d399" },
+    { m: "AGENT",p: "tool_call[search]",s: "→",   ms: "",      c: "#60a5fa" },
+    { m: "GET",  p: "/health",          s: "200", ms: "2ms",   c: "#34d399" },
+    { m: "POST", p: "/n8n/webhook",     s: "200", ms: "67ms",  c: "#34d399" },
+  ];
+  const [rows, setRows] = useState(all.slice(0, 5));
+  useEffect(() => {
+    let i = 5;
+    const t = setInterval(() => { setRows(r => [...r.slice(-4), all[i % all.length]]); i++; }, 2400);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="mono text-[11px] space-y-2">
+      {rows.map((l, i) => (
+        <div key={i} className="flex items-center gap-2 transition-all duration-700" style={{ opacity: 0.28 + i * 0.15 }}>
+          <span style={{ color: l.c, minWidth: 40 }}>{l.m}</span>
+          <span className="text-slate-400 flex-1 truncate">{l.p}</span>
+          <span style={{ color: l.c }}>{l.s}</span>
+          {l.ms && <span className="text-slate-600 text-[9px]">{l.ms}</span>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ===================== AI PIPELINE VIZ ===================== */
+function AIPipelineViz() {
+  const COL = { input:"#60a5fa", orch:"#a78bfa", llm:"#c084fc", agent:"#e879f9", output:"#34d399" };
+  const W = 320;
+  const stages = [
+    { label:"INPUT",       col:COL.input,  y:28,  nodes:["user query","webhook","CSV"] },
+    { label:"ORCHESTRATE", col:COL.orch,   y:110, nodes:["RAG","n8n","Vapi"] },
+    { label:"LLM",         col:COL.llm,    y:192, nodes:["Claude","OpenAI","Gemini"] },
+    { label:"AGENT",       col:COL.agent,  y:274, nodes:["AI Agent","CrewAI","custom"] },
+    { label:"OUTPUT",      col:COL.output, y:352, nodes:["CRM","Slack","API"] },
+  ];
+  const nx = (i, total) => 14 + i * ((W - 90) / Math.max(total - 1, 1));
+  const conns = [
+    [0,0,1,0,0],[0,1,1,1,0.6],[0,2,1,2,1.2],
+    [0,0,1,1,2],[0,2,1,1,2.8],
+    [1,0,2,0,3.6],[1,1,2,1,4.2],[1,2,2,2,4.8],
+    [2,0,3,0,5.6],[2,1,3,1,6.2],[2,2,3,2,6.8],
+    [2,0,3,1,7.6],[2,2,3,1,8.2],
+    [3,0,4,0,9],[3,1,4,1,9.6],[3,2,4,2,10.2],
+  ];
+  return (
+    <svg viewBox={`0 0 ${W} 396`} preserveAspectRatio="xMidYMid meet" className="w-full h-full">
+      <defs>
+        <filter id="pg" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="pgsm" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <pattern id="pgrid" width="22" height="22" patternUnits="userSpaceOnUse">
+          <path d="M 22 0 L 0 0 0 22" fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="0.5"/>
+        </pattern>
+      </defs>
+      <rect width={W} height="396" fill="url(#pgrid)"/>
+      {conns.map(([si,ai,ti,bi,delay], idx) => {
+        const a = stages[si], b = stages[ti];
+        const x1 = nx(ai, a.nodes.length)+30, y1 = a.y+26;
+        const x2 = nx(bi, b.nodes.length)+30, y2 = b.y;
+        const d = `M ${x1} ${y1} C ${x1} ${y1+28} ${x2} ${y2-28} ${x2} ${y2}`;
+        return (
+          <g key={idx}>
+            <path d={d} fill="none" stroke={a.col} strokeOpacity="0.18" strokeWidth="1.4" strokeDasharray="4 7" style={{animation:`vdash ${3.5+idx*0.12}s linear ${delay*0.08}s infinite`}}/>
+            <circle r="2.6" fill={a.col} filter="url(#pgsm)">
+              <animateMotion dur={`${6+idx*0.5}s`} begin={`${delay*0.25}s`} repeatCount="indefinite" path={d}/>
+            </circle>
+          </g>
+        );
+      })}
+      {stages.map((st, si) => (
+        <g key={si}>
+          <text x={W-5} y={st.y+16} textAnchor="end" fontFamily="'JetBrains Mono',monospace" fontSize="6.5" fill={st.col} opacity="0.45">{st.label}</text>
+          {st.nodes.map((n, ni) => {
+            const x = nx(ni, st.nodes.length);
+            return (
+              <g key={ni}>
+                <rect x={x} y={st.y} width="60" height="26" rx="6" fill="rgba(9,9,18,0.97)" stroke={st.col} strokeOpacity="0.5" strokeWidth="1.1" style={{animation:`vpulse ${4+si*0.5+ni*0.25}s ease-in-out ${ni*0.5}s infinite`}}/>
+                <circle cx={x+9} cy={st.y+13} r="2.2" fill={st.col} filter="url(#pgsm)" style={{animation:`vpulse ${3+ni*0.4}s ease-in-out ${si*0.3}s infinite`}}/>
+                <text x={x+32} y={st.y+17} textAnchor="middle" fontFamily="'JetBrains Mono',monospace" fontSize="7.5" fill="#c7d2fe">{n}</text>
+              </g>
+            );
+          })}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/* ===================== SHOWREEL ===================== */
+function ShowreelSection() {
+  return (
+    <section className="max-w-6xl mx-auto px-5 py-10">
+      <Reveal><SectionLabel num="✦">Showreel</SectionLabel></Reveal>
+      <Reveal delay={0.08}><h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Thirty seconds of <span className="grad-text">what I build</span>.</h2></Reveal>
+      <Reveal delay={0.16}><p className="text-slate-400 mb-6 max-w-xl leading-relaxed text-sm">End-to-end AI systems — from the first webhook to the final CRM entry — running without a human in the loop.</p></Reveal>
+      <Reveal delay={0.22}>
+        <div className="rounded-2xl overflow-hidden" style={{background:"rgba(5,5,12,0.97)",border:"1px solid rgba(255,255,255,0.06)"}}>
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+            <span className="w-2.5 h-2.5 rounded-full" style={{background:"rgba(248,113,113,0.55)"}}/>
+            <span className="w-2.5 h-2.5 rounded-full" style={{background:"rgba(251,191,36,0.55)"}}/>
+            <span className="w-2.5 h-2.5 rounded-full" style={{background:"rgba(52,211,153,0.55)"}}/>
+            <span className="mono text-xs text-slate-500 ml-2">~/nexara — systems at work</span>
+            <span className="ml-auto flex items-center gap-1.5 mono text-[10px] text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{animation:"vpulse 3.5s ease-in-out infinite"}}/>live
+            </span>
+          </div>
+          <div className="grid md:grid-cols-[1fr_180px] divide-y md:divide-y-0 md:divide-x divide-white/5">
+            <div className="relative overflow-hidden" style={{height:200}}>
+              <div className="absolute inset-0 pointer-events-none" style={{background:"radial-gradient(400px 200px at 35% 55%,rgba(139,92,246,0.07),transparent 70%)"}}/>
+              <AIPipelineViz />
+            </div>
+            <div className="p-4 flex flex-col justify-between" style={{background:"rgba(0,0,0,0.18)"}}>
+              <div>
+                <div className="mono text-[9px] text-slate-600 uppercase tracking-widest mb-2.5">// live activity</div>
+                <LiveLogs />
+              </div>
+              <div className="mt-3 space-y-2 border-t border-white/5 pt-3">
+                {[["142","commits"],["99.9%","uptime"],["12+","systems"],["10+","clients"]].map(([v,l])=>(
+                  <div key={l} className="flex items-center justify-between">
+                    <span className="mono text-[9px] text-slate-500">{l}</span>
+                    <span className="mono text-[11px] font-bold text-white">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* ===================== SHIPPED SECTION ===================== */
+function ShippedSection() {
+  const shipped = [
+    { n:"01", title:"AI Content Automation API",   client:"Internal · Nexara",  role:"Full Stack · AI",  stack:["FastAPI","Gemini","SQLAlchemy"], year:"2026" },
+    { n:"02", title:"B2B Sales Automation Flow",   client:"Confidential",        role:"Automation",        stack:["n8n","LLMs","CRM APIs"],         year:"2026" },
+    { n:"03", title:"Finance Expense Categorizer", client:"FinTrack",            role:"AI Tooling",        stack:["Python","Gemini","Pandas"],       year:"2025" },
+    { n:"04", title:"Support Chatbot Agent",       client:"NovaCommerce",        role:"AI Agents",         stack:["RAG","React","FastAPI"],          year:"2025" },
+    { n:"05", title:"Lead Enrichment Pipeline",    client:"BrightLeads",         role:"Automation",        stack:["n8n","Clay","OpenAI"],            year:"2025" },
+    { n:"06", title:"Restaurant SaaS MVP",         client:"HN Foods",            role:"Full Stack",        stack:["React","FastAPI","AI"],           year:"2025" },
+  ];
+  return (
+    <section className="max-w-6xl mx-auto px-5 py-16">
+      <Reveal><SectionLabel num="✦">Shipped</SectionLabel></Reveal>
+      <Reveal delay={0.08}><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">A few things I've <span className="grad-text">shipped</span>.</h2></Reveal>
+      <Reveal delay={0.14}>
+        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)",background:"rgba(255,255,255,0.022)"}}>
+          <div className="hidden md:grid grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-3 border-b border-white/5">
+            {["#","Project","Role","Stack","Year"].map(h=>(
+              <span key={h} className="mono text-[10px] text-slate-600 uppercase tracking-wider last:text-right">{h}</span>
+            ))}
+          </div>
+          {shipped.map((p,i)=>(
+            <div key={p.n} className="group grid grid-cols-[44px_1fr] md:grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-4 items-center border-b border-white/5 last:border-b-0 transition-all duration-700 hover:bg-white/[0.03]" data-cursor>
+              <span className="mono text-xs text-slate-600">{p.n}</span>
+              <div className="min-w-0">
+                <div className="text-white font-medium text-sm group-hover:text-indigo-200 transition-colors duration-500">{p.title}</div>
+                <div className="mono text-[10px] text-slate-500 mt-0.5">{p.client}</div>
+              </div>
+              <span className="hidden md:block mono text-xs text-slate-400">{p.role}</span>
+              <div className="hidden md:flex flex-wrap gap-1.5">
+                {p.stack.map(s=>(<span key={s} className="px-2 py-0.5 rounded text-[10px] mono" style={{background:"rgba(99,102,241,0.1)",color:"#a5b4fc"}}>{s}</span>))}
+              </div>
+              <span className="hidden md:block mono text-[11px] text-slate-500 text-right">{p.year}</span>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* ===================== FAQ SECTION ===================== */
+function FAQSection() {
+  const [open, setOpen] = useState(null);
+  const faqs = [
+    { q:"How long does a project take?",              a:"Most automations take 1–3 weeks. A simple n8n workflow can be live in days. A full AI agent system with RAG and CRM integration typically takes 2–4 weeks including testing and documentation." },
+    { q:"Do you work with clients outside Pakistan?", a:"Yes — almost all my clients are international. I work remotely with businesses across Europe, the US, and the Middle East. Time zones are no issue; I deliver async-first and communicate clearly throughout." },
+    { q:"What's your pricing model?",                 a:"I price by the system, not the hour. You pay for a working, documented, self-running system — not my time. This aligns my incentive with yours: ship fast, ship right, hand off clean." },
+    { q:"What happens after delivery?",               a:"You get full docs, all environment variables, a runbook, and a kill switch you control. I include a one-week support window post-delivery. Ongoing retainers are available separately." },
+    { q:"Which LLMs do you build with?",              a:"All major ones — Claude for reasoning and long-context work, GPT-4 for broad capability, Gemini for cost-efficient pipelines. I'll recommend the right fit for your use case." },
+    { q:"Can you integrate into our existing stack?", a:"Yes. I wire into whatever you're running — Notion, Airtable, HubSpot, Slack, custom APIs. If it has a webhook or an API endpoint, it can be part of the system." },
+  ];
+  return (
+    <section className="max-w-6xl mx-auto px-5 py-16">
+      <Reveal><SectionLabel num="✦">FAQ</SectionLabel></Reveal>
+      <Reveal delay={0.08}><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">Questions, <span className="grad-text">answered</span>.</h2></Reveal>
+      <div className="space-y-3 max-w-3xl">
+        {faqs.map((faq,i)=>(
+          <Reveal key={i} delay={i*0.06}>
+            <div className="rounded-xl overflow-hidden transition-all duration-700" style={{background:"rgba(255,255,255,0.028)",border:`1px solid ${open===i?"rgba(139,92,246,0.45)":"rgba(255,255,255,0.07)"}`}}>
+              <button onClick={()=>setOpen(open===i?null:i)} className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left" data-cursor>
+                <span className="text-white font-medium text-sm">{faq.q}</span>
+                <span className="text-indigo-400 text-xl shrink-0 leading-none transition-transform duration-600" style={{transform:open===i?"rotate(45deg)":"rotate(0deg)"}}>{open===i?"×":"+"}</span>
+              </button>
+              <div className="faq-answer" style={{maxHeight:open===i?200:0}}>
+                <p className="px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-4">{faq.a}</p>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ===================== BLOG ===================== */
 const POSTS = [
   { slug: "systems-not-scripts", title: "Why I build systems, not scripts", cat: "Automation", date: "12 Jun 2026", read: "6 min", excerpt: "The real value of AI automation isn't a clever script — it's a system a business can rely on without you. How I think about the difference.", featured: true },
@@ -474,7 +766,16 @@ function Blog({ openArticle }) {
           }))
         })}</script>
       </Helmet>
-      <section className="grid-bg"><div className="max-w-6xl mx-auto px-5 pt-20 pb-6"><Reveal><SectionLabel num="04">Blog</SectionLabel></Reveal><Reveal><h1 className="text-4xl md:text-5xl font-bold text-white">Notes on building <span className="grad-text">with AI</span>.</h1></Reveal><Reveal delay={0.1}><p className="max-w-2xl mt-5 text-slate-400">Thoughts on AI, automation, building systems and the road to a real tech company.</p></Reveal></div></section>
+      <section className="grid-bg"><div className="max-w-6xl mx-auto px-5 pt-20 pb-6">
+        <Reveal><SectionLabel num="04">Blog</SectionLabel></Reveal>
+        <Reveal><h1 className="text-4xl md:text-5xl font-bold text-white">Notes on playing <span className="grad-text">with AI</span>.</h1></Reveal>
+        <Reveal delay={0.1}><p className="max-w-2xl mt-5 text-slate-400">Field notes on AI engineering, automation systems and the road to building a real AI company.</p></Reveal>
+        <Reveal delay={0.16}><div className="flex items-center gap-3 mt-6">
+          {["All","Engineering","AI Agents","Workflow","Strategy"].map((t,i)=>(
+            <button key={t} className={`px-3.5 py-1.5 rounded-full text-xs mono transition-all duration-500 ${i===0?"text-white":"text-slate-400 hover:text-white"}`} style={i===0?{background:"linear-gradient(135deg,#3b82f6,#8b5cf6)"}:{border:"1px solid rgba(255,255,255,0.08)"}}>{t}</button>
+          ))}
+        </div></Reveal>
+      </div></section>
       <section className="max-w-6xl mx-auto px-5 py-10">
         <Reveal><div className="group glass glass-hover rounded-3xl overflow-hidden grid md:grid-cols-2" data-cursor>
           <div className="relative min-h-[220px] overflow-hidden"><BlogVisual cat={feat.cat} /></div>
@@ -844,7 +1145,7 @@ function ContactSection() {
         </Reveal>
         <Reveal delay={0.1}>
           <div className="relative rounded-2xl overflow-hidden" style={{ padding: "1.5px" }}>
-            <div style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, #3b82f6 70deg, #8b5cf6 150deg, transparent 260deg)", animation: "spinSlow 6s linear infinite", opacity: anyFocus ? 0.95 : 0.4, transition: "opacity .4s" }} />
+            <div style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, #3b82f6 70deg, #8b5cf6 150deg, transparent 260deg)", animation: "spinSlow 14s linear infinite", opacity: anyFocus ? 0.95 : 0.35, transition: "opacity 1s" }} />
             <div className="relative rounded-2xl p-6" style={{ background: "rgba(9,9,17,0.94)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
               <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/5">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
