@@ -4,28 +4,28 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
   <url>
-    <loc>https://rehannazir.dev/</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/</loc>
     <lastmod>2026-06-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/#services</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/#services</loc>
     <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/#reviews</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/#reviews</loc>
     <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/#blog</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/#blog</loc>
     <lastmod>2026-06-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -33,7 +33,7 @@
 
   <!-- Blog articles -->
   <url>
-    <loc>https://rehannazir.dev/blog/systems-not-scripts</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/blog/systems-not-scripts</loc>
     <lastmod>2026-06-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
@@ -48,35 +48,35 @@
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/blog/production-ai-content-api</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/blog/production-ai-content-api</loc>
     <lastmod>2026-05-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/blog/rag-chatbots-that-help</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/blog/rag-chatbots-that-help</loc>
     <lastmod>2026-05-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/blog/n8n-llms-freelancer-edge</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/blog/n8n-llms-freelancer-edge</loc>
     <lastmod>2026-04-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/blog/freelancing-to-ai-company</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/blog/freelancing-to-ai-company</loc>
     <lastmod>2026-04-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://rehannazir.dev/blog/algo-trading-meets-automation</loc>
+    <loc>https://rehan-portfolio-eight.vercel.app/blog/algo-trading-meets-automation</loc>
     <lastmod>2026-04-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

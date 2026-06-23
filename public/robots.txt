@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rehannazir.dev/sitemap.xml
+Sitemap: https://rehan-portfolio-eight.vercel.app/sitemap.xml
