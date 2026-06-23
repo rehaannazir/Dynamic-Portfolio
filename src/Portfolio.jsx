@@ -102,6 +102,8 @@ export default function Portfolio() {
         @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(12px,-9px) scale(1.02)}66%{transform:translate(-9px,7px) scale(0.98)}}
         @keyframes orb{0%,100%{opacity:.12;transform:scale(1)}50%{opacity:.22;transform:scale(1.08)}}
         @keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes cardFloat{0%,100%{transform:translateY(0px)}50%{transform:translateY(-7px)}}
+        @media(prefers-reduced-motion:reduce){.card-float{animation:none!important}}
         .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
         .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
         .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08)}
@@ -783,12 +785,71 @@ function ShowreelSection() {
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-10">Thirty seconds of <span className="grad-text">what I do</span>.</h2>
       </Reveal>
       <Reveal delay={0.15}>
-        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)"}}>
-          <iframe
-            src="/nexara-showreel.html"
-            title="Nexara Showreel"
-            style={{width:"100%",height:460,border:"none",display:"block"}}
-          />
+        <div style={{position:"relative"}}>
+          {/* iframe frame — untouched */}
+          <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)"}}>
+            <iframe
+              src="/nexara-showreel.html"
+              title="Nexara Showreel"
+              style={{width:"100%",height:460,border:"none",display:"block"}}
+            />
+          </div>
+
+          {/* ── ambient dashboard cards (decorative) ── */}
+
+          {/* desktop: absolute; mobile: hidden here, shown in grid below */}
+          <div aria-hidden="true" className="card-float hidden lg:block glass rounded-2xl p-4"
+            style={{position:"absolute",top:-18,left:-24,width:216,zIndex:10,
+              animation:"cardFloat 5s ease-in-out infinite",
+              border:"1px solid rgba(139,92,246,0.28)",background:"rgba(255,255,255,0.035)",
+              backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)"}}>
+            <p className="mono text-[10px] text-slate-500 mb-2">automation · 7d</p>
+            <p className="text-2xl font-bold text-white">184 <span className="text-sm font-normal text-slate-400">runs</span></p>
+            <p className="mono text-[10px] text-slate-600 mt-3">Deployed · Vercel · 1m 22s</p>
+          </div>
+
+          <div aria-hidden="true" className="card-float hidden lg:block glass rounded-2xl p-4"
+            style={{position:"absolute",bottom:-18,right:-24,width:228,zIndex:10,
+              animation:"cardFloat 6.2s ease-in-out 0.9s infinite",
+              border:"1px solid rgba(99,102,241,0.28)",background:"rgba(255,255,255,0.035)",
+              backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)"}}>
+            <p className="mono text-[10px] text-slate-500 mb-2">inference · gemini</p>
+            <div className="space-y-1.5 mono text-[11px]">
+              {[["POST","/api/generate"],["GET","/api/models"],["POST","/api/embed"]].map(([m,p])=>(
+                <div key={p} className="flex items-center gap-1.5">
+                  <span className="text-purple-300 w-9">{m}</span>
+                  <span className="text-slate-400 flex-1 truncate">{p}</span>
+                  <span className="text-emerald-400">200</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div aria-hidden="true" className="card-float hidden lg:block glass rounded-2xl p-4"
+            style={{position:"absolute",bottom:-18,left:-24,width:216,zIndex:10,
+              animation:"cardFloat 5.7s ease-in-out 1.8s infinite",
+              border:"1px solid rgba(139,92,246,0.28)",background:"rgba(255,255,255,0.035)",
+              backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)"}}>
+            <p className="mono text-[10px] text-slate-500 mb-2">Q3 roadmap</p>
+            <div className="h-1.5 rounded-full mt-1 mb-2" style={{background:"rgba(255,255,255,0.06)"}}>
+              <div className="h-full rounded-full" style={{width:"84%",background:"linear-gradient(90deg,#3b82f6,#8b5cf6)"}} />
+            </div>
+            <p className="mono text-[10px] text-slate-500">21 / 25 shipped · 84%</p>
+          </div>
+
+          {/* mobile: cards in a row below the frame */}
+          <div aria-hidden="true" className="lg:hidden grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+            {[
+              { label:"automation · 7d", body: <><p className="text-2xl font-bold text-white">184 <span className="text-sm font-normal text-slate-400">runs</span></p><p className="mono text-[10px] text-slate-600 mt-2">Deployed · Vercel · 1m 22s</p></> },
+              { label:"inference · gemini", body: <div className="space-y-1.5 mono text-[11px]">{[["POST","/api/generate"],["GET","/api/models"],["POST","/api/embed"]].map(([m,p])=>(<div key={p} className="flex items-center gap-1.5"><span className="text-purple-300 w-9">{m}</span><span className="text-slate-400 flex-1 truncate">{p}</span><span className="text-emerald-400">200</span></div>))}</div> },
+              { label:"Q3 roadmap", body: <><div className="h-1.5 rounded-full mt-1 mb-2" style={{background:"rgba(255,255,255,0.06)"}}><div className="h-full rounded-full" style={{width:"84%",background:"linear-gradient(90deg,#3b82f6,#8b5cf6)"}}/></div><p className="mono text-[10px] text-slate-500">21 / 25 shipped · 84%</p></> },
+            ].map(({label,body})=>(
+              <div key={label} className="glass rounded-2xl p-4" style={{border:"1px solid rgba(139,92,246,0.28)"}}>
+                <p className="mono text-[10px] text-slate-500 mb-2">{label}</p>
+                {body}
+              </div>
+            ))}
+          </div>
         </div>
       </Reveal>
     </section>
