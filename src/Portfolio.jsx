@@ -776,21 +776,6 @@ const SLIDES = [
 ];
 
 function ShowreelSection() {
-  const [idx, setIdx] = useState(0);
-  const [prog, setProg] = useState(0);
-  const DUR = 6000;
-  useEffect(() => {
-    setProg(0);
-    const adv = setTimeout(() => setIdx(i => (i+1) % SLIDES.length), DUR);
-    return () => clearTimeout(adv);
-  }, [idx]);
-  useEffect(() => {
-    setProg(0);
-    const tick = setInterval(() => setProg(p => p >= 100 ? 100 : p + 100/(DUR/100)), 100);
-    return () => clearInterval(tick);
-  }, [idx]);
-  const s = SLIDES[idx];
-  const V = s.Viz;
   return (
     <section className="max-w-6xl mx-auto px-5 py-16">
       <Reveal>
@@ -798,38 +783,12 @@ function ShowreelSection() {
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-10">Thirty seconds of <span className="grad-text">what I do</span>.</h2>
       </Reveal>
       <Reveal delay={0.15}>
-        <div className="rounded-2xl overflow-hidden" style={{background:"#05050d",border:"1px solid rgba(255,255,255,0.07)",minHeight:460}}>
-          {/* Top bar */}
-          <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/5">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-blue-400" style={{animation:"vpulse 2.4s ease-in-out infinite"}}/>
-              <span className="mono text-sm text-slate-400">rehan.nazir ()</span>
-            </div>
-            <span className="mono text-xs text-slate-700 tracking-wider">Loop 00:30</span>
-          </div>
-          {/* Progress bar */}
-          <div className="h-px" style={{background:"rgba(255,255,255,0.04)"}}>
-            <div style={{height:"100%",width:prog+"%",background:`linear-gradient(90deg,${s.color}66,${s.color})`,transition:"width 0.1s linear"}}/>
-          </div>
-          {/* Slide content */}
-          <div className="px-8 pt-8 pb-6">
-            <p className="mono text-[10px] text-slate-600 tracking-widest mb-3 uppercase">{s.num} · {s.tag}</p>
-            <h3 key={idx} className="text-2xl md:text-3xl font-bold text-white mb-8" style={{animation:"slideIn 0.55s cubic-bezier(.16,1,.3,1) both"}}>{s.heading}</h3>
-            <div style={{minHeight:200}} key={"viz"+idx} className="overflow-hidden">
-              <V />
-            </div>
-          </div>
-          {/* Bottom navigation */}
-          <div className="px-8 py-5 border-t border-white/5 flex items-center justify-between">
-            <div className="flex gap-2 items-center">
-              {SLIDES.map((_,i)=>(
-                <button key={i} onClick={()=>setIdx(i)}
-                  style={{width:i===idx?32:8,height:4,borderRadius:4,background:i===idx?s.color:"rgba(255,255,255,0.13)",transition:"all 0.5s ease",border:"none",cursor:"pointer"}}
-                />
-              ))}
-            </div>
-            <span className="mono text-xs text-slate-700">{String(SLIDES.length).padStart(2,"0")} — {s.num} · {s.tag.split("·")[0].trim()}</span>
-          </div>
+        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)"}}>
+          <iframe
+            src="/nexara-showreel.html"
+            title="Nexara Showreel"
+            style={{width:"100%",height:460,border:"none",display:"block"}}
+          />
         </div>
       </Reveal>
     </section>
