@@ -1380,16 +1380,29 @@ function ContactSection() {
   const [error, setError] = useState("");
   const [focus, setFocus] = useState(null);
   const anyFocus = focus !== null;
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/health`, { method: "GET" }).catch(() => {});
+  }, []);
+
+  const doFetch = () => fetch(`${API_BASE}/api/contact`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(f),
+  });
+
   const submit = async () => {
     if (sent || sending) return;
     setError("");
     setSending(true);
     try {
-      const res = await fetch(`${API_BASE}/api/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(f),
-      });
+      let res;
+      try {
+        res = await doFetch();
+      } catch {
+        await new Promise(r => setTimeout(r, 3000));
+        res = await doFetch();
+      }
       const text = await res.text();
       let data = {};
       try { data = JSON.parse(text); } catch {}
