@@ -280,9 +280,6 @@ function Home({ setPage, mounted }) {
         <div className="marquee py-2"><div className="marquee-track">{[...stack, ...stack].map((s, i) => (<span key={i} className="px-5 py-2.5 rounded-full text-sm mono glass text-slate-200 whitespace-nowrap">{s}</span>))}</div></div>
       </section>
 
-      {/* SHIPPED TABLE */}
-      <ShippedSection />
-
       <section className="max-w-6xl mx-auto px-5 py-16">
         <Reveal><SectionLabel num="03">Selected work</SectionLabel></Reveal>
         <Reveal><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">Things I've shipped.</h2></Reveal>
