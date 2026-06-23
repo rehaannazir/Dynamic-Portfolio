@@ -1390,7 +1390,9 @@ function ContactSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(f),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try { data = JSON.parse(text); } catch {}
       if (!res.ok) throw new Error(data.detail ?? "Something went wrong");
       setSent(true);
     } catch (e) {
