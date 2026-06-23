@@ -83,7 +83,7 @@ export default function Portfolio() {
 
   return (
     <div className="nocursor min-h-screen w-full text-slate-200 relative overflow-x-hidden"
-      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.1), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.12), transparent 60%), #020208", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
+      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.06), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.07), transparent 60%), #010104", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
       <style>{`
         @keyframes floatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}}
         @keyframes floatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.05)}}
