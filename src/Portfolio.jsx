@@ -1564,7 +1564,7 @@ function Footer({ setPage }) {
               </div>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
-              AI Engineer &amp; Automation Specialist. Building intelligent, self-running systems under the <span className="text-indigo-300">Nexara</span> brand.
+              AI Engineer &amp; Automation Specialist. Building intelligent, self-running systems. <span className="text-indigo-300">Design. Build. Deploy. AI.</span>
             </p>
             <div className="mono text-xs text-slate-600 flex items-center gap-2">
               <span className="text-indigo-400">//</span> Lahore, Pakistan · 2026
@@ -1622,7 +1622,7 @@ function Footer({ setPage }) {
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <span className="mono text-xs text-slate-600">© 2026 Rehan Nazir — Nexara.</span>
           <div className="flex items-center gap-2">
-            {["React", "Vite", "Tailwind", "AI"].map((t, i) => (
+            {["LLMs", "FAST API", "REST APIs", "AI Agents"].map((t, i) => (
               <span key={t} className="mono text-[10px] px-2.5 py-1 rounded-full text-slate-500"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 {t}
