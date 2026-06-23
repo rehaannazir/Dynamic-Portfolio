@@ -5,7 +5,12 @@ from datetime import datetime, timezone
 from config import settings
 from typing import AsyncGenerator
 
-engine = create_async_engine(settings.database_url, echo=False)
+_is_postgres = settings.database_url.startswith("postgresql")
+engine = create_async_engine(
+    settings.database_url,
+    echo=False,
+    connect_args={"ssl": "require"} if _is_postgres else {},
+)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
