@@ -2,15 +2,24 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, Text, DateTime
 from datetime import datetime, timezone
+from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 from config import settings
 from typing import AsyncGenerator
 
-_is_postgres = settings.database_url.startswith("postgresql")
-engine = create_async_engine(
-    settings.database_url,
-    echo=False,
-    connect_args={"ssl": "require"} if _is_postgres else {},
-)
+
+def _build_engine():
+    url = settings.database_url
+    if not url.startswith("postgresql"):
+        return create_async_engine(url, echo=False)
+    parsed = urlparse(url)
+    params = {k: v[0] for k, v in parse_qs(parsed.query).items() if k != "sslmode"}
+    clean_url = urlunparse(parsed._replace(query=urlencode(params)))
+    if not clean_url.startswith("postgresql+asyncpg"):
+        clean_url = clean_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    return create_async_engine(clean_url, echo=False, connect_args={"ssl": "require"})
+
+
+engine = _build_engine()
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
