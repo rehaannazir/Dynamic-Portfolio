@@ -10,19 +10,22 @@ class Settings(BaseSettings):
     admin_api_key: str = "change-me-before-deploy"
     database_url: str = "sqlite+aiosqlite:///./portfolio.db"
 
+    resend_api_key: str = ""
+    notify_to: str = "rehaan689nazir@gmail.com"
+
+    # Legacy SMTP fields kept so old .env files don't break
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_pass: str = ""
-    notify_to: str = "rehaan689nazir@gmail.com"
 
     @property
     def allowed_origins(self) -> List[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @property
-    def smtp_enabled(self) -> bool:
-        return bool(self.smtp_host and self.smtp_user and self.smtp_pass)
+    def email_enabled(self) -> bool:
+        return bool(self.resend_api_key)
 
 
 settings = Settings()
