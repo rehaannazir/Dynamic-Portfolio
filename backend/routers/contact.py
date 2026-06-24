@@ -1,8 +1,5 @@
-import smtplib
-import asyncio
 import logging
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc, func
@@ -34,21 +31,8 @@ def _check_rate_limit(ip: str) -> None:
 
 
 async def _send_email_notification(name: str, email: str, details: str) -> None:
-    if not settings.smtp_enabled:
+    if not settings.email_enabled:
         return
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"📬 New contact from {name} — Portfolio"
-    msg["From"] = f"Rehan Portfolio <{settings.smtp_user}>"
-    msg["To"] = settings.notify_to
-    msg["Reply-To"] = email
-
-    plain = (
-        f"New message received on your portfolio.\n\n"
-        f"Name:    {name}\n"
-        f"Email:   {email}\n"
-        f"Details:\n{details}\n"
-    )
 
     html = f"""
 <!DOCTYPE html>
@@ -58,92 +42,56 @@ async def _send_email_notification(name: str, email: str, details: str) -> None:
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0"
              style="background:#0f0f1a;border-radius:16px;border:1px solid rgba(139,92,246,0.3);overflow:hidden">
-
-        <!-- header -->
         <tr><td style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:28px 32px">
-          <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7)">
-            rehan.nazir portfolio
-          </p>
-          <h1 style="margin:8px 0 0;font-size:22px;font-weight:700;color:#fff">
-            New project inquiry
-          </h1>
+          <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7)">rehan.nazir portfolio</p>
+          <h1 style="margin:8px 0 0;font-size:22px;font-weight:700;color:#fff">New project inquiry</h1>
         </td></tr>
-
-        <!-- body -->
         <tr><td style="padding:32px">
-
           <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding:12px 16px;background:rgba(255,255,255,0.04);border-radius:10px 10px 0 0;
-                         border:1px solid rgba(255,255,255,0.08);border-bottom:none">
-                <p style="margin:0 0 2px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b">Name</p>
-                <p style="margin:0;font-size:15px;font-weight:600;color:#f1f5f9">{name}</p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:12px 16px;background:rgba(255,255,255,0.04);
-                         border:1px solid rgba(255,255,255,0.08);border-bottom:none">
-                <p style="margin:0 0 2px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b">Email</p>
-                <a href="mailto:{email}" style="margin:0;font-size:15px;font-weight:600;color:#818cf8;text-decoration:none">{email}</a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:12px 16px;background:rgba(255,255,255,0.04);border-radius:0 0 10px 10px;
-                         border:1px solid rgba(255,255,255,0.08)">
-                <p style="margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b">Project details</p>
-                <p style="margin:0;font-size:14px;line-height:1.7;color:#cbd5e1;white-space:pre-wrap">{details}</p>
-              </td>
-            </tr>
+            <tr><td style="padding:12px 16px;background:rgba(255,255,255,0.04);border-radius:10px 10px 0 0;border:1px solid rgba(255,255,255,0.08);border-bottom:none">
+              <p style="margin:0 0 2px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b">Name</p>
+              <p style="margin:0;font-size:15px;font-weight:600;color:#f1f5f9">{name}</p>
+            </td></tr>
+            <tr><td style="padding:12px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-bottom:none">
+              <p style="margin:0 0 2px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b">Email</p>
+              <a href="mailto:{email}" style="margin:0;font-size:15px;font-weight:600;color:#818cf8;text-decoration:none">{email}</a>
+            </td></tr>
+            <tr><td style="padding:12px 16px;background:rgba(255,255,255,0.04);border-radius:0 0 10px 10px;border:1px solid rgba(255,255,255,0.08)">
+              <p style="margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b">Project details</p>
+              <p style="margin:0;font-size:14px;line-height:1.7;color:#cbd5e1;white-space:pre-wrap">{details}</p>
+            </td></tr>
           </table>
-
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px">
-            <tr>
-              <td align="center">
-                <a href="mailto:{email}"
-                   style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);
-                          color:#fff;font-weight:600;font-size:14px;border-radius:10px;text-decoration:none">
-                  Reply to {name} →
-                </a>
-              </td>
-            </tr>
+            <tr><td align="center">
+              <a href="mailto:{email}" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:600;font-size:14px;border-radius:10px;text-decoration:none">Reply to {name} →</a>
+            </td></tr>
           </table>
-
         </td></tr>
-
-        <!-- footer -->
         <tr><td style="padding:16px 32px;border-top:1px solid rgba(255,255,255,0.06)">
-          <p style="margin:0;font-size:11px;color:#334155;text-align:center">
-            Sent from your portfolio contact form · rehan.nazir()
-          </p>
+          <p style="margin:0;font-size:11px;color:#334155;text-align:center">Sent from your portfolio contact form · rehan.nazir()</p>
         </td></tr>
-
       </table>
     </td></tr>
   </table>
 </body>
 </html>"""
 
-    msg.attach(MIMEText(plain, "plain"))
-    msg.attach(MIMEText(html, "html"))
+    plain = f"New message from your portfolio.\n\nName: {name}\nEmail: {email}\nDetails:\n{details}"
 
-    def _send() -> None:
-        # Port 465 + SSL is more reliable on cloud platforms than 587 + STARTTLS
-        try:
-            with smtplib.SMTP_SSL(settings.smtp_host, 465, timeout=15) as server:
-                server.ehlo()
-                server.login(settings.smtp_user, settings.smtp_pass)
-                server.sendmail(settings.smtp_user, settings.notify_to, msg.as_string())
-        except OSError:
-            # Fallback: STARTTLS on 587
-            with smtplib.SMTP(settings.smtp_host, 587, timeout=15) as server:
-                server.ehlo()
-                server.starttls()
-                server.ehlo()
-                server.login(settings.smtp_user, settings.smtp_pass)
-                server.sendmail(settings.smtp_user, settings.notify_to, msg.as_string())
-
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, _send)
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {settings.resend_api_key}"},
+            json={
+                "from": "Rehan Portfolio <onboarding@resend.dev>",
+                "to": [settings.notify_to],
+                "reply_to": email,
+                "subject": f"New contact from {name} — Portfolio",
+                "html": html,
+                "text": plain,
+            },
+        )
+        resp.raise_for_status()
 
 
 async def _send_email_safe(name: str, email: str, details: str) -> None:
@@ -211,13 +159,10 @@ async def test_email(request: Request) -> dict:
     if api_key != settings.admin_api_key:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    if not settings.smtp_enabled:
+    if not settings.email_enabled:
         return {
             "ok": False,
-            "error": "SMTP not configured",
-            "smtp_host": settings.smtp_host or "(empty)",
-            "smtp_user": settings.smtp_user or "(empty)",
-            "smtp_pass_set": bool(settings.smtp_pass),
+            "error": "RESEND_API_KEY not set in environment variables",
         }
 
     try:
