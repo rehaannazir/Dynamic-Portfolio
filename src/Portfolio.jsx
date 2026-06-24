@@ -1529,9 +1529,6 @@ function ContactSection() {
   const [focus, setFocus] = useState(null);
   const anyFocus = focus !== null;
 
-  useEffect(() => {
-    fetch(`${API_BASE}/api/health`, { method: "GET" }).catch(() => {});
-  }, []);
 
   const fetchWithTimeout = (url, opts, ms) =>
     Promise.race([fetch(url, opts), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
@@ -1583,6 +1580,7 @@ function ContactSection() {
         }
         throw new Error(msg);
       }
+      setF({ name: "", email: "", details: "" });
       setSent(true);
     } catch (e) {
       setError(e.message);
