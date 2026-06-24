@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api/contact", tags=["contact"])
 
 _rate_store: dict[str, list[datetime]] = {}
 _WINDOW = timedelta(hours=1)
-_MAX_REQUESTS = 3
+_MAX_REQUESTS = 5
 
 
 def _check_rate_limit(ip: str) -> None:
