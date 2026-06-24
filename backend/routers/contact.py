@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, func
 from datetime import datetime, timezone, timedelta
 
 from database import ContactMessage, get_db
@@ -127,12 +127,20 @@ async def _send_email_notification(name: str, email: str, details: str) -> None:
     msg.attach(MIMEText(html, "html"))
 
     def _send() -> None:
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=15) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(settings.smtp_user, settings.smtp_pass)
-            server.sendmail(settings.smtp_user, settings.notify_to, msg.as_string())
+        # Port 465 + SSL is more reliable on cloud platforms than 587 + STARTTLS
+        try:
+            with smtplib.SMTP_SSL(settings.smtp_host, 465, timeout=15) as server:
+                server.ehlo()
+                server.login(settings.smtp_user, settings.smtp_pass)
+                server.sendmail(settings.smtp_user, settings.notify_to, msg.as_string())
+        except OSError:
+            # Fallback: STARTTLS on 587
+            with smtplib.SMTP(settings.smtp_host, 587, timeout=15) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(settings.smtp_user, settings.smtp_pass)
+                server.sendmail(settings.smtp_user, settings.notify_to, msg.as_string())
 
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, _send)
@@ -189,3 +197,35 @@ async def list_messages(
     )
     rows = result.scalars().all()
     return [ContactMessageOut.model_validate(r) for r in rows]
+
+
+@router.get("/count", tags=["admin"], summary="Total number of stored contact messages")
+async def message_count(db: AsyncSession = Depends(get_db)) -> dict:
+    result = await db.execute(select(func.count()).select_from(ContactMessage))
+    return {"count": result.scalar() or 0}
+
+
+@router.get("/test-email", include_in_schema=False)
+async def test_email(request: Request) -> dict:
+    api_key = request.headers.get("x-admin-key", "")
+    if api_key != settings.admin_api_key:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    if not settings.smtp_enabled:
+        return {
+            "ok": False,
+            "error": "SMTP not configured",
+            "smtp_host": settings.smtp_host or "(empty)",
+            "smtp_user": settings.smtp_user or "(empty)",
+            "smtp_pass_set": bool(settings.smtp_pass),
+        }
+
+    try:
+        await _send_email_notification(
+            "Test Sender",
+            settings.notify_to,
+            "This is a test email from your portfolio backend. SMTP is working correctly.",
+        )
+        return {"ok": True, "sent_to": settings.notify_to}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc), "smtp_host": settings.smtp_host, "smtp_user": settings.smtp_user}
