@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -10,10 +11,21 @@ from database import init_db
 from routers.contact import router as contact_router
 from routers.portfolio import router as portfolio_router
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    await init_db()
+    try:
+        await init_db()
+        logger.info("Database initialised successfully")
+    except Exception as e:
+        logger.error("Database init failed: %s", e)
+        raise
     yield
 
 
