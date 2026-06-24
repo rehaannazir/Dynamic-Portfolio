@@ -144,6 +144,7 @@ export default function Portfolio() {
         .cursor-grow{width:84px;height:84px;margin:-42px 0 0 -42px}
         @media (pointer:fine){.nocursor,.nocursor *{cursor:none !important}}
         @media (pointer:coarse){.cursor-dot,.cursor-ring{display:none}}
+        .nocursor *:not(input):not(textarea):not(select):not([contenteditable]){-webkit-user-select:none;user-select:none}
         ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:#07070d}::-webkit-scrollbar-thumb{background:linear-gradient(#3b82f6,#8b5cf6);border-radius:8px}
       `}</style>
 
