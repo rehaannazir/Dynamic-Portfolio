@@ -1,29 +1,135 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
+    <!-- Glow filters -->
+    <filter id="outerGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="lineGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="nodeGlow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- 3D depth fill: bright top-left, dark bottom-right -->
+    <radialGradient id="depth3d" cx="30%" cy="22%" r="72%">
+      <stop offset="0%"   stop-color="#a5f3fc" stop-opacity="0.22"/>
+      <stop offset="40%"  stop-color="#3b82f6" stop-opacity="0.11"/>
+      <stop offset="100%" stop-color="#4c1d95" stop-opacity="0.07"/>
+    </radialGradient>
+    <!-- Shadow overlay bottom-right for 3D -->
+    <radialGradient id="shadow3d" cx="75%" cy="78%" r="60%">
+      <stop offset="0%"   stop-color="#000000" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Circuit line gradient cyan→indigo→purple -->
+    <linearGradient id="cLine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#22d3ee"/>
+      <stop offset="45%"  stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
     </linearGradient>
+    <!-- Brain stroke gradient -->
+    <linearGradient id="brainStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#67e8f9"/>
+      <stop offset="50%"  stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <!-- Clip circuit to brain shape -->
+    <clipPath id="brainClip">
+      <path d="M50,14 C39,9 22,12 14,24 C6,36 5,51 9,65 C12,75 20,82 30,86 C37,89 44,90 50,90 C56,90 63,89 70,86 C80,82 88,75 91,65 C95,51 94,36 86,24 C78,12 61,9 50,14Z"/>
+    </clipPath>
   </defs>
-  <!-- Background -->
-  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-  <!-- Neural network icon (matches nav logo) -->
-  <g fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round">
-    <circle cx="32" cy="32" r="7"/>
-    <line x1="32" y1="25" x2="32" y2="14"/>
-    <line x1="32" y1="39" x2="32" y2="50"/>
-    <line x1="26.1" y1="27.9" x2="17.6" y2="21.9"/>
-    <line x1="37.9" y1="36.1" x2="46.4" y2="42.1"/>
-    <line x1="26.1" y1="36.1" x2="17.6" y2="42.1"/>
-    <line x1="37.9" y1="27.9" x2="46.4" y2="21.9"/>
+
+  <!-- === LAYER 1: outer ambient halo === -->
+  <path d="M50,14 C39,9 22,12 14,24 C6,36 5,51 9,65 C12,75 20,82 30,86 C37,89 44,90 50,90 C56,90 63,89 70,86 C80,82 88,75 91,65 C95,51 94,36 86,24 C78,12 61,9 50,14Z"
+    fill="none" stroke="#3b82f6" stroke-width="7" stroke-opacity="0.14" filter="url(#outerGlow)"/>
+
+  <!-- === LAYER 2: 3D fill (bright top-left) === -->
+  <path d="M50,14 C39,9 22,12 14,24 C6,36 5,51 9,65 C12,75 20,82 30,86 C37,89 44,90 50,90 C56,90 63,89 70,86 C80,82 88,75 91,65 C95,51 94,36 86,24 C78,12 61,9 50,14Z"
+    fill="url(#depth3d)"/>
+
+  <!-- === LAYER 3: shadow bottom-right for 3D === -->
+  <path d="M50,14 C39,9 22,12 14,24 C6,36 5,51 9,65 C12,75 20,82 30,86 C37,89 44,90 50,90 C56,90 63,89 70,86 C80,82 88,75 91,65 C95,51 94,36 86,24 C78,12 61,9 50,14Z"
+    fill="url(#shadow3d)"/>
+
+  <!-- === LAYER 4: circuit grid (clipped to brain) === -->
+  <g clip-path="url(#brainClip)" filter="url(#lineGlow)">
+    <!-- Horizontal traces -->
+    <line x1="2" y1="28" x2="98" y2="28" stroke="url(#cLine)" stroke-width="0.8" stroke-opacity="0.65"/>
+    <line x1="2" y1="40" x2="98" y2="40" stroke="url(#cLine)" stroke-width="0.8" stroke-opacity="0.65"/>
+    <line x1="2" y1="52" x2="98" y2="52" stroke="url(#cLine)" stroke-width="0.9" stroke-opacity="0.75"/>
+    <line x1="2" y1="64" x2="98" y2="64" stroke="url(#cLine)" stroke-width="0.8" stroke-opacity="0.65"/>
+    <line x1="2" y1="76" x2="98" y2="76" stroke="url(#cLine)" stroke-width="0.7" stroke-opacity="0.55"/>
+    <!-- Vertical traces -->
+    <line x1="24" y1="2" x2="24" y2="98" stroke="url(#cLine)" stroke-width="0.8" stroke-opacity="0.65"/>
+    <line x1="36" y1="2" x2="36" y2="98" stroke="url(#cLine)" stroke-width="0.8" stroke-opacity="0.65"/>
+    <line x1="50" y1="2" x2="50" y2="98" stroke="url(#cLine)" stroke-width="1"   stroke-opacity="0.85"/>
+    <line x1="64" y1="2" x2="64" y2="98" stroke="url(#cLine)" stroke-width="0.8" stroke-opacity="0.65"/>
+    <line x1="76" y1="2" x2="76" y2="98" stroke="url(#cLine)" stroke-width="0.8" stroke-opacity="0.65"/>
+    <!-- Diagonal signal traces for "neural" feel -->
+    <line x1="24" y1="28" x2="36" y2="40" stroke="#22d3ee" stroke-width="0.7" stroke-opacity="0.5"/>
+    <line x1="36" y1="40" x2="50" y2="52" stroke="#818cf8" stroke-width="0.7" stroke-opacity="0.5"/>
+    <line x1="64" y1="40" x2="50" y2="52" stroke="#818cf8" stroke-width="0.7" stroke-opacity="0.5"/>
+    <line x1="64" y1="28" x2="76" y2="40" stroke="#c084fc" stroke-width="0.7" stroke-opacity="0.5"/>
+    <line x1="24" y1="76" x2="36" y2="64" stroke="#22d3ee" stroke-width="0.7" stroke-opacity="0.5"/>
+    <line x1="36" y1="64" x2="50" y2="76" stroke="#818cf8" stroke-width="0.7" stroke-opacity="0.5"/>
+    <line x1="64" y1="64" x2="50" y2="76" stroke="#818cf8" stroke-width="0.7" stroke-opacity="0.5"/>
+    <line x1="76" y1="64" x2="64" y2="76" stroke="#c084fc" stroke-width="0.7" stroke-opacity="0.5"/>
   </g>
-  <!-- Dot nodes -->
-  <g fill="white">
-    <circle cx="32" cy="14" r="3.5"/>
-    <circle cx="32" cy="50" r="3.5"/>
-    <circle cx="17.6" cy="21.9" r="3.5"/>
-    <circle cx="46.4" cy="42.1" r="3.5"/>
-    <circle cx="17.6" cy="42.1" r="3.5"/>
-    <circle cx="46.4" cy="21.9" r="3.5"/>
+
+  <!-- === LAYER 5: brain outline (main glowing stroke) === -->
+  <path d="M50,14 C39,9 22,12 14,24 C6,36 5,51 9,65 C12,75 20,82 30,86 C37,89 44,90 50,90 C56,90 63,89 70,86 C80,82 88,75 91,65 C95,51 94,36 86,24 C78,12 61,9 50,14Z"
+    fill="none" stroke="url(#brainStroke)" stroke-width="1.8" filter="url(#lineGlow)"/>
+
+  <!-- === LAYER 6: brain folds / gyri (3D contour depth lines) === -->
+  <g filter="url(#lineGlow)">
+    <path d="M26,20 C21,27 19,36 21,45 C23,52 25,57 23,65" fill="none" stroke="#22d3ee" stroke-width="1.3" stroke-opacity="0.55" stroke-linecap="round"/>
+    <path d="M18,38 C16,45 17,54 19,60" fill="none" stroke="#22d3ee" stroke-width="1"   stroke-opacity="0.38" stroke-linecap="round"/>
+    <path d="M74,20 C79,27 81,36 79,45 C77,52 75,57 77,65" fill="none" stroke="#c084fc" stroke-width="1.3" stroke-opacity="0.55" stroke-linecap="round"/>
+    <path d="M82,38 C84,45 83,54 81,60" fill="none" stroke="#c084fc" stroke-width="1"   stroke-opacity="0.38" stroke-linecap="round"/>
   </g>
+
+  <!-- Center hemisphere divider -->
+  <line x1="50" y1="14" x2="50" y2="90" stroke="#818cf8" stroke-width="1" stroke-opacity="0.45" stroke-dasharray="5 3" filter="url(#lineGlow)"/>
+
+  <!-- === LAYER 7: glowing intersection nodes === -->
+  <g filter="url(#nodeGlow)">
+    <!-- Top apex -->
+    <circle cx="50" cy="14" r="3"   fill="#e0f9ff" opacity="1"/>
+    <!-- Center column (brightest — focal point) -->
+    <circle cx="50" cy="28" r="2.6" fill="#67e8f9" opacity="0.95"/>
+    <circle cx="50" cy="40" r="3"   fill="#ffffff"  opacity="1"/>
+    <circle cx="50" cy="52" r="3"   fill="#67e8f9"  opacity="1"/>
+    <circle cx="50" cy="64" r="2.6" fill="#a78bfa"  opacity="0.9"/>
+    <circle cx="50" cy="76" r="2.2" fill="#a78bfa"  opacity="0.85"/>
+    <!-- Left mid column -->
+    <circle cx="36" cy="28" r="2.2" fill="#22d3ee" opacity="0.88"/>
+    <circle cx="36" cy="40" r="2.5" fill="#67e8f9" opacity="0.92"/>
+    <circle cx="36" cy="52" r="2.5" fill="#67e8f9" opacity="0.92"/>
+    <circle cx="36" cy="64" r="2.2" fill="#818cf8" opacity="0.88"/>
+    <circle cx="36" cy="76" r="1.8" fill="#818cf8" opacity="0.75"/>
+    <!-- Left outer column -->
+    <circle cx="24" cy="40" r="2"   fill="#22d3ee" opacity="0.82"/>
+    <circle cx="24" cy="52" r="2.2" fill="#22d3ee" opacity="0.85"/>
+    <circle cx="24" cy="64" r="2"   fill="#818cf8" opacity="0.8"/>
+    <!-- Right mid column -->
+    <circle cx="64" cy="28" r="2.2" fill="#c084fc" opacity="0.88"/>
+    <circle cx="64" cy="40" r="2.5" fill="#a78bfa" opacity="0.92"/>
+    <circle cx="64" cy="52" r="2.5" fill="#a78bfa" opacity="0.92"/>
+    <circle cx="64" cy="64" r="2.2" fill="#c084fc" opacity="0.88"/>
+    <circle cx="64" cy="76" r="1.8" fill="#a855f7" opacity="0.75"/>
+    <!-- Right outer column -->
+    <circle cx="76" cy="40" r="2"   fill="#c084fc" opacity="0.82"/>
+    <circle cx="76" cy="52" r="2.2" fill="#c084fc" opacity="0.85"/>
+    <circle cx="76" cy="64" r="2"   fill="#a855f7" opacity="0.8"/>
+    <!-- Upper wing nodes -->
+    <circle cx="36" cy="18" r="1.8" fill="#22d3ee" opacity="0.8"/>
+    <circle cx="64" cy="18" r="1.8" fill="#c084fc" opacity="0.8"/>
+  </g>
+
+  <!-- === LAYER 8: 3D specular highlight (top-left rim) === -->
+  <path d="M50,14 C41,10 26,12 18,22 C11,31 8,43 9,55"
+    fill="none" stroke="white" stroke-width="2" stroke-opacity="0.18" stroke-linecap="round"/>
 </svg>

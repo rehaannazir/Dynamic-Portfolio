@@ -163,13 +163,51 @@ export default function Portfolio() {
           <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
             <button onClick={() => setPage("home")} className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 22px -3px rgba(99,102,241,0.85)" }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ filter: "drop-shadow(0 0 3px rgba(255,255,255,0.7))" }}>
-                  <g fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 9 V5" /><path d="M12 15 V19" /><path d="M9.8 9.8 L6.6 7.2" /><path d="M14.2 14.2 L17.4 16.8" /><path d="M9.8 14.2 L6.6 16.8" /><path d="M14.2 9.8 L17.4 7.2" />
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                  <defs>
+                    <filter id="bfg1" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="0.7" result="b"/>
+                      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="bng1" x="-150%" y="-150%" width="400%" height="400%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="b"/>
+                      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <clipPath id="bclip1">
+                      <path d="M12,3 C9.5,2 5.5,2.5 3.5,5.5 C1.5,8.5 1.5,12 2.5,15 C3.5,17.5 5.5,19 8,19.8 C9.5,20.4 11,20.8 12,20.8 C13,20.8 14.5,20.4 16,19.8 C18.5,19 20.5,17.5 21.5,15 C22.5,12 22.5,8.5 20.5,5.5 C18.5,2.5 14.5,2 12,3Z"/>
+                    </clipPath>
+                  </defs>
+                  {/* Brain outline */}
+                  <path d="M12,3 C9.5,2 5.5,2.5 3.5,5.5 C1.5,8.5 1.5,12 2.5,15 C3.5,17.5 5.5,19 8,19.8 C9.5,20.4 11,20.8 12,20.8 C13,20.8 14.5,20.4 16,19.8 C18.5,19 20.5,17.5 21.5,15 C22.5,12 22.5,8.5 20.5,5.5 C18.5,2.5 14.5,2 12,3Z"
+                    fill="none" stroke="white" strokeWidth="0.9" filter="url(#bfg1)"/>
+                  {/* Circuit grid clipped to brain */}
+                  <g clipPath="url(#bclip1)" filter="url(#bfg1)">
+                    <line x1="0" y1="9" x2="24" y2="9" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="0" y1="13" x2="24" y2="13" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="0" y1="17" x2="24" y2="17" stroke="white" strokeWidth="0.45" strokeOpacity="0.35"/>
+                    <line x1="9" y1="0" x2="9" y2="24" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="12" y1="0" x2="12" y2="24" stroke="white" strokeWidth="0.65" strokeOpacity="0.65"/>
+                    <line x1="15" y1="0" x2="15" y2="24" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="9" y1="9" x2="12" y2="13" stroke="white" strokeWidth="0.4" strokeOpacity="0.3"/>
+                    <line x1="15" y1="9" x2="12" y2="13" stroke="white" strokeWidth="0.4" strokeOpacity="0.3"/>
                   </g>
-                  <g fill="#fff" style={{ animation: "vpulse 2.4s ease-in-out infinite" }}>
-                    <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="19" r="1.5" /><circle cx="6.6" cy="7.2" r="1.5" /><circle cx="17.4" cy="16.8" r="1.5" /><circle cx="6.6" cy="16.8" r="1.5" /><circle cx="17.4" cy="7.2" r="1.5" />
+                  {/* Brain folds (3D depth) */}
+                  <path d="M7,5.5 C5.5,7.5 5,10.5 5.5,13.5" fill="none" stroke="white" strokeWidth="0.8" strokeOpacity="0.45" strokeLinecap="round" filter="url(#bfg1)"/>
+                  <path d="M17,5.5 C18.5,7.5 19,10.5 18.5,13.5" fill="none" stroke="white" strokeWidth="0.8" strokeOpacity="0.45" strokeLinecap="round" filter="url(#bfg1)"/>
+                  {/* Center hemisphere divider */}
+                  <line x1="12" y1="3" x2="12" y2="20.8" stroke="white" strokeWidth="0.5" strokeOpacity="0.4" strokeDasharray="2 1.5" filter="url(#bfg1)"/>
+                  {/* Glowing nodes */}
+                  <g filter="url(#bng1)">
+                    <circle cx="12" cy="3"    r="1"    fill="white"/>
+                    <circle cx="12" cy="9"    r="1.1"  fill="white"/>
+                    <circle cx="12" cy="13"   r="1.1"  fill="white"/>
+                    <circle cx="9"  cy="9"    r="0.85" fill="white"/>
+                    <circle cx="15" cy="9"    r="0.85" fill="white"/>
+                    <circle cx="9"  cy="13"   r="0.85" fill="white"/>
+                    <circle cx="15" cy="13"   r="0.85" fill="white"/>
+                    <circle cx="12" cy="17"   r="0.85" fill="white"/>
+                    <circle cx="9"  cy="17"   r="0.7"  fill="white" opacity="0.7"/>
+                    <circle cx="15" cy="17"   r="0.7"  fill="white" opacity="0.7"/>
                   </g>
                 </svg>
               </div>
@@ -1690,16 +1728,46 @@ function Footer({ setPage }) {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 24px -4px rgba(99,102,241,0.9)" }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ filter: "drop-shadow(0 0 3px rgba(255,255,255,0.7))" }}>
-                  <g fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 9 V5" /><path d="M12 15 V19" /><path d="M9.8 9.8 L6.6 7.2" />
-                    <path d="M14.2 14.2 L17.4 16.8" /><path d="M9.8 14.2 L6.6 16.8" /><path d="M14.2 9.8 L17.4 7.2" />
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                  <defs>
+                    <filter id="bfg2" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="0.7" result="b"/>
+                      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="bng2" x="-150%" y="-150%" width="400%" height="400%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="b"/>
+                      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <clipPath id="bclip2">
+                      <path d="M12,3 C9.5,2 5.5,2.5 3.5,5.5 C1.5,8.5 1.5,12 2.5,15 C3.5,17.5 5.5,19 8,19.8 C9.5,20.4 11,20.8 12,20.8 C13,20.8 14.5,20.4 16,19.8 C18.5,19 20.5,17.5 21.5,15 C22.5,12 22.5,8.5 20.5,5.5 C18.5,2.5 14.5,2 12,3Z"/>
+                    </clipPath>
+                  </defs>
+                  <path d="M12,3 C9.5,2 5.5,2.5 3.5,5.5 C1.5,8.5 1.5,12 2.5,15 C3.5,17.5 5.5,19 8,19.8 C9.5,20.4 11,20.8 12,20.8 C13,20.8 14.5,20.4 16,19.8 C18.5,19 20.5,17.5 21.5,15 C22.5,12 22.5,8.5 20.5,5.5 C18.5,2.5 14.5,2 12,3Z"
+                    fill="none" stroke="white" strokeWidth="0.9" filter="url(#bfg2)"/>
+                  <g clipPath="url(#bclip2)" filter="url(#bfg2)">
+                    <line x1="0" y1="9" x2="24" y2="9" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="0" y1="13" x2="24" y2="13" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="0" y1="17" x2="24" y2="17" stroke="white" strokeWidth="0.45" strokeOpacity="0.35"/>
+                    <line x1="9" y1="0" x2="9" y2="24" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="12" y1="0" x2="12" y2="24" stroke="white" strokeWidth="0.65" strokeOpacity="0.65"/>
+                    <line x1="15" y1="0" x2="15" y2="24" stroke="white" strokeWidth="0.55" strokeOpacity="0.5"/>
+                    <line x1="9" y1="9" x2="12" y2="13" stroke="white" strokeWidth="0.4" strokeOpacity="0.3"/>
+                    <line x1="15" y1="9" x2="12" y2="13" stroke="white" strokeWidth="0.4" strokeOpacity="0.3"/>
                   </g>
-                  <g fill="#fff" style={{ animation: "vpulse 2.4s ease-in-out infinite" }}>
-                    <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-                    <circle cx="6.6" cy="7.2" r="1.5" /><circle cx="17.4" cy="16.8" r="1.5" />
-                    <circle cx="6.6" cy="16.8" r="1.5" /><circle cx="17.4" cy="7.2" r="1.5" />
+                  <path d="M7,5.5 C5.5,7.5 5,10.5 5.5,13.5" fill="none" stroke="white" strokeWidth="0.8" strokeOpacity="0.45" strokeLinecap="round" filter="url(#bfg2)"/>
+                  <path d="M17,5.5 C18.5,7.5 19,10.5 18.5,13.5" fill="none" stroke="white" strokeWidth="0.8" strokeOpacity="0.45" strokeLinecap="round" filter="url(#bfg2)"/>
+                  <line x1="12" y1="3" x2="12" y2="20.8" stroke="white" strokeWidth="0.5" strokeOpacity="0.4" strokeDasharray="2 1.5" filter="url(#bfg2)"/>
+                  <g filter="url(#bng2)">
+                    <circle cx="12" cy="3"    r="1"    fill="white"/>
+                    <circle cx="12" cy="9"    r="1.1"  fill="white"/>
+                    <circle cx="12" cy="13"   r="1.1"  fill="white"/>
+                    <circle cx="9"  cy="9"    r="0.85" fill="white"/>
+                    <circle cx="15" cy="9"    r="0.85" fill="white"/>
+                    <circle cx="9"  cy="13"   r="0.85" fill="white"/>
+                    <circle cx="15" cy="13"   r="0.85" fill="white"/>
+                    <circle cx="12" cy="17"   r="0.85" fill="white"/>
+                    <circle cx="9"  cy="17"   r="0.7"  fill="white" opacity="0.7"/>
+                    <circle cx="15" cy="17"   r="0.7"  fill="white" opacity="0.7"/>
                   </g>
                 </svg>
               </div>
