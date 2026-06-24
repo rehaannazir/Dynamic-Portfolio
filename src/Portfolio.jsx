@@ -1377,6 +1377,7 @@ function ContactSection() {
   const [f, setF] = useState({ name: "", email: "", details: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendingMsg, setSendingMsg] = useState("Sending");
   const [error, setError] = useState("");
   const [focus, setFocus] = useState(null);
   const anyFocus = focus !== null;
@@ -1385,22 +1386,37 @@ function ContactSection() {
     fetch(`${API_BASE}/api/health`, { method: "GET" }).catch(() => {});
   }, []);
 
-  const doFetch = () => fetch(`${API_BASE}/api/contact`, {
+  const fetchWithTimeout = (url, opts, ms) =>
+    Promise.race([fetch(url, opts), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+
+  const doFetch = () => fetchWithTimeout(`${API_BASE}/api/contact`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(f),
-  });
+  }, 12000);
 
   const submit = async () => {
     if (sent || sending) return;
     setError("");
     setSending(true);
+    setSendingMsg("Sending");
     try {
       let res;
       try {
         res = await doFetch();
       } catch {
-        await new Promise(r => setTimeout(r, 3000));
+        setSendingMsg("Waking up server");
+        const deadline = Date.now() + 90000;
+        let up = false;
+        while (Date.now() < deadline) {
+          await new Promise(r => setTimeout(r, 5000));
+          try {
+            const h = await fetchWithTimeout(`${API_BASE}/api/health`, {}, 5000);
+            if (h.ok) { up = true; break; }
+          } catch {}
+        }
+        if (!up) throw new Error("Server is taking too long to respond. Please try again in a minute.");
+        setSendingMsg("Sending");
         res = await doFetch();
       }
       const text = await res.text();
@@ -1412,6 +1428,7 @@ function ContactSection() {
       setError(e.message);
     } finally {
       setSending(false);
+      setSendingMsg("Sending");
     }
   };
   return (
@@ -1450,7 +1467,7 @@ function ContactSection() {
                   <textarea value={f.details} onChange={(e) => setF({ ...f, details: e.target.value })} onFocus={() => setFocus("details")} onBlur={() => setFocus(null)} rows={4} maxLength={500} placeholder="What would you like to automate?" className="w-full mt-1.5 bg-white/5 rounded-lg px-4 py-2.5 text-sm text-white outline-none transition-all resize-none" style={{ border: "1px solid", borderColor: focus === "details" ? "#818cf8" : "rgba(255,255,255,0.1)", boxShadow: focus === "details" ? "0 0 0 3px rgba(99,102,241,0.16), 0 0 26px -6px rgba(139,92,246,0.7)" : "none" }} />
                 </div>
                 <button onClick={submit} disabled={sent || sending} className="btn-glow w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all" style={{ background: sent ? "linear-gradient(135deg,#10b981,#059669)" : "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
-                  {sent ? (<><CircleCheck className="w-4 h-4" /> Message sent — I'll be in touch</>) : sending ? (<span className="inline-flex items-center gap-2">Sending <span className="flex gap-1">{[0, 1, 2].map((i) => (<span key={i} className="w-1.5 h-1.5 rounded-full bg-white" style={{ animation: `vpulse 1s ease-in-out ${i * 0.2}s infinite` }} />))}</span></span>) : (<>Send message <Send className="w-4 h-4" /></>)}
+                  {sent ? (<><CircleCheck className="w-4 h-4" /> Message sent — I'll be in touch</>) : sending ? (<span className="inline-flex items-center gap-2">{sendingMsg} <span className="flex gap-1">{[0, 1, 2].map((i) => (<span key={i} className="w-1.5 h-1.5 rounded-full bg-white" style={{ animation: `vpulse 1s ease-in-out ${i * 0.2}s infinite` }} />))}</span></span>) : (<>Send message <Send className="w-4 h-4" /></>)}
                 </button>
                 {error && <p className="text-xs text-rose-400 mono mt-2">⚠ {error}</p>}
               </div>
