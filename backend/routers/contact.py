@@ -1,8 +1,9 @@
 import smtplib
 import asyncio
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from datetime import datetime, timezone, timedelta
@@ -10,6 +11,8 @@ from datetime import datetime, timezone, timedelta
 from database import ContactMessage, get_db
 from models import ContactRequest, ContactResponse, ContactMessageOut
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/contact", tags=["contact"])
 
@@ -124,21 +127,30 @@ async def _send_email_notification(name: str, email: str, details: str) -> None:
     msg.attach(MIMEText(html, "html"))
 
     def _send() -> None:
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=15) as server:
             server.ehlo()
             server.starttls()
             server.ehlo()
             server.login(settings.smtp_user, settings.smtp_pass)
             server.sendmail(settings.smtp_user, settings.notify_to, msg.as_string())
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, _send)
+
+
+async def _send_email_safe(name: str, email: str, details: str) -> None:
+    try:
+        await _send_email_notification(name, email, details)
+        logger.info("Email notification sent for %s <%s>", name, email)
+    except Exception as exc:
+        logger.error("Email notification failed for %s <%s>: %s", name, email, exc)
 
 
 @router.post("", response_model=ContactResponse, status_code=201)
 async def submit_contact(
     payload: ContactRequest,
     request: Request,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> ContactResponse:
     client_ip = request.client.host if request.client else "unknown"
@@ -153,10 +165,7 @@ async def submit_contact(
     await db.commit()
     await db.refresh(message)
 
-    try:
-        await _send_email_notification(payload.name, payload.email, payload.details)
-    except Exception:
-        pass
+    background_tasks.add_task(_send_email_safe, payload.name, payload.email, payload.details)
 
     return ContactResponse(ok=True, message="Message received — I'll be in touch soon!")
 
