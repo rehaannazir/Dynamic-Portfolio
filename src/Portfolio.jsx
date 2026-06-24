@@ -296,7 +296,7 @@ function Hero3D() {
       // Glow vertices
       [[0,2],[1,4]].forEach(([a]) => {
         const g = ctx.createRadialGradient(v[a][0],v[a][1],0,v[a][0],v[a][1],4);
-        g.addColorStop(0,"rgba(167,139,250,0.5)"); g.addColorStop(1,"rgba(0,0,0,0)");
+        g.addColorStop(0,"rgba(167,139,250,0.22)"); g.addColorStop(1,"rgba(0,0,0,0)");
         ctx.fillStyle=g; ctx.beginPath(); ctx.arc(v[a][0],v[a][1],4,0,Math.PI*2); ctx.fill();
       });
     };
@@ -314,7 +314,7 @@ function Hero3D() {
       // Outer halo rings (two concentric)
       [1.15, 1.35].forEach((scale, i) => {
         ctx.beginPath(); ctx.arc(cx, cy, r*scale, 0, Math.PI*2);
-        ctx.strokeStyle = `rgba(99,102,241,${0.12 - i*0.05})`; ctx.lineWidth = i===0 ? 1.5 : 0.8; ctx.stroke();
+        ctx.strokeStyle = `rgba(99,102,241,${0.06 - i*0.02})`; ctx.lineWidth = i===0 ? 1.5 : 0.8; ctx.stroke();
       });
 
       // Connections between nearby particles
@@ -330,12 +330,12 @@ function Hero3D() {
 
       // Layered ambient glow
       const g1 = ctx.createRadialGradient(cx,cy,0,cx,cy,r*1.9);
-      g1.addColorStop(0,"rgba(99,102,241,0.18)"); g1.addColorStop(0.45,"rgba(59,130,246,0.08)"); g1.addColorStop(1,"rgba(0,0,0,0)");
+      g1.addColorStop(0,"rgba(99,102,241,0.08)"); g1.addColorStop(0.45,"rgba(59,130,246,0.04)"); g1.addColorStop(1,"rgba(0,0,0,0)");
       ctx.fillStyle=g1; ctx.beginPath(); ctx.arc(cx,cy,r*1.9,0,Math.PI*2); ctx.fill();
 
       // Second inner glow
       const g2 = ctx.createRadialGradient(cx,cy,0,cx,cy,r*0.8);
-      g2.addColorStop(0,"rgba(139,92,246,0.14)"); g2.addColorStop(1,"rgba(0,0,0,0)");
+      g2.addColorStop(0,"rgba(139,92,246,0.06)"); g2.addColorStop(1,"rgba(0,0,0,0)");
       ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(cx,cy,r*0.8,0,Math.PI*2); ctx.fill();
 
       // Particles
@@ -345,7 +345,7 @@ function Hero3D() {
         ctx.fillStyle = z>0 ? `rgba(192,168,255,${alpha})` : `rgba(96,165,250,${alpha*0.7})`; ctx.fill();
         if (z>0.3) {
           const g=ctx.createRadialGradient(sx,sy,0,sx,sy,size*6);
-          g.addColorStop(0,`rgba(167,139,250,${alpha*0.22})`); g.addColorStop(1,"rgba(0,0,0,0)");
+          g.addColorStop(0,`rgba(167,139,250,${alpha*0.09})`); g.addColorStop(1,"rgba(0,0,0,0)");
           ctx.fillStyle=g; ctx.beginPath(); ctx.arc(sx,sy,size*6,0,Math.PI*2); ctx.fill();
         }
       });
