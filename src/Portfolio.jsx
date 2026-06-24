@@ -1548,7 +1548,20 @@ function ContactSection() {
       const text = await res.text();
       let data = {};
       try { data = JSON.parse(text); } catch {}
-      if (!res.ok) throw new Error(data.detail ?? "Something went wrong");
+      if (!res.ok) {
+        const detail = data.detail;
+        let msg = "Something went wrong. Please try again.";
+        if (typeof detail === "string") msg = detail;
+        else if (Array.isArray(detail)) {
+          const emailErr = detail.find(e => e.loc?.includes("email"));
+          const nameErr = detail.find(e => e.loc?.includes("name"));
+          const detailsErr = detail.find(e => e.loc?.includes("details"));
+          if (emailErr) msg = "Please enter a valid email address.";
+          else if (nameErr) msg = "Please enter your name.";
+          else if (detailsErr) msg = "Please describe your project.";
+        }
+        throw new Error(msg);
+      }
       setSent(true);
     } catch (e) {
       setError(e.message);
