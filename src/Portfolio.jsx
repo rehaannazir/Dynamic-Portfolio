@@ -67,14 +67,34 @@ function ReadingProgress() {
 }
 
 /* ===================== APP ===================== */
+function getStateFromPath(path) {
+  const p = path || window.location.pathname;
+  if (p.startsWith("/blog/")) return { page: "article", article: p.slice(6).replace(/\/$/, "") || null };
+  if (/^\/services\/?$/.test(p)) return { page: "services", article: null };
+  if (/^\/reviews\/?$/.test(p)) return { page: "reviews", article: null };
+  if (/^\/blog\/?$/.test(p)) return { page: "blog", article: null };
+  return { page: "home", article: null };
+}
+
 export default function Portfolio() {
-  const [page, setPage] = useState("home");
-  const [article, setArticle] = useState(null);
+  const initial = getStateFromPath();
+  const [page, setPage] = useState(initial.page);
+  const [article, setArticle] = useState(initial.article);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => { setMenuOpen(false); scrollTo({ top: 0, behavior: "smooth" }); }, [page, article]);
-  const goArticle = (slug) => { setArticle(slug); setPage("article"); };
+  useEffect(() => {
+    const onPop = () => { const s = getStateFromPath(); setPage(s.page); setArticle(s.article); };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const navigate = (newPage) => {
+    const paths = { home: "/", services: "/services", reviews: "/reviews", blog: "/blog" };
+    window.history.pushState({}, "", paths[newPage] || "/");
+    setPage(newPage);
+  };
+  const goArticle = (slug) => { window.history.pushState({}, "", `/blog/${slug}`); setArticle(slug); setPage("article"); };
 
   const nav = [
     { id: "home", label: "home", num: "01" }, { id: "services", label: "services", num: "02" },
@@ -156,31 +176,31 @@ export default function Portfolio() {
             </button>
             <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
               {nav.map((n) => (
-                <button key={n.id} onClick={() => setPage(n.id)} className={"px-3 py-2 rounded-lg text-sm mono transition-all flex items-center gap-1.5 " + ((page === n.id || (page === "article" && n.id === "blog")) ? "text-white" : "text-slate-400 hover:text-white")} style={(page === n.id || (page === "article" && n.id === "blog")) ? { background: "rgba(99,102,241,0.14)", border: "1px solid rgba(139,92,246,0.4)" } : {}}>
+                <button key={n.id} onClick={() => navigate(n.id)} className={"px-3 py-2 rounded-lg text-sm mono transition-all flex items-center gap-1.5 " + ((page === n.id || (page === "article" && n.id === "blog")) ? "text-white" : "text-slate-400 hover:text-white")} style={(page === n.id || (page === "article" && n.id === "blog")) ? { background: "rgba(99,102,241,0.14)", border: "1px solid rgba(139,92,246,0.4)" } : {}}>
                   <span className="text-indigo-400 text-xs">{n.num}</span>{n.label}
                 </button>
               ))}
-              <button onClick={() => { setPage("home"); setTimeout(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); }} className="btn-glow ml-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>hire me →</button>
+              <button onClick={() => { navigate("home"); setTimeout(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); }} className="btn-glow ml-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>hire me →</button>
             </nav>
             <button className="md:hidden text-white" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
           </div>
           {menuOpen && (
             <div className="md:hidden glass border-t border-white/5 px-5 py-3 flex flex-col gap-1">
-              {nav.map((n) => (<button key={n.id} onClick={() => setPage(n.id)} className={"px-4 py-3 rounded-lg text-sm mono text-left flex items-center gap-2 " + (page === n.id ? "text-white bg-white/5" : "text-slate-400")}><span className="text-indigo-400 text-xs">{n.num}</span>{n.label}</button>))}
+              {nav.map((n) => (<button key={n.id} onClick={() => navigate(n.id)} className={"px-4 py-3 rounded-lg text-sm mono text-left flex items-center gap-2 " + (page === n.id ? "text-white bg-white/5" : "text-slate-400")}><span className="text-indigo-400 text-xs">{n.num}</span>{n.label}</button>))}
             </div>
           )}
         </div>
       </header>
 
       <main className="relative z-10" key={page + (article || "")}>
-        {page === "home" && <Home setPage={setPage} mounted={mounted} />}
-        {page === "services" && <Services setPage={setPage} />}
+        {page === "home" && <Home setPage={navigate} mounted={mounted} />}
+        {page === "services" && <Services setPage={navigate} />}
         {page === "reviews" && <Reviews />}
         {page === "blog" && <Blog openArticle={goArticle} />}
-        {page === "article" && (<><BlogPost slug={article} back={() => setPage("blog")} openArticle={goArticle} /><div className="max-w-6xl mx-auto px-5 pb-20 flex justify-center"><button onClick={() => setPage("blog")} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium text-slate-200 glass glass-hover" data-cursor><ArrowLeft className="w-4 h-4" /> Back to all blogs</button></div></>)}
+        {page === "article" && (<><BlogPost slug={article} back={() => navigate("blog")} openArticle={goArticle} /><div className="max-w-6xl mx-auto px-5 pb-20 flex justify-center"><button onClick={() => navigate("blog")} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium text-slate-200 glass glass-hover" data-cursor><ArrowLeft className="w-4 h-4" /> Back to all blogs</button></div></>)}
       </main>
 
-      <Footer setPage={setPage} />
+      <Footer setPage={navigate} />
     </div>
   );
 }
@@ -452,8 +472,8 @@ function Services({ setPage }) {
       <Helmet>
         <title>AI Automation Services — Rehan Nazir | FastAPI, n8n, AI Agents</title>
         <meta name="description" content="AI chatbots, B2B sales automation, content APIs, n8n workflows and agentic systems. Rehan Nazir builds self-running automation systems for businesses worldwide." />
-        <link rel="canonical" href={SITE_URL + "/#services"} />
-        <meta property="og:url" content={SITE_URL + "/#services"} />
+        <link rel="canonical" href={SITE_URL + "/services"} />
+        <meta property="og:url" content={SITE_URL + "/services"} />
         <meta property="og:title" content="AI Automation Services — Rehan Nazir" />
         <meta property="og:description" content="AI chatbots, B2B sales automation, content APIs, n8n workflows and agentic systems built to run themselves." />
       </Helmet>
@@ -487,8 +507,8 @@ function Reviews() {
       <Helmet>
         <title>Client Reviews — Rehan Nazir | AI Automation Projects</title>
         <meta name="description" content="Real client testimonials for Rehan Nazir's AI automation work. 10+ clients, 4.9 average rating, 100% on-time delivery. AI chatbots, sales automation and workflow systems." />
-        <link rel="canonical" href={SITE_URL + "/#reviews"} />
-        <meta property="og:url" content={SITE_URL + "/#reviews"} />
+        <link rel="canonical" href={SITE_URL + "/reviews"} />
+        <meta property="og:url" content={SITE_URL + "/reviews"} />
         <meta property="og:title" content="Client Reviews — Rehan Nazir" />
         <meta property="og:description" content="Real client testimonials. 10+ clients, 4.9 average rating, 100% on-time delivery." />
       </Helmet>
@@ -1125,12 +1145,12 @@ function FAQSection() {
 
 /* ===================== BLOG ===================== */
 const POSTS = [
-  { slug: "systems-not-scripts", title: "Why I build systems, not scripts", cat: "Automation", date: "12 Jun 2026", read: "6 min", excerpt: "The real value of AI automation isn't a clever script — it's a system a business can rely on without you. How I think about the difference.", featured: true },
-  { slug: "production-ai-content-api", title: "Building a production AI content API", cat: "Engineering", date: "28 May 2026", read: "8 min", excerpt: "Architecting a FastAPI + Gemini backend that's clean, scalable and ready to hand off to a client." },
-  { slug: "rag-chatbots-that-help", title: "RAG chatbots that actually help", cat: "AI Agents", date: "14 May 2026", read: "6 min", excerpt: "Most chatbots frustrate users. The fix is grounding them in real context. A practical look at retrieval-augmented agents." },
-  { slug: "n8n-llms-freelancer-edge", title: "n8n + LLMs: the freelancer's edge", cat: "Workflow", date: "30 Apr 2026", read: "4 min", excerpt: "How combining n8n orchestration with language models lets a solo builder deliver agency-level automation." },
-  { slug: "freelancing-to-ai-company", title: "From freelancing to an AI company", cat: "Strategy", date: "18 Apr 2026", read: "7 min", excerpt: "My roadmap from done-for-you services to a productized SaaS — and the niche decisions driving it." },
-  { slug: "algo-trading-meets-automation", title: "Algorithmic trading meets automation", cat: "Trading", date: "02 Apr 2026", read: "6 min", excerpt: "Trading, ML and automation share one loop: data → pattern → test → execute. Why learning them together compounds." },
+  { slug: "systems-not-scripts", title: "Why I build systems, not scripts", cat: "Automation", date: "12 Jun 2026", isoDate: "2026-06-12", read: "6 min", excerpt: "The real value of AI automation isn't a clever script — it's a system a business can rely on without you. How I think about the difference.", featured: true },
+  { slug: "production-ai-content-api", title: "Building a production AI content API", cat: "Engineering", date: "28 May 2026", isoDate: "2026-05-28", read: "8 min", excerpt: "Architecting a FastAPI + Gemini backend that's clean, scalable and ready to hand off to a client." },
+  { slug: "rag-chatbots-that-help", title: "RAG chatbots that actually help", cat: "AI Agents", date: "14 May 2026", isoDate: "2026-05-14", read: "6 min", excerpt: "Most chatbots frustrate users. The fix is grounding them in real context. A practical look at retrieval-augmented agents." },
+  { slug: "n8n-llms-freelancer-edge", title: "n8n + LLMs: the freelancer's edge", cat: "Workflow", date: "30 Apr 2026", isoDate: "2026-04-30", read: "4 min", excerpt: "How combining n8n orchestration with language models lets a solo builder deliver agency-level automation." },
+  { slug: "freelancing-to-ai-company", title: "From freelancing to an AI company", cat: "Strategy", date: "18 Apr 2026", isoDate: "2026-04-18", read: "7 min", excerpt: "My roadmap from done-for-you services to a productized SaaS — and the niche decisions driving it." },
+  { slug: "algo-trading-meets-automation", title: "Algorithmic trading meets automation", cat: "Trading", date: "02 Apr 2026", isoDate: "2026-04-02", read: "6 min", excerpt: "Trading, ML and automation share one loop: data → pattern → test → execute. Why learning them together compounds." },
 ];
 
 function Blog({ openArticle }) {
@@ -1140,8 +1160,8 @@ function Blog({ openArticle }) {
       <Helmet>
         <title>Blog — AI Automation & Engineering | Rehan Nazir</title>
         <meta name="description" content="Practical notes on AI engineering, workflow automation, n8n, RAG chatbots and building systems that run themselves. By Rehan Nazir, AI Engineer and Founder of Nexara." />
-        <link rel="canonical" href={SITE_URL + "/#blog"} />
-        <meta property="og:url" content={SITE_URL + "/#blog"} />
+        <link rel="canonical" href={SITE_URL + "/blog"} />
+        <meta property="og:url" content={SITE_URL + "/blog"} />
         <meta property="og:title" content="Blog — AI Automation & Engineering | Rehan Nazir" />
         <meta property="og:description" content="Practical notes on AI engineering, workflow automation, n8n, RAG chatbots and building systems that run themselves." />
         <script type="application/ld+json">{JSON.stringify({
@@ -1155,7 +1175,7 @@ function Blog({ openArticle }) {
             "@type": "BlogPosting",
             "headline": p.title,
             "description": p.excerpt,
-            "datePublished": p.date,
+            "datePublished": p.isoDate,
             "url": `${SITE_URL}/blog/${p.slug}`,
             "author": { "@type": "Person", "name": "Rehan Nazir" }
           }))
@@ -1297,14 +1317,14 @@ function BlogPost({ slug, back, openArticle }) {
           <meta property="og:title" content={meta.title} />
           <meta property="og:description" content={meta.excerpt} />
           <meta property="article:author" content="Rehan Nazir" />
-          <meta property="article:published_time" content={meta.date} />
+          <meta property="article:published_time" content={meta.isoDate} />
           <meta property="article:section" content={meta.cat} />
           <script type="application/ld+json">{JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BlogPosting",
             "headline": meta.title,
             "description": meta.excerpt,
-            "datePublished": meta.date,
+            "datePublished": meta.isoDate,
             "url": `${SITE_URL}/blog/${meta.slug}`,
             "author": { "@type": "Person", "name": "Rehan Nazir", "url": SITE_URL },
             "publisher": { "@type": "Organization", "name": "Nexara", "url": SITE_URL },
