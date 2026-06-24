@@ -8,7 +8,7 @@ import {
   GitBranch, Activity, List, Quote, ChevronRight, TriangleAlert, BookOpen, User, Send
 } from "lucide-react";
 
-const SITE_URL = "https://rehannazir.dev";
+const SITE_URL = "https://rehannazir.com";
 
 /* ===================== CUSTOM GLOWING CURSOR ===================== */
 function CustomCursor() {
