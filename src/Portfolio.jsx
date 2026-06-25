@@ -326,7 +326,7 @@ function Home({ setPage, mounted }) {
   const PROFILE_PIC = rehanPhoto;
   const projects = [
     { n: "01", cat: "FastAPI · Gemini", title: "AI Content Automation API", desc: "Production backend that generates, categorizes and schedules content via LLMs behind a clean REST interface.", role: "Full Stack · AI · 2026", stack: ["FastAPI", "Gemini", "SQLAlchemy"] },
-    { n: "02", cat: "n8n · LLMs", title: "B2B Sales Automation Flow", desc: "End-to-end lead enrichment and outreach pipeline that runs hands-free and hands off cleanly to the client.", role: "Automation · 2026", stack: ["n8n", "LLMs", "APIs"] },
+    { n: "02", cat: "n8n · LLMs", title: "B2B Sales Automation Flow", desc: "End-to-end lead enrichment and outreach pipeline that runs hands-free and hands off cleanly to the client.", role: "Automation · 2026", stack: ["n8n", "LLMs", "APIs"], link: "https://www.loom.com/share/68bfcd80b9de459e975966cc671d11cb" },
     { n: "03", cat: "Python · Gemini", title: "Finance Expense Categorizer", desc: "Turns raw CSV bank exports into categorized, analysis-ready Excel sheets automatically.", role: "AI Tooling · 2025", stack: ["Python", "Gemini", "Pandas"] },
     { n: "04", cat: "RAG · Agents", title: "Support Chatbot Agent", desc: "Context-aware support agent grounded in company docs, deployed across web and messaging channels.", role: "AI Agents · 2025", stack: ["RAG", "Agents", "React"] },
   ];
@@ -425,7 +425,7 @@ function Home({ setPage, mounted }) {
         <div className="grid sm:grid-cols-2 gap-5">
           {projects.map((p, i) => (
             <Reveal key={p.title} delay={i * 0.1}>
-              <div className="glass glass-hover rounded-2xl p-6 h-full group" data-cursor>
+              <div className="glass glass-hover rounded-2xl p-6 h-full group" data-cursor onClick={() => p.link && window.open(p.link, '_blank')} style={p.link ? {cursor:'pointer'} : {}}>
                 <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">[ {p.n} / 04 ]</span><span className="inline-flex items-center gap-1.5 text-xs text-emerald-300 mono"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{animation:"vpulse 3s ease-in-out infinite"}}/>live</span></div>
                 <div className="mono text-[11px] uppercase tracking-wide text-indigo-300/80 mt-5">{p.cat}</div>
                 <h3 className="text-lg font-semibold text-white mt-1 flex items-center gap-2">{p.title}<ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-indigo-300 transition-colors duration-500" /></h3>
@@ -446,7 +446,7 @@ function Home({ setPage, mounted }) {
 function Services({ setPage }) {
   const services = [
     { icon: <MessageSquare className="w-6 h-6" />, title: "AI Chatbots & Agents", desc: "Context-aware assistants and autonomous agents trained on your data, deployed across web and messaging.", points: ["RAG over your docs", "Multi-channel deploy", "Human-in-the-loop ready"] },
-    { icon: <TrendingUp className="w-6 h-6" />, title: "B2B Sales Automation", desc: "Lead enrichment, qualification and personalized outreach pipelines that run without manual lifting.", points: ["Lead enrichment", "Personalized outreach", "CRM sync"] },
+    { icon: <TrendingUp className="w-6 h-6" />, title: "B2B Sales Automation", desc: "Lead enrichment, qualification and personalized outreach pipelines that run without manual lifting.", points: ["Lead enrichment", "Personalized outreach", "CRM sync"], link: "https://www.loom.com/share/68bfcd80b9de459e975966cc671d11cb" },
     { icon: <Layers className="w-6 h-6" />, title: "Content Automation APIs", desc: "Production-grade FastAPI backends that generate, categorize and schedule content via LLMs.", points: ["REST API", "LLM pipelines", "Scalable backend"] },
     { icon: <Workflow className="w-6 h-6" />, title: "Custom Workflow Automation", desc: "End-to-end n8n + AI workflows that connect your tools and remove repetitive ops entirely.", points: ["n8n orchestration", "API integrations", "Hands-off handoff"] },
     { icon: <Cpu className="w-6 h-6" />, title: "Agentic Systems", desc: "Multi-step reasoning agents that plan, call tools and execute tasks autonomously.", points: ["Tool calling", "Task planning", "Reliable execution"] },
@@ -474,7 +474,7 @@ function Services({ setPage }) {
         <Reveal delay={0.1}><p className="max-w-2xl mt-5 text-slate-400">I don't just hand you scripts — I build and deliver automated systems your business can rely on.</p></Reveal>
       </div></section>
       <section className="max-w-6xl mx-auto px-5 py-12"><div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {services.map((s, i) => (<Reveal key={s.title} delay={(i % 3) * 0.08}><div className="glass glass-hover rounded-2xl p-6 h-full" data-cursor><div className="w-12 h-12 rounded-xl flex items-center justify-center text-white mb-5" style={{ background: "linear-gradient(135deg,rgba(59,130,246,0.9),rgba(139,92,246,0.9))" }}>{s.icon}</div><h3 className="text-lg font-semibold text-white">{s.title}</h3><p className="text-sm text-slate-400 mt-2 leading-relaxed">{s.desc}</p><div className="mt-4 space-y-2">{s.points.map((pt) => (<div key={pt} className="flex items-center gap-2 text-sm text-slate-300"><CircleCheck className="w-4 h-4 text-indigo-400 shrink-0" />{pt}</div>))}</div></div></Reveal>))}
+        {services.map((s, i) => (<Reveal key={s.title} delay={(i % 3) * 0.08}><div className="glass glass-hover rounded-2xl p-6 h-full" data-cursor onClick={() => s.link && window.open(s.link, '_blank')} style={s.link ? {cursor:'pointer'} : {}}><div className="w-12 h-12 rounded-xl flex items-center justify-center text-white mb-5" style={{ background: "linear-gradient(135deg,rgba(59,130,246,0.9),rgba(139,92,246,0.9))" }}>{s.icon}</div><h3 className="text-lg font-semibold text-white flex items-center gap-2">{s.title}{s.link && <ExternalLink className="w-3.5 h-3.5 text-indigo-400 shrink-0" />}</h3><p className="text-sm text-slate-400 mt-2 leading-relaxed">{s.desc}</p><div className="mt-4 space-y-2">{s.points.map((pt) => (<div key={pt} className="flex items-center gap-2 text-sm text-slate-300"><CircleCheck className="w-4 h-4 text-indigo-400 shrink-0" />{pt}</div>))}</div></div></Reveal>))}
       </div></section>
       <section className="max-w-6xl mx-auto px-5 py-12"><Reveal><SectionLabel num="03">How it works</SectionLabel></Reveal><div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">{process.map((p, i) => (<Reveal key={p.n} delay={i * 0.08}><div className="glass rounded-2xl p-6 h-full" data-cursor><div className="text-4xl font-bold grad-text mono">{p.n}</div><h3 className="text-white font-semibold mt-3">{p.t}</h3><p className="text-sm text-slate-400 mt-2">{p.d}</p></div></Reveal>))}</div></section>
       <ShippedSection />
@@ -1063,7 +1063,7 @@ function AboutSection() {
 function ShippedSection() {
   const shipped = [
     { n:"01", title:"AI Content Automation API",   client:"Internal · Nexara",  role:"Full Stack · AI",  stack:["FastAPI","Gemini","SQLAlchemy"], year:"2026" },
-    { n:"02", title:"B2B Sales Automation Flow",   client:"Confidential",        role:"Automation",        stack:["n8n","LLMs","CRM APIs"],         year:"2026" },
+    { n:"02", title:"B2B Sales Automation Flow",   client:"Confidential",        role:"Automation",        stack:["n8n","LLMs","CRM APIs"],         year:"2026", link:"https://www.loom.com/share/68bfcd80b9de459e975966cc671d11cb" },
     { n:"03", title:"Finance Expense Categorizer", client:"FinTrack",            role:"AI Tooling",        stack:["Python","Gemini","Pandas"],       year:"2025" },
     { n:"04", title:"Support Chatbot Agent",       client:"NovaCommerce",        role:"AI Agents",         stack:["RAG","React","FastAPI"],          year:"2025" },
     { n:"05", title:"Lead Enrichment Pipeline",    client:"BrightLeads",         role:"Automation",        stack:["n8n","Clay","OpenAI"],            year:"2025" },
@@ -1081,7 +1081,7 @@ function ShippedSection() {
             ))}
           </div>
           {shipped.map((p,i)=>(
-            <div key={p.n} className="group grid grid-cols-[44px_1fr] md:grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-4 items-center border-b border-white/5 last:border-b-0 transition-all duration-700 hover:bg-white/[0.03]" data-cursor>
+            <div key={p.n} className="group grid grid-cols-[44px_1fr] md:grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-4 items-center border-b border-white/5 last:border-b-0 transition-all duration-700 hover:bg-white/[0.03]" data-cursor onClick={() => p.link && window.open(p.link, '_blank')} style={p.link ? {cursor:'pointer'} : {}}>
               <span className="mono text-xs text-slate-600">{p.n}</span>
               <div className="min-w-0">
                 <div className="text-white font-medium text-sm group-hover:text-indigo-200 transition-colors duration-500">{p.title}</div>
