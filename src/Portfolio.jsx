@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import rehanPhoto from "./assets/rehan.jpg";
+import PythonAutomationPost from "./PythonAutomationPost";
 import {
   Workflow, Cpu, MessageSquare, TrendingUp, Code, Zap, Star,
   ArrowRight, ArrowUpRight, ArrowLeft, GitFork, Link, Mail, MessageCircle, Menu, X,
@@ -136,9 +137,15 @@ export default function Portfolio() {
         .marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
         .marquee-track{display:flex;gap:.75rem;width:max-content;animation:scrollX 70s linear infinite}
         .faq-answer{overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1)}
-        .prose-blog p{color:#cbd5e1;line-height:1.8;margin:1rem 0}
-        .prose-blog h2{color:#fff;font-size:1.6rem;font-weight:700;margin:2.5rem 0 1rem;scroll-margin-top:96px}
+        .prose-blog p{color:#cbd5e1;line-height:1.85;margin:1.1rem 0}
+        .prose-blog h2{color:#fff;font-size:1.55rem;font-weight:700;margin:2.8rem 0 1rem;scroll-margin-top:96px;letter-spacing:-0.01em}
+        .prose-blog h3{color:#e2e8f0;font-size:1.08rem;font-weight:600;margin:2rem 0 0.6rem;scroll-margin-top:96px}
         .prose-blog strong{color:#e9d5ff}
+        .prose-blog code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:0.82em;background:rgba(99,102,241,0.14);color:#a5b4fc;padding:2px 6px;border-radius:5px;border:1px solid rgba(99,102,241,0.2)}
+        .prose-blog blockquote{border-left:2px solid #818cf8;padding-left:1.2rem;margin:1.8rem 0;color:#94a3b8;font-style:italic}
+        .prose-blog ul{color:#cbd5e1;line-height:1.85;padding-left:1.4rem;margin:0.8rem 0}
+        .prose-blog ul li{margin:0.35rem 0}
+        .prose-blog a{color:#60a5fa;text-decoration:underline;text-underline-offset:3px}
         .cursor-dot{position:fixed;top:0;left:0;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#ddd6fe;pointer-events:none;z-index:99999;mix-blend-mode:screen}
         .cursor-ring{position:fixed;top:0;left:0;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;pointer-events:none;z-index:99998;background:radial-gradient(circle,rgba(139,92,246,0.4),rgba(59,130,246,0.18) 50%,transparent 72%);box-shadow:0 0 34px 8px rgba(99,102,241,0.32);transition:width .28s,height .28s,margin .28s;mix-blend-mode:screen}
         .cursor-grow{width:84px;height:84px;margin:-42px 0 0 -42px}
@@ -1336,7 +1343,10 @@ function BlogPost({ slug, back, openArticle }) {
     );
   }
 
-  return (
+  return <PythonAutomationPost back={back} openArticle={openArticle} />;
+
+  /* dead code removed — isMain now delegates to PythonAutomationPost */
+  if (false) return (
     <article className="max-w-6xl mx-auto px-5 pt-12 pb-24" itemScope itemType="https://schema.org/BlogPosting">
       <Helmet>
         <title>Why Python is Ideal for Automation | Nexara</title>
