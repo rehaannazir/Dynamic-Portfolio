@@ -109,12 +109,12 @@ REVIEWS: list[Review] = [
 
 POSTS: list[Post] = [
     Post(
-        slug="systems-not-scripts",
-        title="Why I build systems, not scripts",
+        slug="python-ideal-for-automation",
+        title="Why Python is Ideal for Automation",
         cat="Automation",
-        date="12 Jun 2026",
-        read="6 min",
-        excerpt="The real value of AI automation isn't a clever script — it's a system a business can rely on without you. How I think about the difference.",
+        date="27 Jun 2026",
+        read="8 min",
+        excerpt="Discover why Python's simplicity and vast libraries make it the top choice for automation. Real code examples, key libraries, and interactive 3D visuals.",
         featured=True,
     ),
     Post(
