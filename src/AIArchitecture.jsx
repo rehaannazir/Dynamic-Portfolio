@@ -165,19 +165,25 @@ export default function AIArchitecture({ fallback = null }) {
       };
       window.addEventListener("resize", onResize);
 
-      let visible = true;
-      const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0 });
-      io.observe(stage);
-
       const tmp = new THREE.Vector3();
       const step = 0.86 / N;
-      let raf, last = performance.now(), tsec = 0, pLerp = 0, slow = 0, qStep = 0;
+      let raf = 0, running = false, last = performance.now(), tsec = 0, pLerp = 0, slow = 0, qStep = 0;
+      const start = () => { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(frame); };
+      const stop = () => { if (!running) return; running = false; cancelAnimationFrame(raf); };
+
+      // fully start/stop the loop with viewport visibility + tab visibility — no idle rendering
+      let onscreen = false;
+      const sync = () => { if (onscreen && !document.hidden) start(); else stop(); };
+      const io = new IntersectionObserver(([e]) => { onscreen = e.isIntersecting; sync(); }, { threshold: 0 });
+      io.observe(stage);
+      const onVis = () => sync();
+      document.addEventListener("visibilitychange", onVis);
 
       const frame = (now) => {
+        if (!running) return;
         raf = requestAnimationFrame(frame);
         const dt = Math.min(now - last, 50);
         last = now;
-        if (!visible) return;
 
         if (qStep === 0) { if (dt > 26) slow++; else slow = Math.max(0, slow - 1); if (slow > 50) { dpr = Math.min(dpr, 1.3); renderer.setPixelRatio(dpr); qStep = 1; slow = 0; } }
 
@@ -234,11 +240,12 @@ export default function AIArchitecture({ fallback = null }) {
 
         if (hudRef.current) hudRef.current.style.width = (p * 100).toFixed(1) + "%";
       };
-      raf = requestAnimationFrame(frame);
+      sync(); // start only if already onscreen
 
       return () => {
-        cancelAnimationFrame(raf);
+        stop();
         io.disconnect();
+        document.removeEventListener("visibilitychange", onVis);
         window.removeEventListener("resize", onResize);
         ctx.revert(); // kills the ScrollTrigger + reverts pin spacing before React unmounts
         nodeObjs.forEach((no) => { no.wire.material.dispose(); no.core.material.dispose(); no.glow.material.dispose(); });

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { onScrollFrame } from "./motion";
 
 /* ============================================================
    HeroWebGL — cinematic Three.js hero (real WebGL).
@@ -221,11 +222,9 @@ function initScene(THREE, addons, mount) {
   };
   window.addEventListener("pointermove", onPointer, { passive: true });
 
-  /* ---- cinematic scroll: the scene dollies back, sinks and dissolves as you head into About ---- */
+  /* ---- cinematic scroll (shared scroll dispatcher — no private scroll listener) ---- */
   let scrollTarget = 0, scrollP = 0;
-  const onScroll = () => { scrollTarget = Math.min(1, Math.max(0, window.scrollY / Math.max(1, window.innerHeight))); };
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
+  const offScroll = onScrollFrame({ write: (y) => { scrollTarget = Math.min(1, Math.max(0, y / Math.max(1, window.innerHeight))); } });
 
   /* ---- resize ---- */
   const onResize = () => {
@@ -239,10 +238,13 @@ function initScene(THREE, addons, mount) {
   };
   window.addEventListener("resize", onResize);
 
-  /* ---- visibility gating ---- */
-  let visible = true;
-  const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0 });
+  /* ---- visibility gating: fully START/STOP the rAF loop (no idle background rendering) ---- */
+  let onscreen = false;
+  const io = new IntersectionObserver(([e]) => { onscreen = e.isIntersecting; sync(); }, { threshold: 0 });
   io.observe(mount);
+  const onVis = () => sync();
+  document.addEventListener("visibilitychange", onVis);
+  const sync = () => { if (onscreen && !document.hidden) start(); else stop(); };
 
   /* ---- adaptive quality ---- */
   let slowFrames = 0, qualityStep = 0;
@@ -259,13 +261,15 @@ function initScene(THREE, addons, mount) {
     }
   };
 
-  /* ---- loop ---- */
-  let raf, last = performance.now(), t = 0;
+  /* ---- loop (runs ONLY while onscreen and tab-visible) ---- */
+  let raf = 0, running = false, last = performance.now(), t = 0;
+  const start = () => { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(animate); };
+  const stop = () => { if (!running) return; running = false; cancelAnimationFrame(raf); };
   const animate = (now) => {
+    if (!running) return;
     raf = requestAnimationFrame(animate);
     const dt = Math.min(now - last, 50);
     last = now;
-    if (!visible) return;
 
     if (qualityStep < 2) {
       if (dt > 24) slowFrames++; else slowFrames = Math.max(0, slowFrames - 1);
@@ -302,14 +306,15 @@ function initScene(THREE, addons, mount) {
     if (bloomEnabled) composer.render();
     else renderer.render(scene, camera);
   };
-  raf = requestAnimationFrame(animate);
+  sync(); // start only if already onscreen
 
   /* ---- teardown ---- */
   return () => {
-    cancelAnimationFrame(raf);
+    stop();
     io.disconnect();
+    document.removeEventListener("visibilitychange", onVis);
+    offScroll();
     window.removeEventListener("pointermove", onPointer);
-    window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onResize);
     [pGeo, icoGeo, edges, coreGeo, ringGeoA, ringGeoB, netGeo].forEach((g) => g.dispose && g.dispose());
     [pMat, wire.material, core.material, ringMat, net.material].forEach((m) => m.dispose && m.dispose());
