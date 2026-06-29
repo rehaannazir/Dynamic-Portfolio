@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import rehanPhoto from "./assets/rehan.jpg";
 import PythonAutomationPost from "./PythonAutomationPost";
+
+const HeroWebGL = lazy(() => import("./HeroWebGL"));
 import {
   Workflow, Cpu, MessageSquare, TrendingUp, Code, Zap, Star,
   ArrowRight, ArrowUpRight, ArrowLeft, GitFork, Link, Mail, MessageCircle, Menu, X,
@@ -34,7 +36,7 @@ function Reveal({ children, delay = 0, className = "" }) {
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); io.disconnect(); } }, { threshold: 0.12 });
     io.observe(el); return () => io.disconnect();
   }, []);
-  return <div ref={ref} className={className} style={{ opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(44px)", transition: `opacity 1.5s cubic-bezier(.16,1,.3,1) ${delay}s, transform 1.5s cubic-bezier(.16,1,.3,1) ${delay}s` }}>{children}</div>;
+  return <div ref={ref} className={className} style={{ opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(44px)", filter: vis ? "blur(0)" : "blur(8px)", transition: `opacity 1.5s cubic-bezier(.16,1,.3,1) ${delay}s, transform 1.5s cubic-bezier(.16,1,.3,1) ${delay}s, filter 1.5s cubic-bezier(.16,1,.3,1) ${delay}s` }}>{children}</div>;
 }
 function Counter({ to, suffix = "" }) {
   const ref = useRef(null), [n, setN] = useState(0), done = useRef(false);
@@ -66,6 +68,28 @@ function ReadingProgress() {
   }, []);
   return <div className="fixed top-0 left-0 right-0 z-[60] h-0.5"><div className="h-full" style={{ width: p + "%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.8)" }} /></div>;
 }
+/* Magnetic CTA — element drifts toward the cursor, springs back on leave. */
+function useMagnetic(strength = 0.32) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    if (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const move = (e) => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - (r.left + r.width / 2)) * strength;
+      const y = (e.clientY - (r.top + r.height / 2)) * strength;
+      el.style.transform = `translate(${x}px,${y}px)`;
+    };
+    const leave = () => { el.style.transform = "translate(0,0)"; };
+    el.addEventListener("pointermove", move); el.addEventListener("pointerleave", leave);
+    return () => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); };
+  }, [strength]);
+  return ref;
+}
+/* A faint sweeping light-beam used sparingly between sections. */
+function LightBeam({ className = "", style = {} }) {
+  return <div aria-hidden="true" className={"pointer-events-none absolute left-0 right-0 " + className} style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(139,92,246,0.5),rgba(99,102,241,0.25),transparent)", maskImage: "linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent)", ...style }} />;
+}
 
 /* ===================== APP ===================== */
 function getStateFromPath(path) {
@@ -90,6 +114,29 @@ export default function Portfolio() {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
+  // Pointer-reactive spotlight + subtle 3D tilt on every glass card (delegated, one listener).
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let current = null;
+    const reset = (el) => { el.style.removeProperty("--rx"); el.style.removeProperty("--ry"); };
+    const move = (e) => {
+      const card = e.target.closest(".glass-hover");
+      if (card !== current) { if (current) reset(current); current = card; }
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      card.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
+      card.style.setProperty("--my", (py * 100).toFixed(1) + "%");
+      if (!reduce) {
+        card.style.setProperty("--rx", ((0.5 - py) * 5).toFixed(2) + "deg");
+        card.style.setProperty("--ry", ((px - 0.5) * 5).toFixed(2) + "deg");
+      }
+    };
+    document.addEventListener("pointermove", move, { passive: true });
+    return () => { document.removeEventListener("pointermove", move); if (current) reset(current); };
+  }, []);
+  const hireRef = useMagnetic();
   const navigate = (newPage) => {
     const paths = { home: "/", services: "/services", reviews: "/reviews", blog: "/blog" };
     window.history.pushState({}, "", paths[newPage] || "/");
@@ -122,14 +169,20 @@ export default function Portfolio() {
         @keyframes xflash{0%,60%{opacity:0}70%,100%{opacity:1}}
         @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(12px,-9px) scale(1.02)}66%{transform:translate(-9px,7px) scale(0.98)}}
         @keyframes orb{0%,100%{opacity:.12;transform:scale(1)}50%{opacity:.22;transform:scale(1.08)}}
+        @keyframes aurora{0%,100%{transform:rotate(0deg) scale(1.05);opacity:.6}50%{transform:rotate(18deg) scale(1.18);opacity:.85}}
+        @keyframes beamShift{0%{transform:translateX(-12%)}100%{transform:translateX(12%)}}
         @keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         @keyframes cardFloat{0%,100%{transform:translateY(0px)}50%{transform:translateY(-7px)}}
         @media(prefers-reduced-motion:reduce){.card-float{animation:none!important}}
         .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
         .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
         .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08)}
-        .glass-hover{transition:all .7s cubic-bezier(.16,1,.3,1)}
-        .glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(1.5deg);border-color:rgba(139,92,246,0.6);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.65);background:rgba(255,255,255,0.06)}
+        .glass-hover{--rx:0deg;--ry:0deg;position:relative;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .7s cubic-bezier(.16,1,.3,1),box-shadow .7s cubic-bezier(.16,1,.3,1),background .7s cubic-bezier(.16,1,.3,1)}
+        .glass-hover::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,0.22),transparent 60%);transition:opacity .5s ease}
+        .glass-hover:hover::before{opacity:1}
+        .glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));border-color:rgba(139,92,246,0.6);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.65);background:rgba(255,255,255,0.06)}
+        .magnetic{transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .5s cubic-bezier(.16,1,.3,1)}
+        @media(prefers-reduced-motion:reduce){.glass-hover:hover{transform:translateY(-8px)}.magnetic{transition:none}}
         .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
         .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
         .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
@@ -162,6 +215,7 @@ export default function Portfolio() {
         <div className="absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.2),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
         <div className="absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.18),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
         <div className="absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.1),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
+        <div className="absolute inset-0" style={{ background: "conic-gradient(from 200deg at 80% 12%, transparent 0deg, rgba(99,102,241,0.06) 60deg, transparent 130deg, rgba(139,92,246,0.05) 220deg, transparent 300deg)", animation: "aurora 60s ease-in-out infinite", opacity: 0.7 }} />
       </div>
 
       {/* NAV */}
@@ -178,7 +232,7 @@ export default function Portfolio() {
                   <span className="text-indigo-400 text-xs">{n.num}</span>{n.label}
                 </button>
               ))}
-              <button onClick={() => { navigate("home"); setTimeout(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); }} className="btn-glow ml-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>hire me →</button>
+              <button ref={hireRef} onClick={() => { navigate("home"); setTimeout(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); }} className="btn-glow magnetic ml-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>hire me →</button>
             </nav>
             <button className="md:hidden text-white" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
           </div>
@@ -331,6 +385,8 @@ function Hero3D() {
 /* ===================== HOME ===================== */
 function Home({ setPage, mounted }) {
   const PROFILE_PIC = rehanPhoto;
+  const workRef = useMagnetic();
+  const touchRef = useMagnetic();
   const projects = [
     { n: "01", cat: "FastAPI · Gemini", title: "AI Content Automation API", desc: "Production backend that generates, categorizes and schedules content via LLMs behind a clean REST interface.", role: "Full Stack · AI · 2026", stack: ["FastAPI", "Gemini", "SQLAlchemy"] },
     { n: "02", cat: "n8n · LLMs", title: "B2B Sales Automation Flow", desc: "End-to-end lead enrichment and outreach pipeline that runs hands-free and hands off cleanly to the client.", role: "Automation · 2026", stack: ["n8n", "LLMs", "APIs"], link: "https://www.loom.com/share/68bfcd80b9de459e975966cc671d11cb" },
@@ -362,7 +418,7 @@ function Home({ setPage, mounted }) {
         })}</script>
       </Helmet>
       <section className="grid-bg relative overflow-hidden">
-        <Hero3D />
+        <Suspense fallback={<Hero3D />}><HeroWebGL fallback={<Hero3D />} /></Suspense>
         <div className="relative z-10 max-w-6xl mx-auto px-5 pt-20 pb-24 grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className={mounted ? "fade-up" : ""}><div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs mono text-indigo-200"><span className="w-2 h-2 rounded-full" style={{ background: "#34d399", boxShadow: "0 0 10px #34d399" }} />Available · Open to projects worldwide</div></div>
@@ -371,8 +427,8 @@ function Home({ setPage, mounted }) {
             <p className="fade-up grad-text text-lg md:text-xl font-semibold mt-4 mono" style={{ animationDelay: ".18s" }}>AI Engineer &amp; Automation Specialist</p>
             <p className="fade-up max-w-lg mt-5 text-slate-400 leading-relaxed" style={{ animationDelay: ".24s" }}>I design and ship <span className="text-slate-200">intelligent automation end to end</span> — AI agents, chatbots and workflows that quietly do the work, so businesses scale without the busywork.</p>
             <div className="fade-up flex flex-wrap gap-3 mt-8" style={{ animationDelay: ".3s" }}>
-              <button onClick={() => setPage("services")} className="btn-glow inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>View selected work <ArrowRight className="w-4 h-4" /></button>
-              <button onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-slate-200 glass glass-hover">Get in touch</button>
+              <button ref={workRef} onClick={() => setPage("services")} className="btn-glow magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>View selected work <ArrowRight className="w-4 h-4" /></button>
+              <button ref={touchRef} onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-slate-200 glass glass-hover">Get in touch</button>
             </div>
           </div>
           <div className="fade-up flex flex-col gap-5" style={{ animationDelay: ".2s" }}>
@@ -415,6 +471,7 @@ function Home({ setPage, mounted }) {
         </div>
       </section>
 
+      <div className="relative h-px max-w-6xl mx-auto px-5 my-2"><LightBeam style={{ top: 0, animation: "beamShift 9s ease-in-out infinite alternate" }} /></div>
       {/* SHOWREEL */}
       <ShowreelSection />
 
@@ -426,6 +483,7 @@ function Home({ setPage, mounted }) {
         <div className="marquee py-2"><div className="marquee-track">{[...stack, ...stack].map((s, i) => (<span key={i} className="px-5 py-2.5 rounded-full text-sm mono glass text-slate-200 whitespace-nowrap">{s}</span>))}</div></div>
       </section>
 
+      <div className="relative h-px max-w-6xl mx-auto px-5 my-2"><LightBeam style={{ top: 0, animation: "beamShift 11s ease-in-out infinite alternate-reverse" }} /></div>
       <section className="max-w-6xl mx-auto px-5 py-16">
         <Reveal><SectionLabel num="03">Selected work</SectionLabel></Reveal>
         <Reveal><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">Things I've shipped.</h2></Reveal>
@@ -1623,6 +1681,7 @@ function ContactSection() {
   const [error, setError] = useState("");
   const [focus, setFocus] = useState(null);
   const anyFocus = focus !== null;
+  const sendRef = useMagnetic(0.22);
 
 
   const fetchWithTimeout = (url, opts, ms) =>
@@ -1719,7 +1778,7 @@ function ContactSection() {
                   <div className="flex items-center justify-between"><label className="text-xs mono text-slate-500 flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5 text-indigo-400" /> project_details</label><span className="text-[10px] mono text-slate-600">{f.details.length}/500</span></div>
                   <textarea value={f.details} onChange={(e) => setF({ ...f, details: e.target.value })} onFocus={() => setFocus("details")} onBlur={() => setFocus(null)} rows={4} maxLength={500} placeholder="What would you like to automate?" className="w-full mt-1.5 bg-white/5 rounded-lg px-4 py-2.5 text-sm text-white outline-none transition-all resize-none" style={{ border: "1px solid", borderColor: focus === "details" ? "#818cf8" : "rgba(255,255,255,0.1)", boxShadow: focus === "details" ? "0 0 0 3px rgba(99,102,241,0.16), 0 0 26px -6px rgba(139,92,246,0.7)" : "none" }} />
                 </div>
-                <button onClick={submit} disabled={sent || sending} className="btn-glow w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all" style={{ background: sent ? "linear-gradient(135deg,#10b981,#059669)" : "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
+                <button ref={sendRef} onClick={submit} disabled={sent || sending} className="btn-glow magnetic w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all" style={{ background: sent ? "linear-gradient(135deg,#10b981,#059669)" : "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
                   {sent ? (<><CircleCheck className="w-4 h-4" /> Message sent — I'll be in touch</>) : sending ? (<span className="inline-flex items-center gap-2">{sendingMsg} <span className="flex gap-1">{[0, 1, 2].map((i) => (<span key={i} className="w-1.5 h-1.5 rounded-full bg-white" style={{ animation: `vpulse 1s ease-in-out ${i * 0.2}s infinite` }} />))}</span></span>) : (<>Send message <Send className="w-4 h-4" /></>)}
                 </button>
                 {error && <p className="text-xs text-rose-400 mono mt-2">⚠ {error}</p>}
