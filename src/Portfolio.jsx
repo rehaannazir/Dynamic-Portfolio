@@ -192,7 +192,7 @@ export default function Portfolio() {
         html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}.lenis.lenis-stopped{overflow:hidden}
         @media(prefers-reduced-motion:reduce){.glass-hover:hover{transform:translateY(-8px)}.glass-hover:hover::after{animation:none}.magnetic{transition:none}.float-soft,.float-soft-2,.floating,.breathe{animation:none}.light-sweep::after{display:none}}
         /* Freeze decorative animations WHILE the user scrolls — frees the main thread/GPU for smooth scrolling; they resume the instant scrolling stops. */
-        html[data-scrolling] .float-soft,html[data-scrolling] .float-soft-2,html[data-scrolling] .floating,html[data-scrolling] .breathe,html[data-scrolling] .grad-text,html[data-scrolling] .marquee-track,html[data-scrolling] .light-sweep::after,html[data-scrolling] .bg-orb{animation-play-state:paused!important}
+        html[data-scrolling] .float-soft,html[data-scrolling] .float-soft-2,html[data-scrolling] .floating,html[data-scrolling] .breathe,html[data-scrolling] .grad-text,html[data-scrolling] .marquee-track,html[data-scrolling] .light-sweep::after,html[data-scrolling] .bg-orb,html[data-scrolling] .ring-spin{animation-play-state:paused!important}
         .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
         .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
         .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
@@ -1097,18 +1097,22 @@ function ShowreelSection() {
         <p className="mono text-[10px] text-slate-600 tracking-widest mb-4 uppercase">Agent loop · tool calling · automation &amp; more — in one breath.</p>
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-10">Thirty seconds of <span className="grad-text">what I do</span>.</h2>
       </Reveal>
-      <Reveal delay={0.15} variant="scale">
-        {/* Cinematic floating frame: ambient glow + animated light ring + gentle breathing */}
-        <div className="relative breathe" style={{ transformOrigin: "center" }}>
-          <div aria-hidden="true" className="absolute -inset-6 rounded-[2rem] blur-2xl" style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(99,102,241,0.28), transparent 70%)", opacity: 0.7 }} />
+      <Reveal delay={0.15} variant="plain">
+        {/* Cinematic floating frame: ambient glow + animated light ring. The frame itself is NOT
+            animated — scaling/filtering an element that contains an iframe forces a full iframe
+            re-rasterization every frame, which is what made scrolling here stutter. The gentle
+            "breathing" now lives on the blurred glow only (cheap), never on the iframe. */}
+        <div className="relative" style={{ transformOrigin: "center" }}>
+          <div aria-hidden="true" className="absolute -inset-6 rounded-[2rem] blur-2xl breathe" style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(99,102,241,0.28), transparent 70%)", opacity: 0.7 }} />
           <div className="relative rounded-2xl p-px overflow-hidden" style={{ boxShadow: "0 40px 90px -30px rgba(0,0,0,0.8), 0 0 50px -16px rgba(99,102,241,0.45)" }}>
-            <div aria-hidden="true" style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.5) 60deg, rgba(139,92,246,0.5) 130deg, transparent 240deg)", animation: "spinSlow 18s linear infinite" }} />
+            <div aria-hidden="true" className="ring-spin" style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.5) 60deg, rgba(139,92,246,0.5) 130deg, transparent 240deg)", animation: "spinSlow 18s linear infinite" }} />
             <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)", aspectRatio: "16/9", background: "#05050b" }}>
               <iframe
                 src="/nexara-showreel.html"
                 title="Nexara Showreel"
                 loading="lazy"
-                style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+                tabIndex={-1}
+                style={{ width: "100%", height: "100%", border: "none", display: "block", pointerEvents: "none" }}
               />
               {/* glass reflection sweep across the top */}
               <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.06), transparent)" }} />
