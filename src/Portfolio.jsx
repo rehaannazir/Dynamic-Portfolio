@@ -13,6 +13,52 @@ import {
 
 const SITE_URL = "https://rehannazir.com";
 
+/* ===================== MOTION SYSTEM ===================== */
+const prefersReduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isCoarse = () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+
+/* Lenis smooth-scroll singleton — one momentum-scroll source the whole page shares. */
+let _lenis = null;
+function smoothTo(target, { offset = 0, duration } = {}) {
+  if (_lenis) { _lenis.scrollTo(target, { offset, duration }); return; }
+  if (typeof target === "number") window.scrollTo({ top: target, behavior: "smooth" });
+  else if (target && target.scrollIntoView) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY + offset, behavior: "smooth" });
+}
+function useSmoothScroll() {
+  useEffect(() => {
+    if (isCoarse() || prefersReduced()) return; // native scroll on touch / reduced-motion
+    let raf = 0, lenis = null, alive = true;
+    import("lenis").then(({ default: Lenis }) => {
+      if (!alive) return;
+      lenis = new Lenis({ duration: 1.15, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true, wheelMultiplier: 1 });
+      _lenis = lenis;
+      const loop = (t) => { lenis.raf(t); raf = requestAnimationFrame(loop); };
+      raf = requestAnimationFrame(loop);
+    }).catch(() => {});
+    return () => { alive = false; cancelAnimationFrame(raf); if (lenis) lenis.destroy(); _lenis = null; };
+  }, []);
+}
+/* Scroll-driven parallax — translate an element as it moves through the viewport (depth). */
+function useParallax(speed = 0.12) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current; if (!el || prefersReduced() || isCoarse()) return;
+    let raf = 0, ticking = false;
+    const update = () => {
+      ticking = false;
+      const r = el.getBoundingClientRect();
+      const center = r.top + r.height / 2 - window.innerHeight / 2;
+      el.style.transform = `translate3d(0,${(-center * speed).toFixed(1)}px,0)`;
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; raf = requestAnimationFrame(update); } };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); };
+  }, [speed]);
+  return ref;
+}
+
 /* ===================== CUSTOM GLOWING CURSOR ===================== */
 function CustomCursor() {
   const dot = useRef(null), ring = useRef(null);
@@ -29,14 +75,32 @@ function CustomCursor() {
 }
 
 /* ===================== HELPERS ===================== */
-function Reveal({ children, delay = 0, className = "" }) {
+/* Reveal motion presets — each section uses a different one so no two reveals feel identical. */
+const REVEAL_VARIANTS = {
+  up:    { hidden: { transform: "translateY(44px)",                         filter: "blur(8px)"  } },
+  blur:  { hidden: { transform: "translateY(22px)",                         filter: "blur(16px)" } },
+  scale: { hidden: { transform: "translateY(26px) scale(.93)",              filter: "blur(7px)"  } },
+  left:  { hidden: { transform: "translateX(-52px)",                        filter: "blur(6px)"  } },
+  right: { hidden: { transform: "translateX(52px)",                         filter: "blur(6px)"  } },
+  rotate:{ hidden: { transform: "perspective(1200px) rotateX(12deg) translateY(34px)", filter: "blur(5px)" } },
+  clip:  { hidden: { transform: "translateY(20px)", filter: "blur(4px)", clipPath: "inset(0 0 100% 0)" }, shown: { clipPath: "inset(0 0 0% 0)" } },
+};
+function Reveal({ children, delay = 0, className = "", variant = "up", duration = 1.5, style = {} }) {
   const ref = useRef(null), [vis, setVis] = useState(false);
+  const reduced = typeof window !== "undefined" && prefersReduced();
   useEffect(() => {
+    if (reduced) { setVis(true); return; }
     const el = ref.current; if (!el) return;
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); io.disconnect(); } }, { threshold: 0.12 });
     io.observe(el); return () => io.disconnect();
-  }, []);
-  return <div ref={ref} className={className} style={{ opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(44px)", filter: vis ? "blur(0)" : "blur(8px)", transition: `opacity 1.5s cubic-bezier(.16,1,.3,1) ${delay}s, transform 1.5s cubic-bezier(.16,1,.3,1) ${delay}s, filter 1.5s cubic-bezier(.16,1,.3,1) ${delay}s` }}>{children}</div>;
+  }, [reduced]);
+  if (reduced) return <div ref={ref} className={className} style={style}>{children}</div>;
+  const v = REVEAL_VARIANTS[variant] || REVEAL_VARIANTS.up;
+  const ease = "cubic-bezier(.16,1,.3,1)";
+  const props = ["opacity", "transform", "filter", "clip-path"].map((p) => `${p} ${duration}s ${ease} ${delay}s`).join(", ");
+  const hidden = { opacity: 0, transform: "translateY(0)", filter: "blur(0)", ...v.hidden };
+  const shown = { opacity: 1, transform: "translateY(0)", filter: "blur(0)", clipPath: "inset(0 0 0% 0)", ...(v.shown || {}) };
+  return <div ref={ref} className={className} style={{ ...(vis ? shown : hidden), transition: props, willChange: "transform, opacity, filter", ...style }}>{children}</div>;
 }
 function Counter({ to, suffix = "" }) {
   const ref = useRef(null), [n, setN] = useState(0), done = useRef(false);
@@ -108,7 +172,17 @@ export default function Portfolio() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { setMenuOpen(false); scrollTo({ top: 0, behavior: "smooth" }); }, [page, article]);
+  useSmoothScroll();
+  useEffect(() => { setMenuOpen(false); smoothTo(0, { duration: 0.8 }); }, [page, article]);
+  // Background depth — let the ambient layer drift with scroll (parallax).
+  useEffect(() => {
+    if (prefersReduced()) return;
+    let raf = 0, ticking = false;
+    const update = () => { ticking = false; document.documentElement.style.setProperty("--sy", String(window.scrollY)); };
+    const onScroll = () => { if (!ticking) { ticking = true; raf = requestAnimationFrame(update); } };
+    update(); window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+  }, []);
   useEffect(() => {
     const onPop = () => { const s = getStateFromPath(); setPage(s.page); setArticle(s.article); };
     window.addEventListener("popstate", onPop);
@@ -153,6 +227,10 @@ export default function Portfolio() {
     <div className="nocursor min-h-screen w-full text-slate-200 relative overflow-x-hidden"
       style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.06), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.07), transparent 60%), #010104", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
       <style>{`
+        @property --bg{syntax:'<angle>';inherits:false;initial-value:0deg}
+        @keyframes floatSoft{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+        @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+        @keyframes borderSpin{to{--bg:360deg}}
         @keyframes floatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}}
         @keyframes floatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.05)}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
@@ -178,11 +256,17 @@ export default function Portfolio() {
         .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
         .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08)}
         .glass-hover{--rx:0deg;--ry:0deg;position:relative;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .7s cubic-bezier(.16,1,.3,1),box-shadow .7s cubic-bezier(.16,1,.3,1),background .7s cubic-bezier(.16,1,.3,1)}
-        .glass-hover::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,0.22),transparent 60%);transition:opacity .5s ease}
+        .glass-hover::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,0.22),transparent 60%);transition:opacity .5s ease;z-index:2}
+        .glass-hover::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;pointer-events:none;background:conic-gradient(from var(--bg,0deg),transparent 0deg,rgba(139,92,246,.7) 60deg,rgba(96,165,250,.5) 120deg,transparent 200deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;transition:opacity .6s ease;z-index:3}
         .glass-hover:hover::before{opacity:1}
-        .glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));border-color:rgba(139,92,246,0.6);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.65);background:rgba(255,255,255,0.06)}
+        .glass-hover:hover::after{opacity:1;animation:borderSpin 6s linear infinite}
+        .glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));border-color:rgba(139,92,246,0.55);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.08);background:rgba(255,255,255,0.06)}
+        .float-soft{animation:floatSoft 7s ease-in-out infinite;will-change:transform}
+        .float-soft-2{animation:floatSoft 9.5s ease-in-out infinite;will-change:transform}
+        .breathe{animation:breathe 7s ease-in-out infinite;will-change:transform}
         .magnetic{transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .5s cubic-bezier(.16,1,.3,1)}
-        @media(prefers-reduced-motion:reduce){.glass-hover:hover{transform:translateY(-8px)}.magnetic{transition:none}}
+        html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}.lenis.lenis-stopped{overflow:hidden}
+        @media(prefers-reduced-motion:reduce){.glass-hover:hover{transform:translateY(-8px)}.glass-hover:hover::after{animation:none}.magnetic{transition:none}.float-soft,.float-soft-2,.breathe{animation:none}}
         .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
         .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
         .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
@@ -216,6 +300,8 @@ export default function Portfolio() {
         <div className="absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.18),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
         <div className="absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.1),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
         <div className="absolute inset-0" style={{ background: "conic-gradient(from 200deg at 80% 12%, transparent 0deg, rgba(99,102,241,0.06) 60deg, transparent 130deg, rgba(139,92,246,0.05) 220deg, transparent 300deg)", animation: "aurora 60s ease-in-out infinite", opacity: 0.7 }} />
+        <div className="absolute inset-x-0 bottom-0 h-[60vh]" style={{ background: "radial-gradient(60% 100% at 50% 120%, rgba(99,102,241,0.06), transparent 70%)", transform: "translateY(calc(var(--sy,0) * -0.05px))" }} />
+        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(165,180,252,0.10) 1px, transparent 1.4px)", backgroundSize: "46px 46px", opacity: 0.35, maskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", transform: "translateY(calc(var(--sy,0) * 0.04px))" }} />
       </div>
 
       {/* NAV */}
@@ -232,7 +318,7 @@ export default function Portfolio() {
                   <span className="text-indigo-400 text-xs">{n.num}</span>{n.label}
                 </button>
               ))}
-              <button ref={hireRef} onClick={() => { navigate("home"); setTimeout(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); }} className="btn-glow magnetic ml-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>hire me →</button>
+              <button ref={hireRef} onClick={() => { navigate("home"); setTimeout(() => smoothTo(document.getElementById("contact"), { offset: -80 }), 180); }} className="btn-glow magnetic ml-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>hire me →</button>
             </nav>
             <button className="md:hidden text-white" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
           </div>
@@ -428,7 +514,7 @@ function Home({ setPage, mounted }) {
             <p className="fade-up max-w-lg mt-5 text-slate-400 leading-relaxed" style={{ animationDelay: ".24s" }}>I design and ship <span className="text-slate-200">intelligent automation end to end</span> — AI agents, chatbots and workflows that quietly do the work, so businesses scale without the busywork.</p>
             <div className="fade-up flex flex-wrap gap-3 mt-8" style={{ animationDelay: ".3s" }}>
               <button ref={workRef} onClick={() => setPage("services")} className="btn-glow magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>View selected work <ArrowRight className="w-4 h-4" /></button>
-              <button ref={touchRef} onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-slate-200 glass glass-hover">Get in touch</button>
+              <button ref={touchRef} onClick={() => smoothTo(document.getElementById("contact"), { offset: -80 })} className="magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-slate-200 glass glass-hover">Get in touch</button>
             </div>
           </div>
           <div className="fade-up flex flex-col gap-5" style={{ animationDelay: ".2s" }}>
@@ -453,21 +539,21 @@ function Home({ setPage, mounted }) {
 
       <section className="max-w-6xl mx-auto px-5 pb-8">
         <div className="grid sm:grid-cols-3 gap-4">
-          <Reveal className="glass glass-hover rounded-2xl p-5" style={{transformStyle:"preserve-3d"}}>
+          <Reveal variant="blur"><div className="float-soft h-full"><div className="glass glass-hover rounded-2xl p-5 h-full">
             <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">automation activity · 7d</span><GitBranch className="w-4 h-4 text-indigo-400" /></div>
             <div className="text-2xl font-bold text-white mt-3">128 <span className="text-sm font-normal text-slate-500">flows run</span></div>
             <div className="flex gap-1 mt-3">{Array.from({ length: 14 }).map((_, i) => (<span key={i} className="flex-1 rounded" style={{ height: 4+Math.round((i % 5)*8)+"px", marginTop:"auto", background: `rgba(139,92,246,${0.18 + (i % 5) * 0.18})`, transition:"height 1s ease" }} />))}</div>
-          </Reveal>
-          <Reveal delay={0.1} className="glass glass-hover rounded-2xl p-5">
+          </div></div></Reveal>
+          <Reveal variant="blur" delay={0.1}><div className="float-soft-2 h-full" style={{ animationDelay: "1.2s" }}><div className="glass glass-hover rounded-2xl p-5 h-full">
             <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">inference · live</span><Activity className="w-4 h-4 text-indigo-400" /></div>
             <div className="mt-3 space-y-1.5 mono text-xs">{[["POST","/api/generate","200"],["GET","/api/agents","200"],["POST","/api/embed","200"]].map(([m,p,s])=>(<div key={p} className="flex items-center gap-2"><span className="text-purple-300 w-9">{m}</span><span className="text-slate-400 flex-1 truncate">{p}</span><span className="text-emerald-400">{s}</span></div>))}</div>
-          </Reveal>
-          <Reveal delay={0.2} className="glass glass-hover rounded-2xl p-5">
+          </div></div></Reveal>
+          <Reveal variant="blur" delay={0.2}><div className="float-soft h-full" style={{ animationDelay: "2.4s" }}><div className="glass glass-hover rounded-2xl p-5 h-full">
             <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">nexara roadmap</span><span className="mono text-xs text-indigo-300">71%</span></div>
             <div className="mt-3 text-sm text-slate-400">10 / 14 milestones shipped</div>
             <div className="h-1.5 rounded-full bg-white/5 mt-3 overflow-hidden"><div className="h-full rounded-full" style={{ width:"71%", background:"linear-gradient(90deg,#3b82f6,#8b5cf6)", transition:"width 2s cubic-bezier(.16,1,.3,1)" }} /></div>
             <div className="mt-3 flex gap-1.5 flex-wrap">{["AI Agents","RAG","n8n","Vapi","SaaS"].map(t=>(<span key={t} className="px-2 py-0.5 rounded text-[10px] mono" style={{background:"rgba(99,102,241,0.1)",color:"#a5b4fc"}}>{t}</span>))}</div>
-          </Reveal>
+          </div></div></Reveal>
         </div>
       </section>
 
@@ -479,17 +565,18 @@ function Home({ setPage, mounted }) {
 
       <section className="max-w-6xl mx-auto px-5 py-12">
         <Reveal><SectionLabel num="02">Tech stack</SectionLabel></Reveal>
-        <Reveal><h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Tools I reach for to ship end-to-end.</h2></Reveal>
+        <Reveal variant="clip"><h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Tools I reach for to ship end-to-end.</h2></Reveal>
         <div className="marquee py-2"><div className="marquee-track">{[...stack, ...stack].map((s, i) => (<span key={i} className="px-5 py-2.5 rounded-full text-sm mono glass text-slate-200 whitespace-nowrap">{s}</span>))}</div></div>
       </section>
 
       <div className="relative h-px max-w-6xl mx-auto px-5 my-2"><LightBeam style={{ top: 0, animation: "beamShift 11s ease-in-out infinite alternate-reverse" }} /></div>
       <section className="max-w-6xl mx-auto px-5 py-16">
         <Reveal><SectionLabel num="03">Selected work</SectionLabel></Reveal>
-        <Reveal><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">Things I've shipped.</h2></Reveal>
-        <div className="grid sm:grid-cols-2 gap-5">
+        <Reveal variant="clip"><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">Things I've shipped.</h2></Reveal>
+        <div className="grid sm:grid-cols-2 gap-5" style={{ perspective: "1400px" }}>
           {projects.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.1}>
+            <Reveal key={p.title} delay={i * 0.12} variant="rotate">
+              <div className={"h-full " + (i % 2 ? "float-soft-2" : "float-soft")} style={{ animationDelay: i * 0.9 + "s" }}>
               <div className="glass glass-hover rounded-2xl p-6 h-full group" data-cursor onClick={() => p.link && window.open(p.link, '_blank')} style={p.link ? {cursor:'pointer'} : {}}>
                 <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">[ {p.n} / 04 ]</span><span className="inline-flex items-center gap-1.5 text-xs text-emerald-300 mono"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{animation:"vpulse 3s ease-in-out infinite"}}/>live</span></div>
                 <div className="mono text-[11px] uppercase tracking-wide text-indigo-300/80 mt-5">{p.cat}</div>
@@ -497,6 +584,7 @@ function Home({ setPage, mounted }) {
                 <p className="text-sm text-slate-400 mt-2 leading-relaxed">{p.desc}</p>
                 <div className="mono text-xs text-slate-500 mt-4">{p.role}</div>
                 <div className="flex flex-wrap gap-1.5 mt-3">{p.stack.map((s) => (<span key={s} className="px-2.5 py-1 rounded-md text-[11px] mono" style={{ background: "rgba(99,102,241,0.12)", color: "#c7d2fe" }}>{s}</span>))}</div>
+              </div>
               </div>
             </Reveal>
           ))}
@@ -982,17 +1070,27 @@ const SLIDES = [
 function ShowreelSection() {
   return (
     <section className="max-w-6xl mx-auto px-5 py-16">
-      <Reveal>
+      <Reveal variant="clip">
         <p className="mono text-[10px] text-slate-600 tracking-widest mb-4 uppercase">Agent loop · tool calling · automation &amp; more — in one breath.</p>
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-10">Thirty seconds of <span className="grad-text">what I do</span>.</h2>
       </Reveal>
-      <Reveal delay={0.15}>
-        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)",aspectRatio:"16/9"}}>
-          <iframe
-            src="/nexara-showreel.html"
-            title="Nexara Showreel"
-            style={{width:"100%",height:"100%",border:"none",display:"block"}}
-          />
+      <Reveal delay={0.15} variant="scale">
+        {/* Cinematic floating frame: ambient glow + animated light ring + gentle breathing */}
+        <div className="relative breathe" style={{ transformOrigin: "center" }}>
+          <div aria-hidden="true" className="absolute -inset-6 rounded-[2rem] blur-2xl" style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(99,102,241,0.28), transparent 70%)", opacity: 0.7 }} />
+          <div className="relative rounded-2xl p-px overflow-hidden" style={{ boxShadow: "0 40px 90px -30px rgba(0,0,0,0.8), 0 0 50px -16px rgba(99,102,241,0.45)" }}>
+            <div aria-hidden="true" style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.5) 60deg, rgba(139,92,246,0.5) 130deg, transparent 240deg)", animation: "spinSlow 18s linear infinite" }} />
+            <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)", aspectRatio: "16/9", background: "#05050b" }}>
+              <iframe
+                src="/nexara-showreel.html"
+                title="Nexara Showreel"
+                loading="lazy"
+                style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+              />
+              {/* glass reflection sweep across the top */}
+              <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.06), transparent)" }} />
+            </div>
+          </div>
         </div>
       </Reveal>
     </section>
@@ -1002,6 +1100,7 @@ function ShowreelSection() {
 /* ===================== ABOUT SECTION ===================== */
 function AboutSection() {
   const [phase, setPhase] = useState(0);
+  const panelRef = useParallax(0.08);
   useEffect(() => {
     const t = setTimeout(() => setPhase(p => (p+1) % 3), 3800);
     return () => clearTimeout(t);
@@ -1010,9 +1109,10 @@ function AboutSection() {
   return (
     <section className="max-w-6xl mx-auto px-5 py-20">
       <div className="grid lg:grid-cols-2 gap-14 items-center">
-        {/* Left: floating terminal panel */}
-        <Reveal>
-          <div className="relative" style={{height:400}}>
+        {/* Left: floating terminal panel — scroll parallax + idle float (separate nodes) */}
+        <Reveal variant="left" duration={1.7}>
+          <div ref={panelRef}>
+          <div className="relative float-soft" style={{height:400}}>
             {/* GIT ACTIVITY — top left */}
             <div className="absolute left-0 top-0 z-20 glass rounded-xl p-3" style={{width:162,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
               <div className="flex items-center justify-between mb-2">
@@ -1098,27 +1198,30 @@ function AboutSection() {
               ))}
             </div>
           </div>
+          </div>
         </Reveal>
-        {/* Right: bio text */}
-        <Reveal delay={0.15}>
-          <SectionLabel num="01">About</SectionLabel>
-          <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">I live where <span className="grad-text">product meets AI</span>.</h2>
-          <p className="text-slate-400 mt-5 leading-relaxed">I take ideas from a blank repo to a deployed, self-running system — designing the data model, wiring the APIs and the agents, and delivering something a business can actually rely on.</p>
-          <p className="text-slate-400 mt-4 leading-relaxed">Lately that means <span className="text-slate-200">AI content APIs, n8n automations and chatbot agents</span> built on Python, FastAPI and the Gemini API — with a focus on clean handoff, not babysitting.</p>
-          <p className="mono text-sm text-indigo-300 mt-5">// currently — Founder @ Nexara</p>
+        {/* Right: bio text — layered, staggered reveal */}
+        <div>
+          <Reveal variant="right" delay={0.05}><SectionLabel num="01">About</SectionLabel></Reveal>
+          <Reveal variant="right" delay={0.12}><h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">I live where <span className="grad-text">product meets AI</span>.</h2></Reveal>
+          <Reveal variant="right" delay={0.2}><p className="text-slate-400 mt-5 leading-relaxed">I take ideas from a blank repo to a deployed, self-running system — designing the data model, wiring the APIs and the agents, and delivering something a business can actually rely on.</p></Reveal>
+          <Reveal variant="right" delay={0.28}><p className="text-slate-400 mt-4 leading-relaxed">Lately that means <span className="text-slate-200">AI content APIs, n8n automations and chatbot agents</span> built on Python, FastAPI and the Gemini API — with a focus on clean handoff, not babysitting.</p></Reveal>
+          <Reveal variant="right" delay={0.34}><p className="mono text-sm text-indigo-300 mt-5">// currently — Founder @ Nexara</p></Reveal>
           <div className="mt-8 flex flex-col gap-3">
             {[
               {icon:"◈",label:"End-to-end delivery",desc:"From data model to deployed interface."},
               {icon:"◎",label:"Self-running systems",desc:"Built to run without you babysitting them."},
               {icon:"◉",label:"Clean handoff",desc:"Docs, runbooks and a kill switch you own."},
-            ].map(({icon,label,desc})=>(
-              <div key={label} className="flex items-start gap-4 px-5 py-4 rounded-xl hover:bg-white/[0.03] transition-all duration-700" style={{border:"1px solid rgba(255,255,255,0.055)"}}>
+            ].map(({icon,label,desc},i)=>(
+              <Reveal key={label} variant="up" delay={0.4 + i * 0.1}>
+              <div className="glass-hover flex items-start gap-4 px-5 py-4 rounded-xl transition-all duration-700" style={{border:"1px solid rgba(255,255,255,0.055)"}}>
                 <span className="text-indigo-400 text-lg mt-0.5 shrink-0">{icon}</span>
                 <div><div className="text-white text-sm font-medium">{label}</div><div className="text-slate-500 text-xs mt-0.5">{desc}</div></div>
               </div>
+              </Reveal>
             ))}
           </div>
-        </Reveal>
+        </div>
       </div>
     </section>
   );
