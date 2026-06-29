@@ -76,7 +76,7 @@ function initScene(THREE, addons, mount) {
   let height = mount.clientHeight || mount.offsetHeight || 1;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   renderer.setPixelRatio(dpr);
   renderer.setSize(width, height);
   renderer.setClearColor(0x000000, 0);
@@ -102,7 +102,7 @@ function initScene(THREE, addons, mount) {
   };
 
   /* ---- particle neural field ---- */
-  const COUNT = 3000;
+  const COUNT = 1700;
   const positions = new Float32Array(COUNT * 3);
   const rand = new Float32Array(COUNT);
   for (let i = 0; i < COUNT; i++) {
@@ -121,7 +121,7 @@ function initScene(THREE, addons, mount) {
   const pMat = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uSize: { value: 3.2 },
+      uSize: { value: 2.6 },
       uPixelRatio: { value: dpr },
       uPointer: { value: new THREE.Vector2(0, 0) },
     },
@@ -139,11 +139,11 @@ function initScene(THREE, addons, mount) {
   const edges = new THREE.EdgesGeometry(icoGeo);
   const wire = new THREE.LineSegments(
     edges,
-    new THREE.LineBasicMaterial({ color: 0x9f7bff, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending })
+    new THREE.LineBasicMaterial({ color: 0x9f7bff, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending })
   );
   group.add(wire);
   const coreGeo = new THREE.IcosahedronGeometry(1.2, 1);
-  const core = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending }));
+  const core = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending }));
   group.add(core);
 
   /* ---- orbiting rings ---- */
@@ -194,7 +194,7 @@ function initScene(THREE, addons, mount) {
     { c: 0x8b5cf6, s: 8, x: 1.6, y: -1, z: -1 },
     { c: 0xc084fc, s: 5, x: 0.4, y: 1.6, z: -0.5 },
   ].map(({ c, s, x, y, z }) => {
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: c, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: c, transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false }));
     sp.scale.set(s, s, 1);
     sp.position.set(x, y, z);
     group.add(sp);
@@ -206,10 +206,12 @@ function initScene(THREE, addons, mount) {
   composer.setPixelRatio(dpr);
   composer.setSize(width, height);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(width, height), 0.72, 0.85, 0.82);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(width, height), 0.32, 0.7, 0.88);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
-  let bloomEnabled = true;
+  // Bloom is the most expensive GPU pass on the page and made the core too bright. Off by default —
+  // the additive particles already glow. (Kept wired so adaptive logic / future toggling still works.)
+  let bloomEnabled = false;
 
   placeGroup();
 
@@ -292,7 +294,7 @@ function initScene(THREE, addons, mount) {
     core.rotation.y += 0.004;
     ringA.rotation.z += 0.0035;
     ringB.rotation.z -= 0.0028;
-    glows.forEach((g, i) => { g.material.opacity = 0.42 + 0.14 * Math.sin(t * 0.8 + i * 1.7); });
+    glows.forEach((g, i) => { g.material.opacity = 0.26 + 0.1 * Math.sin(t * 0.8 + i * 1.7); });
 
     // scroll choreography — dolly out, sink and gently expand the field as the hero leaves
     group.position.y = -scrollP * 1.3;

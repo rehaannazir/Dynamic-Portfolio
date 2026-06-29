@@ -142,7 +142,7 @@ export default function Portfolio() {
 
   return (
     <div className="nocursor min-h-screen w-full text-slate-200 relative overflow-x-hidden"
-      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.06), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.07), transparent 60%), #010104", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
+      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.035), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.04), transparent 60%), #000002", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
       <style>{`
         @property --bg{syntax:'<angle>';inherits:false;initial-value:0deg}
         @keyframes floatSoft{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -175,7 +175,7 @@ export default function Portfolio() {
         @media(prefers-reduced-motion:reduce){.card-float{animation:none!important}}
         .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
         .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
-        .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08)}
+        .glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08)}
         .glass-hover{--rx:0deg;--ry:0deg;position:relative;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .7s cubic-bezier(.16,1,.3,1),box-shadow .7s cubic-bezier(.16,1,.3,1),background .7s cubic-bezier(.16,1,.3,1)}
         .glass-hover::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,0.22),transparent 60%);transition:opacity .5s ease;z-index:2}
         .glass-hover::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;pointer-events:none;background:conic-gradient(from var(--bg,0deg),transparent 0deg,rgba(139,92,246,.7) 60deg,rgba(96,165,250,.5) 120deg,transparent 200deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;transition:opacity .6s ease;z-index:3}
@@ -223,10 +223,10 @@ export default function Portfolio() {
       {page === "home" && <ChapterRail />}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.2),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
-        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.18),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
-        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.1),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
-        <div className="bg-orb absolute inset-0" style={{ background: "conic-gradient(from 200deg at 80% 12%, transparent 0deg, rgba(99,102,241,0.06) 60deg, transparent 130deg, rgba(139,92,246,0.05) 220deg, transparent 300deg)", animation: "aurora 60s ease-in-out infinite", opacity: 0.7 }} />
+        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
+        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.1),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
+        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.06),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
+        <div className="bg-orb absolute inset-0" style={{ background: "conic-gradient(from 200deg at 80% 12%, transparent 0deg, rgba(99,102,241,0.05) 60deg, transparent 130deg, rgba(139,92,246,0.04) 220deg, transparent 300deg)", animation: "aurora 60s ease-in-out infinite", opacity: 0.45 }} />
         <div className="absolute inset-x-0 bottom-0 h-[60vh]" style={{ background: "radial-gradient(60% 100% at 50% 120%, rgba(99,102,241,0.06), transparent 70%)", transform: "translateY(calc(var(--sy,0) * -0.05px))" }} />
         <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(165,180,252,0.10) 1px, transparent 1.4px)", backgroundSize: "46px 46px", opacity: 0.35, maskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", transform: "translateY(calc(var(--sy,0) * 0.04px))" }} />
       </div>
