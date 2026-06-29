@@ -221,6 +221,12 @@ function initScene(THREE, addons, mount) {
   };
   window.addEventListener("pointermove", onPointer, { passive: true });
 
+  /* ---- cinematic scroll: the scene dollies back, sinks and dissolves as you head into About ---- */
+  let scrollTarget = 0, scrollP = 0;
+  const onScroll = () => { scrollTarget = Math.min(1, Math.max(0, window.scrollY / Math.max(1, window.innerHeight))); };
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
   /* ---- resize ---- */
   const onResize = () => {
     width = mount.clientWidth || mount.offsetWidth || 1;
@@ -273,6 +279,8 @@ function initScene(THREE, addons, mount) {
     pLerp.y += (pointer.y - pLerp.y) * 0.045;
     pMat.uniforms.uPointer.value.set(pLerp.x, -pLerp.y);
 
+    scrollP += (scrollTarget - scrollP) * 0.06;
+
     group.rotation.y += 0.0016;
     group.rotation.x += (pLerp.y * 0.18 - group.rotation.x) * 0.04;
     wire.rotation.y -= 0.0026;
@@ -282,9 +290,14 @@ function initScene(THREE, addons, mount) {
     ringB.rotation.z -= 0.0028;
     glows.forEach((g, i) => { g.material.opacity = 0.42 + 0.14 * Math.sin(t * 0.8 + i * 1.7); });
 
+    // scroll choreography — dolly out, sink and gently expand the field as the hero leaves
+    group.position.y = -scrollP * 1.3;
+    const s = 1 + scrollP * 0.12; group.scale.set(s, s, s);
     camera.position.x += (pLerp.x * 0.8 - camera.position.x) * 0.05;
-    camera.position.y += (-pLerp.y * 0.5 - camera.position.y) * 0.05;
-    camera.lookAt(group.position.x * 0.45, 0, 0);
+    camera.position.y += ((-pLerp.y * 0.5 - scrollP * 1.4) - camera.position.y) * 0.05;
+    camera.position.z += ((9 + scrollP * 4.5) - camera.position.z) * 0.05;
+    camera.lookAt(group.position.x * 0.45, group.position.y * 0.5, 0);
+    renderer.domElement.style.opacity = (1 - scrollP * 0.82).toFixed(3);
 
     if (bloomEnabled) composer.render();
     else renderer.render(scene, camera);
@@ -296,6 +309,7 @@ function initScene(THREE, addons, mount) {
     cancelAnimationFrame(raf);
     io.disconnect();
     window.removeEventListener("pointermove", onPointer);
+    window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onResize);
     [pGeo, icoGeo, edges, coreGeo, ringGeoA, ringGeoB, netGeo].forEach((g) => g.dispose && g.dispose());
     [pMat, wire.material, core.material, ringMat, net.material].forEach((m) => m.dispose && m.dispose());

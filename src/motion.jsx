@@ -23,8 +23,14 @@ export function useMotionState() {
   return state;
 }
 
-/* ---------- Smooth scroll (Lenis singleton) ---------- */
+/* ---------- Cinematic scroll: Lenis momentum + GSAP/ScrollTrigger timeline engine ----------
+   Lenis drives the scroll; GSAP's ticker drives Lenis; ScrollTrigger updates off Lenis.
+   This is the canonical wiring that lets scrubbed timelines stay perfectly in sync with
+   smooth scroll. `gsapReady` resolves once the engine is live; anything scroll-choreographed
+   waits on it and otherwise renders in its natural (visible) state — so no JS = no blank page. */
 let _lenis = null;
+let _gsapResolve;
+export const gsapReady = new Promise((res) => { _gsapResolve = res; });
 export function smoothTo(target, { offset = 0, duration } = {}) {
   if (_lenis) { _lenis.scrollTo(target, { offset, duration }); return; }
   if (typeof target === "number") window.scrollTo({ top: target, behavior: "smooth" });
@@ -33,16 +39,61 @@ export function smoothTo(target, { offset = 0, duration } = {}) {
 export function useSmoothScroll() {
   useEffect(() => {
     if (isCoarse() || prefersReduced()) return; // native scroll on touch / reduced-motion
-    let raf = 0, lenis = null, alive = true;
-    import("lenis").then(({ default: Lenis }) => {
-      if (!alive) return;
-      lenis = new Lenis({ duration: 1.15, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true, wheelMultiplier: 1 });
-      _lenis = lenis;
-      const loop = (t) => { lenis.raf(t); raf = requestAnimationFrame(loop); };
-      raf = requestAnimationFrame(loop);
-    }).catch(() => {});
-    return () => { alive = false; cancelAnimationFrame(raf); if (lenis) lenis.destroy(); _lenis = null; };
+    let raf = 0, lenis = null, alive = true, ticker = null, gsap = null, ScrollTrigger = null;
+    Promise.all([import("lenis"), import("gsap"), import("gsap/ScrollTrigger")])
+      .then(([lm, gm, sm]) => {
+        if (!alive) return;
+        const Lenis = lm.default;
+        gsap = gm.gsap || gm.default;
+        ScrollTrigger = sm.ScrollTrigger || sm.default;
+        gsap.registerPlugin(ScrollTrigger);
+        lenis = new Lenis({ duration: 1.15, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true, wheelMultiplier: 1 });
+        _lenis = lenis;
+        lenis.on("scroll", ScrollTrigger.update);
+        ticker = (time) => lenis.raf(time * 1000);
+        gsap.ticker.add(ticker);
+        gsap.ticker.lagSmoothing(0);
+        _gsapResolve({ gsap, ScrollTrigger });
+        ScrollTrigger.refresh();
+      })
+      .catch(() => {
+        // Fall back to a plain rAF Lenis loop if GSAP fails to load.
+        import("lenis").then(({ default: Lenis }) => {
+          if (!alive) return;
+          lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+          _lenis = lenis;
+          const loop = (t) => { lenis.raf(t); raf = requestAnimationFrame(loop); };
+          raf = requestAnimationFrame(loop);
+        }).catch(() => {});
+      });
+    return () => {
+      alive = false;
+      cancelAnimationFrame(raf);
+      if (ticker && gsap) gsap.ticker.remove(ticker);
+      if (ScrollTrigger) ScrollTrigger.getAll().forEach((t) => t.kill());
+      if (lenis) lenis.destroy();
+      _lenis = null;
+    };
   }, []);
+}
+
+/* ---------- useScrub — reusable scroll-linked timeline primitive ----------
+   Pass a builder (gsap, ScrollTrigger, el) => void that creates a scrubbed timeline.
+   Runs inside a gsap.context scoped to the element so every tween/trigger it makes is
+   reverted cleanly on unmount. No-ops (element stays visible) for reduced-motion / touch. */
+export function useScrub(build, deps = []) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current; if (!el || prefersReduced() || isCoarse()) return;
+    let ctx = null, cancelled = false;
+    gsapReady.then(({ gsap, ScrollTrigger }) => {
+      if (cancelled || !ref.current) return;
+      ctx = gsap.context(() => build(gsap, ScrollTrigger, ref.current), ref);
+    });
+    return () => { cancelled = true; if (ctx) ctx.revert(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+  return ref;
 }
 
 /* ---------- useParallax — translate an element through the viewport (depth) ---------- */

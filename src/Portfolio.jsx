@@ -12,8 +12,8 @@ import {
   Cloud, Rocket, Bot
 } from "lucide-react";
 import {
-  prefersReduced, useMotionState, smoothTo, useSmoothScroll, useParallax, useScrollDepth,
-  useMagnetic, useSpotlight, Reveal, FloatingCard, LightSweep, SectionTransition,
+  prefersReduced, isCoarse, useMotionState, smoothTo, useSmoothScroll, useParallax, useScrollDepth,
+  useMagnetic, useSpotlight, useScrub, Reveal, FloatingCard, LightSweep, SectionTransition,
 } from "./motion";
 
 const SITE_URL = "https://rehannazir.com";
@@ -34,6 +34,36 @@ function CustomCursor() {
 }
 
 /* ===================== HELPERS ===================== */
+/* ChapterRail — a quiet narrative spine: dots track the story (Intro → About → Stack → Work → Talk),
+   the active chapter glows, and clicking glides there. The story, made navigable. */
+function ChapterRail() {
+  const chapters = [["intro", "Intro"], ["about", "About"], ["tech", "Stack"], ["work", "Work"], ["contact", "Talk"]];
+  const [active, setActive] = useState("intro");
+  useEffect(() => {
+    if (isCoarse()) return;
+    const els = chapters.map(([id]) => document.getElementById(id)).filter(Boolean);
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); });
+    }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <nav aria-label="Section progress" className="hidden lg:flex fixed right-6 top-1/2 -translate-y-1/2 z-40 flex-col gap-3.5 items-end">
+      {chapters.map(([id, label]) => {
+        const on = active === id;
+        return (
+          <button key={id} onClick={() => smoothTo(document.getElementById(id), { offset: -60 })} className="group flex items-center gap-2.5" data-cursor aria-label={label} aria-current={on ? "true" : undefined}>
+            <span className="mono text-[10px] uppercase tracking-wider transition-all duration-300 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0" style={{ color: on ? "#c7d2fe" : "#64748b" }}>{label}</span>
+            <span className="rounded-full transition-all duration-500" style={{ width: on ? 22 : 8, height: 8, background: on ? "linear-gradient(90deg,#3b82f6,#8b5cf6)" : "rgba(255,255,255,0.22)", boxShadow: on ? "0 0 12px rgba(99,102,241,0.8)" : "none" }} />
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
 function Counter({ to, suffix = "" }) {
   const ref = useRef(null), [n, setN] = useState(0), done = useRef(false);
   useEffect(() => {
@@ -190,6 +220,7 @@ export default function Portfolio() {
 
       <CustomCursor />
       {page === "article" && <ReadingProgress />}
+      {page === "home" && <ChapterRail />}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
         <div className="absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.2),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
@@ -370,10 +401,10 @@ function Home({ setPage, mounted }) {
   const workRef = useMagnetic();
   const touchRef = useMagnetic();
   const projects = [
-    { n: "01", cat: "FastAPI · Gemini", title: "AI Content Automation API", desc: "Production backend that generates, categorizes and schedules content via LLMs behind a clean REST interface.", role: "Full Stack · AI · 2026", stack: ["FastAPI", "Gemini", "SQLAlchemy"], accent: "#60a5fa" },
-    { n: "02", cat: "n8n · LLMs", title: "B2B Sales Automation Flow", desc: "End-to-end lead enrichment and outreach pipeline that runs hands-free and hands off cleanly to the client.", role: "Automation · 2026", stack: ["n8n", "LLMs", "APIs"], link: "https://www.loom.com/share/68bfcd80b9de459e975966cc671d11cb", accent: "#8b5cf6" },
-    { n: "03", cat: "Python · Gemini", title: "Finance Expense Categorizer", desc: "Turns raw CSV bank exports into categorized, analysis-ready Excel sheets automatically.", role: "AI Tooling · 2025", stack: ["Python", "Gemini", "Pandas"], accent: "#818cf8" },
-    { n: "04", cat: "RAG · Agents", title: "Support Chatbot Agent", desc: "Context-aware support agent grounded in company docs, deployed across web and messaging channels.", role: "AI Agents · 2025", stack: ["RAG", "Agents", "React"], accent: "#c084fc" },
+    { n: "01", cat: "FastAPI · Gemini", title: "AI Content Automation API", desc: "Production backend that generates, categorizes and schedules content via LLMs behind a clean REST interface.", role: "Full Stack · AI · 2026", stack: ["FastAPI", "Gemini", "SQLAlchemy"], accent: "#60a5fa", viz: "Engineering", metrics: [["p95", "120ms"], ["uptime", "99.9%"], ["routes", "12"]] },
+    { n: "02", cat: "n8n · LLMs", title: "B2B Sales Automation Flow", desc: "End-to-end lead enrichment and outreach pipeline that runs hands-free and hands off cleanly to the client.", role: "Automation · 2026", stack: ["n8n", "LLMs", "APIs"], link: "https://www.loom.com/share/68bfcd80b9de459e975966cc671d11cb", accent: "#8b5cf6", viz: "Workflow", metrics: [["leads/wk", "480"], ["manual steps", "0"], ["integrations", "6"]] },
+    { n: "03", cat: "Python · Gemini", title: "Finance Expense Categorizer", desc: "Turns raw CSV bank exports into categorized, analysis-ready Excel sheets automatically.", role: "AI Tooling · 2025", stack: ["Python", "Gemini", "Pandas"], accent: "#818cf8", viz: "Strategy", metrics: [["rows/run", "1.2k"], ["accuracy", "98%"], ["pipeline", "CSV→XLSX"]] },
+    { n: "04", cat: "RAG · Agents", title: "Support Chatbot Agent", desc: "Context-aware support agent grounded in company docs, deployed across web and messaging channels.", role: "AI Agents · 2025", stack: ["RAG", "Agents", "React"], accent: "#c084fc", viz: "AI Agents", metrics: [["deflection", "70%"], ["grounding", "RAG"], ["channels", "2"]] },
   ];
   const stack = ["Python", "FastAPI", "n8n", "Gemini API", "AI Agents", "RAG", "SQLAlchemy", "React", "Vite", "Tailwind"];
   return (
@@ -399,7 +430,7 @@ function Home({ setPage, mounted }) {
           }
         })}</script>
       </Helmet>
-      <section className="grid-bg relative overflow-hidden">
+      <section id="intro" className="grid-bg relative overflow-hidden">
         <Suspense fallback={<Hero3D />}><HeroWebGL fallback={<Hero3D />} /></Suspense>
         <div className="relative z-10 max-w-6xl mx-auto px-5 pt-20 pb-24 grid lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -459,7 +490,7 @@ function Home({ setPage, mounted }) {
 
       <AboutSection />
 
-      <section className="max-w-6xl mx-auto px-5 py-12">
+      <section id="tech" className="max-w-6xl mx-auto px-5 py-12">
         <Reveal><SectionLabel num="02">Tech stack</SectionLabel></Reveal>
         <Reveal variant="clip"><h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Tools I reach for to ship end-to-end.</h2></Reveal>
         <Reveal delay={0.08}><p className="text-slate-400 max-w-2xl mb-10">Not a pile of logos — a pipeline. This is how an idea actually flows from code to something running in production.</p></Reveal>
@@ -468,26 +499,12 @@ function Home({ setPage, mounted }) {
       </section>
 
       <SectionTransition duration={11} reverse />
-      <section className="max-w-6xl mx-auto px-5 py-16">
+      <section id="work" className="max-w-6xl mx-auto px-5 py-16">
         <Reveal><SectionLabel num="03">Selected work</SectionLabel></Reveal>
-        <Reveal variant="clip"><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">Things I've shipped.</h2></Reveal>
-        <div className="grid sm:grid-cols-2 gap-5" style={{ perspective: "1400px" }}>
-          {projects.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.12} variant="rotate">
-              <div className={"h-full " + (i % 2 ? "float-soft-2" : "float-soft")} style={{ animationDelay: i * 0.9 + "s" }}>
-              <div className="glass glass-hover rounded-2xl p-6 h-full group relative overflow-hidden" data-cursor onClick={() => p.link && window.open(p.link, '_blank')} style={p.link ? {cursor:'pointer'} : {}}>
-                {/* per-project ambient corner glow — gives each card its own identity */}
-                <div aria-hidden="true" className="absolute -top-16 -right-16 w-44 h-44 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `radial-gradient(circle, ${p.accent}55, transparent 70%)` }} />
-                <div className="relative flex items-center justify-between"><span className="mono text-xs text-slate-500">[ {p.n} / 04 ]</span><span className="inline-flex items-center gap-1.5 text-xs text-emerald-300 mono"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{animation:"vpulse 3s ease-in-out infinite"}}/>live</span></div>
-                <div className="relative mono text-[11px] uppercase tracking-wide mt-5 transition-colors duration-500" style={{ color: p.accent }}>{p.cat}</div>
-                <h3 className="relative text-lg font-semibold text-white mt-1 flex items-center gap-2">{p.title}<ArrowUpRight className="w-4 h-4 text-slate-600 transition-all duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: p.accent }} /></h3>
-                <p className="relative text-sm text-slate-400 mt-2 leading-relaxed">{p.desc}</p>
-                <div className="relative mono text-xs text-slate-500 mt-4">{p.role}</div>
-                <div className="relative flex flex-wrap gap-1.5 mt-3">{p.stack.map((s, bi) => (<span key={s} className="px-2.5 py-1 rounded-md text-[11px] mono transition-all duration-500 group-hover:-translate-y-0.5" style={{ background: `${p.accent}1f`, color: "#dbe3ff", border: `1px solid ${p.accent}33`, transitionDelay: `${bi * 60}ms` }}>{s}</span>))}</div>
-              </div>
-              </div>
-            </Reveal>
-          ))}
+        <Reveal variant="clip"><h2 className="text-3xl md:text-4xl font-bold text-white mb-3">Things I've shipped.</h2></Reveal>
+        <Reveal delay={0.08}><p className="text-slate-400 max-w-2xl mb-12">Each one is a system that runs itself. Here's what's happening under the hood.</p></Reveal>
+        <div className="flex flex-col gap-20 md:gap-28">
+          {projects.map((p, i) => (<ProjectShowcase key={p.title} p={p} i={i} />))}
         </div>
       </section>
       <ContactSection />
@@ -967,6 +984,52 @@ const SLIDES = [
   { num:"05", tag:"DELIVERY · IDEA TO PRODUCTION",       heading:"Shipped. Monitored. Reliable.",            color:"#34d399", Viz:DeployViz      },
 ];
 
+/* ===================== PROJECT SHOWCASE ===================== */
+/* Each project is presented as a cinematic product row: an animated architecture/pipeline
+   visual (shared BlogVisual language) paired with live metrics. Reveals are scrubbed to
+   scroll via GSAP when available, and simply render in place otherwise. */
+function ProjectShowcase({ p, i }) {
+  const reversed = i % 2 === 1;
+  const ref = useScrub((gsap, ScrollTrigger, el) => {
+    const viz = el.querySelector("[data-viz]");
+    const copyKids = el.querySelectorAll("[data-copy] > *");
+    gsap.from(viz, { autoAlpha: 0, y: 70, filter: "blur(12px)", ease: "none",
+      scrollTrigger: { trigger: el, start: "top 82%", end: "top 42%", scrub: 0.6 } });
+    gsap.from(copyKids, { autoAlpha: 0, y: 36, stagger: 0.08, ease: "none",
+      scrollTrigger: { trigger: el, start: "top 80%", end: "top 38%", scrub: 0.6 } });
+  });
+  return (
+    <article ref={ref} className="group grid md:grid-cols-2 gap-8 md:gap-12 items-center" data-cursor
+      onClick={() => p.link && window.open(p.link, "_blank")} style={p.link ? { cursor: "pointer" } : {}}>
+      <div data-viz className={"relative " + (reversed ? "md:order-2" : "")}>
+        <div aria-hidden="true" className="absolute -inset-6 rounded-[2rem] blur-3xl opacity-50 group-hover:opacity-90 transition-opacity duration-700" style={{ background: `radial-gradient(60% 60% at 50% 45%, ${p.accent}40, transparent 70%)` }} />
+        <div className="relative rounded-2xl overflow-hidden glass-hover light-sweep" style={{ aspectRatio: "16 / 10", "--accent": p.accent }}>
+          <BlogVisual cat={p.viz} />
+        </div>
+      </div>
+      <div data-copy className={reversed ? "md:order-1" : ""}>
+        <div className="flex items-center gap-3 mono text-xs">
+          <span className="text-5xl md:text-6xl font-bold leading-none" style={{ color: p.accent, opacity: 0.22 }}>{p.n}</span>
+          <span className="inline-flex items-center gap-1.5 text-emerald-300"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ animation: "vpulse 3s ease-in-out infinite" }} />live in production</span>
+        </div>
+        <div className="mono text-[11px] uppercase tracking-wider mt-4" style={{ color: p.accent }}>{p.cat}</div>
+        <h3 className="text-2xl md:text-3xl font-bold text-white mt-1 flex items-center gap-2">{p.title}{p.link && <ArrowUpRight className="w-5 h-5 shrink-0 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" style={{ color: p.accent }} />}</h3>
+        <p className="text-slate-400 mt-3 leading-relaxed max-w-lg">{p.desc}</p>
+        <div className="flex flex-wrap gap-2.5 mt-6">
+          {p.metrics.map(([label, val]) => (
+            <div key={label} className="glass glass-hover rounded-xl px-3.5 py-2 min-w-[86px]" style={{ "--accent": p.accent }}>
+              <div className="text-white font-semibold text-sm tabular-nums">{val}</div>
+              <div className="mono text-[9px] text-slate-500 uppercase tracking-wide mt-0.5">{label}</div>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-1.5 mt-5">{p.stack.map((s) => (<span key={s} className="px-2.5 py-1 rounded-md text-[11px] mono" style={{ background: `${p.accent}1f`, color: "#dbe3ff", border: `1px solid ${p.accent}33` }}>{s}</span>))}</div>
+        <div className="mono text-xs text-slate-500 mt-5">{p.role}</div>
+      </div>
+    </article>
+  );
+}
+
 /* ===================== TECH ECOSYSTEM ===================== */
 /* A living pipeline (code → backend → agents → automation → cloud → deploy)
    with energy flowing along the connectors. Elegant, not a network graph. */
@@ -1069,7 +1132,7 @@ function AboutSection() {
   }, [phase]);
   const barH = [3,5,8,12,7,14,10,6,11,9,13,7,5,9];
   return (
-    <section className="max-w-6xl mx-auto px-5 py-20">
+    <section id="about" className="max-w-6xl mx-auto px-5 py-20">
       <div className="grid lg:grid-cols-2 gap-14 items-center">
         {/* Left: floating terminal panel — scroll parallax + idle float (separate nodes) */}
         <Reveal variant="left" duration={1.7}>
