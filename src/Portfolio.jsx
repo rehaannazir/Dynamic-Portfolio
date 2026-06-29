@@ -191,6 +191,8 @@ export default function Portfolio() {
         .magnetic{transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .5s cubic-bezier(.16,1,.3,1)}
         html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}.lenis.lenis-stopped{overflow:hidden}
         @media(prefers-reduced-motion:reduce){.glass-hover:hover{transform:translateY(-8px)}.glass-hover:hover::after{animation:none}.magnetic{transition:none}.float-soft,.float-soft-2,.floating,.breathe{animation:none}.light-sweep::after{display:none}}
+        /* Freeze decorative animations WHILE the user scrolls — frees the main thread/GPU for smooth scrolling; they resume the instant scrolling stops. */
+        html[data-scrolling] .float-soft,html[data-scrolling] .float-soft-2,html[data-scrolling] .floating,html[data-scrolling] .breathe,html[data-scrolling] .grad-text,html[data-scrolling] .marquee-track,html[data-scrolling] .light-sweep::after,html[data-scrolling] .bg-orb{animation-play-state:paused!important}
         .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
         .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
         .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
@@ -221,10 +223,10 @@ export default function Portfolio() {
       {page === "home" && <ChapterRail />}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.2),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
-        <div className="absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.18),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
-        <div className="absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.1),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
-        <div className="absolute inset-0" style={{ background: "conic-gradient(from 200deg at 80% 12%, transparent 0deg, rgba(99,102,241,0.06) 60deg, transparent 130deg, rgba(139,92,246,0.05) 220deg, transparent 300deg)", animation: "aurora 60s ease-in-out infinite", opacity: 0.7 }} />
+        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.2),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
+        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.18),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
+        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.1),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
+        <div className="bg-orb absolute inset-0" style={{ background: "conic-gradient(from 200deg at 80% 12%, transparent 0deg, rgba(99,102,241,0.06) 60deg, transparent 130deg, rgba(139,92,246,0.05) 220deg, transparent 300deg)", animation: "aurora 60s ease-in-out infinite", opacity: 0.7 }} />
         <div className="absolute inset-x-0 bottom-0 h-[60vh]" style={{ background: "radial-gradient(60% 100% at 50% 120%, rgba(99,102,241,0.06), transparent 70%)", transform: "translateY(calc(var(--sy,0) * -0.05px))" }} />
         <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(165,180,252,0.10) 1px, transparent 1.4px)", backgroundSize: "46px 46px", opacity: 0.35, maskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", transform: "translateY(calc(var(--sy,0) * 0.04px))" }} />
       </div>
@@ -991,10 +993,10 @@ function ProjectShowcase({ p, i }) {
   const ref = useScrub((gsap, ScrollTrigger, el) => {
     const viz = el.querySelector("[data-viz]");
     const copyKids = el.querySelectorAll("[data-copy] > *");
-    gsap.from(viz, { autoAlpha: 0, y: 70, filter: "blur(12px)", ease: "none",
-      scrollTrigger: { trigger: el, start: "top 82%", end: "top 42%", scrub: 0.6 } });
-    gsap.from(copyKids, { autoAlpha: 0, y: 36, stagger: 0.08, ease: "none",
-      scrollTrigger: { trigger: el, start: "top 80%", end: "top 38%", scrub: 0.6 } });
+    // One timeline + one ScrollTrigger for the whole row (batched, not per-element).
+    const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 82%", end: "top 40%", scrub: 0.6 } });
+    tl.from(viz, { autoAlpha: 0, y: 70, filter: "blur(12px)", ease: "none" }, 0)
+      .from(copyKids, { autoAlpha: 0, y: 36, stagger: 0.08, ease: "none" }, 0.1);
   });
   return (
     <article ref={ref} className="group grid md:grid-cols-2 gap-8 md:gap-12 items-center" data-cursor
