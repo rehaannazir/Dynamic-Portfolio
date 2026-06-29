@@ -12,6 +12,59 @@ import { useEffect, useRef, useState } from "react";
 export const prefersReduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const isCoarse = () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
+/* ============================================================
+   ANIMATION MANAGER
+   One rAF ticker and one scroll dispatcher for the whole page,
+   instead of every hook spinning its own loop/listener.
+   - onFrame:        shared per-frame ticker; auto-stops when no
+                     subscribers and when the tab is hidden.
+   - onScrollFrame:  single passive scroll listener; batches all
+                     reads, then all writes (no layout thrash); also
+                     flags <html data-scrolling> so decorative CSS
+                     animations can freeze while the user scrolls.
+   ============================================================ */
+const _frameSubs = new Set();
+let _afOn = false, _afId = 0, _afLast = 0;
+function _afLoop(t) {
+  _afId = requestAnimationFrame(_afLoop);
+  const dt = t - _afLast; _afLast = t;
+  _frameSubs.forEach((fn) => fn(t, dt));
+}
+function _afStart() { if (!_afOn && _frameSubs.size && (typeof document === "undefined" || !document.hidden)) { _afOn = true; _afLast = performance.now(); _afId = requestAnimationFrame(_afLoop); } }
+function _afStop() { if (_afOn) { _afOn = false; cancelAnimationFrame(_afId); } }
+export function onFrame(fn) {
+  _frameSubs.add(fn); _afStart();
+  return () => { _frameSubs.delete(fn); if (!_frameSubs.size) _afStop(); };
+}
+
+const _scrollSubs = new Set();
+let _scrollOn = false, _scrollQueued = false, _idleT = 0;
+function _flushScroll() {
+  _scrollQueued = false;
+  const y = window.scrollY || window.pageYOffset || 0;
+  _scrollSubs.forEach((s) => { if (s.read) s.read(y); });   // read phase
+  _scrollSubs.forEach((s) => { if (s.write) s.write(y); });  // write phase
+}
+function _onScrollEvt() {
+  if (!_scrollQueued) { _scrollQueued = true; requestAnimationFrame(_flushScroll); }
+  const r = document.documentElement;
+  if (!r.hasAttribute("data-scrolling")) r.setAttribute("data-scrolling", "");
+  clearTimeout(_idleT);
+  _idleT = setTimeout(() => r.removeAttribute("data-scrolling"), 150);
+}
+export function onScrollFrame(sub) {
+  _scrollSubs.add(sub);
+  if (!_scrollOn) { _scrollOn = true; window.addEventListener("scroll", _onScrollEvt, { passive: true }); window.addEventListener("resize", _onScrollEvt, { passive: true }); }
+  _flushScroll();
+  return () => {
+    _scrollSubs.delete(sub);
+    if (!_scrollSubs.size && _scrollOn) { _scrollOn = false; window.removeEventListener("scroll", _onScrollEvt); window.removeEventListener("resize", _onScrollEvt); }
+  };
+}
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => { if (document.hidden) _afStop(); else _afStart(); });
+}
+
 /* Capability tier — lets components scale effort to the device. */
 export function useMotionState() {
   const [state] = useState(() => {
@@ -96,45 +149,33 @@ export function useScrub(build, deps = []) {
   return ref;
 }
 
-/* ---------- useParallax — translate an element through the viewport (depth) ---------- */
+/* ---------- useParallax — translate an element through the viewport (depth) ----------
+   Shares the central scroll dispatcher; read (measure) and write (transform) run in
+   separate batched phases so multiple parallax elements never thrash layout. */
 export function useParallax(speed = 0.12) {
   const ref = useRef(null);
   useEffect(() => {
     const el = ref.current; if (!el || prefersReduced() || isCoarse()) return;
-    let raf = 0, ticking = false;
-    const update = () => {
-      ticking = false;
-      const r = el.getBoundingClientRect();
-      const center = r.top + r.height / 2 - window.innerHeight / 2;
-      el.style.transform = `translate3d(0,${(-center * speed).toFixed(1)}px,0)`;
-    };
-    const onScroll = () => { if (!ticking) { ticking = true; raf = requestAnimationFrame(update); } };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); };
+    let target = 0;
+    return onScrollFrame({
+      read: () => { const r = el.getBoundingClientRect(); target = -(r.top + r.height / 2 - window.innerHeight / 2) * speed; },
+      write: () => { el.style.transform = `translate3d(0,${target.toFixed(1)}px,0)`; },
+    });
   }, [speed]);
   return ref;
 }
 
-/* ---------- useScrollDepth — expose 0..1 viewport progress as a CSS var (--p) for scroll-linked lighting ---------- */
+/* ---------- useScrollDepth — expose 0..1 viewport progress as a CSS var for scroll-linked lighting ---------- */
 export function useScrollDepth(varName = "--p") {
   const ref = useRef(null);
   useEffect(() => {
     const el = ref.current; if (!el) return;
     if (prefersReduced()) { el.style.setProperty(varName, "0.5"); return; }
-    let raf = 0, ticking = false;
-    const update = () => {
-      ticking = false;
-      const r = el.getBoundingClientRect();
-      const p = 1 - (r.top + r.height / 2) / (window.innerHeight + r.height / 2);
-      el.style.setProperty(varName, Math.max(0, Math.min(1, p)).toFixed(3));
-    };
-    const onScroll = () => { if (!ticking) { ticking = true; raf = requestAnimationFrame(update); } };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); };
+    let val = 0.5;
+    return onScrollFrame({
+      read: () => { const r = el.getBoundingClientRect(); val = Math.max(0, Math.min(1, 1 - (r.top + r.height / 2) / (window.innerHeight + r.height / 2))); },
+      write: () => { el.style.setProperty(varName, val.toFixed(3)); },
+    });
   }, [varName]);
   return ref;
 }
@@ -151,32 +192,37 @@ export function useMagnetic(strength = 0.32) {
   useEffect(() => {
     const el = ref.current; if (!el) return;
     if (isCoarse() || prefersReduced()) return;
-    const move = (e) => {
+    let raf = 0, ev = null;
+    const apply = () => {
+      raf = 0; if (!ev) return;
       const r = el.getBoundingClientRect();
-      const x = (e.clientX - (r.left + r.width / 2)) * strength;
-      const y = (e.clientY - (r.top + r.height / 2)) * strength;
+      const x = (ev.clientX - (r.left + r.width / 2)) * strength;
+      const y = (ev.clientY - (r.top + r.height / 2)) * strength;
       el.style.transform = `translate(${x}px,${y}px)`;
     };
-    const leave = () => { el.style.transform = "translate(0,0)"; };
+    const move = (e) => { ev = e; if (!raf) raf = requestAnimationFrame(apply); };
+    const leave = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } ev = null; el.style.transform = "translate(0,0)"; };
     el.addEventListener("pointermove", move); el.addEventListener("pointerleave", leave);
-    return () => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); };
+    return () => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); if (raf) cancelAnimationFrame(raf); };
   }, [strength]);
   return ref;
 }
 
-/* ---------- useSpotlight — one delegated listener powering pointer glow + tilt on every .glass-hover ---------- */
+/* ---------- useSpotlight — one delegated listener powering pointer glow + tilt on every .glass-hover.
+   rAF-throttled: at most one measure + write per frame regardless of pointer event rate. ---------- */
 export function useSpotlight() {
   useEffect(() => {
     if (isCoarse()) return;
     const reduce = prefersReduced();
-    let current = null;
+    let current = null, raf = 0, ev = null;
     const reset = (el) => { el.style.removeProperty("--rx"); el.style.removeProperty("--ry"); };
-    const move = (e) => {
-      const card = e.target.closest(".glass-hover");
+    const apply = () => {
+      raf = 0; if (!ev) return;
+      const card = ev.target.closest && ev.target.closest(".glass-hover");
       if (card !== current) { if (current) reset(current); current = card; }
       if (!card) return;
       const r = card.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      const px = (ev.clientX - r.left) / r.width, py = (ev.clientY - r.top) / r.height;
       card.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
       card.style.setProperty("--my", (py * 100).toFixed(1) + "%");
       if (!reduce) {
@@ -184,8 +230,9 @@ export function useSpotlight() {
         card.style.setProperty("--ry", ((px - 0.5) * 5).toFixed(2) + "deg");
       }
     };
+    const move = (e) => { ev = e; if (!raf) raf = requestAnimationFrame(apply); };
     document.addEventListener("pointermove", move, { passive: true });
-    return () => { document.removeEventListener("pointermove", move); if (current) reset(current); };
+    return () => { document.removeEventListener("pointermove", move); if (raf) cancelAnimationFrame(raf); if (current) reset(current); };
   }, []);
 }
 

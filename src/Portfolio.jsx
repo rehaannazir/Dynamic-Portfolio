@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import {
   prefersReduced, isCoarse, useMotionState, smoothTo, useSmoothScroll, useParallax, useScrollDepth,
-  useMagnetic, useSpotlight, useScrub, Reveal, FloatingCard, LightSweep, SectionTransition,
+  useMagnetic, useSpotlight, useScrub, onFrame, onScrollFrame, Reveal, FloatingCard, LightSweep, SectionTransition,
 } from "./motion";
 
 const SITE_URL = "https://rehannazir.com";
@@ -24,12 +24,13 @@ function CustomCursor() {
   const dot = useRef(null), ring = useRef(null);
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
-    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, raf;
+    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
     const move = (e) => { mx = e.clientX; my = e.clientY; if (dot.current) dot.current.style.transform = `translate(${mx}px,${my}px)`; };
-    const loop = () => { rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16; if (ring.current) ring.current.style.transform = `translate(${rx}px,${ry}px)`; raf = requestAnimationFrame(loop); };
+    const tick = () => { rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16; if (ring.current) ring.current.style.transform = `translate(${rx}px,${ry}px)`; };
     const over = (e) => { const hit = e.target.closest("a,button,[data-cursor],input,textarea,label"); ring.current?.classList.toggle("cursor-grow", !!hit); };
-    addEventListener("mousemove", move); addEventListener("mouseover", over); loop();
-    return () => { removeEventListener("mousemove", move); removeEventListener("mouseover", over); cancelAnimationFrame(raf); };
+    addEventListener("mousemove", move); addEventListener("mouseover", over);
+    const off = onFrame(tick); // shares the one central ticker; pauses when tab hidden
+    return () => { removeEventListener("mousemove", move); removeEventListener("mouseover", over); off(); };
   }, []);
   return (<><div ref={ring} className="cursor-ring" /><div ref={dot} className="cursor-dot" /></>);
 }
@@ -114,14 +115,10 @@ export default function Portfolio() {
   useEffect(() => { setMounted(true); }, []);
   useSmoothScroll();
   useEffect(() => { setMenuOpen(false); smoothTo(0, { duration: 0.8 }); }, [page, article]);
-  // Background depth — let the ambient layer drift with scroll (parallax).
+  // Background depth — drift the ambient layer with scroll, via the shared scroll dispatcher.
   useEffect(() => {
     if (prefersReduced()) return;
-    let raf = 0, ticking = false;
-    const update = () => { ticking = false; document.documentElement.style.setProperty("--sy", String(window.scrollY)); };
-    const onScroll = () => { if (!ticking) { ticking = true; raf = requestAnimationFrame(update); } };
-    update(); window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+    return onScrollFrame({ write: (y) => document.documentElement.style.setProperty("--sy", String(y)) });
   }, []);
   useEffect(() => {
     const onPop = () => { const s = getStateFromPath(); setPage(s.page); setArticle(s.article); };
@@ -178,7 +175,7 @@ export default function Portfolio() {
         @media(prefers-reduced-motion:reduce){.card-float{animation:none!important}}
         .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
         .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
-        .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08)}
+        .glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08)}
         .glass-hover{--rx:0deg;--ry:0deg;position:relative;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .7s cubic-bezier(.16,1,.3,1),box-shadow .7s cubic-bezier(.16,1,.3,1),background .7s cubic-bezier(.16,1,.3,1)}
         .glass-hover::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,0.22),transparent 60%);transition:opacity .5s ease;z-index:2}
         .glass-hover::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;pointer-events:none;background:conic-gradient(from var(--bg,0deg),transparent 0deg,rgba(139,92,246,.7) 60deg,rgba(96,165,250,.5) 120deg,transparent 200deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;transition:opacity .6s ease;z-index:3}
