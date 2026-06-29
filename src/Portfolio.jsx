@@ -4,6 +4,7 @@ import rehanPhoto from "./assets/rehan.jpg";
 import PythonAutomationPost from "./PythonAutomationPost";
 
 const HeroWebGL = lazy(() => import("./HeroWebGL"));
+import AIArchitecture from "./AIArchitecture";
 import {
   Workflow, Cpu, MessageSquare, TrendingUp, Code, Zap, Star,
   ArrowRight, ArrowUpRight, ArrowLeft, GitFork, Link, Mail, MessageCircle, Menu, X,
@@ -494,7 +495,7 @@ function Home({ setPage, mounted }) {
         <Reveal><SectionLabel num="02">Tech stack</SectionLabel></Reveal>
         <Reveal variant="clip"><h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Tools I reach for to ship end-to-end.</h2></Reveal>
         <Reveal delay={0.08}><p className="text-slate-400 max-w-2xl mb-10">Not a pile of logos — a pipeline. This is how an idea actually flows from code to something running in production.</p></Reveal>
-        <TechEcosystem />
+        <AIArchitecture fallback={<TechEcosystem />} />
         <Reveal delay={0.1}><div className="marquee py-2 mt-10"><div className="marquee-track">{[...stack, ...stack].map((s, i) => (<span key={i} className="px-5 py-2.5 rounded-full text-sm mono glass text-slate-200 whitespace-nowrap">{s}</span>))}</div></div></Reveal>
       </section>
 
