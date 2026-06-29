@@ -246,6 +246,9 @@ export const REVEAL_VARIANTS = {
   rotate:{ hidden: { transform: "perspective(1200px) rotateX(12deg) translateY(34px)", filter: "blur(5px)" } },
   depth: { hidden: { transform: "perspective(1200px) translateZ(-120px) translateY(30px)", filter: "blur(6px)" } },
   clip:  { hidden: { transform: "translateY(20px)", filter: "blur(4px)", clipPath: "inset(0 0 100% 0)" }, shown: { clipPath: "inset(0 0 0% 0)" } },
+  // transform-light: opacity + translate only (no scale/blur) — safe for elements that wrap an
+  // <iframe>/<video>, where scale/filter would force an expensive per-frame re-rasterization.
+  plain: { hidden: { transform: "translateY(30px)" } },
 };
 export function Reveal({ children, delay = 0, className = "", variant = "up", duration = 1.5, style = {} }) {
   const ref = useRef(null), [vis, setVis] = useState(false);
