@@ -80,7 +80,7 @@ export default function AIArchitecture({ fallback = null }) {
     function build(THREE, gsap, ScrollTrigger) {
       let width = mount.clientWidth || 1, height = mount.clientHeight || 1;
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       renderer.setPixelRatio(dpr);
       renderer.setSize(width, height);
       renderer.setClearColor(0x000000, 0);

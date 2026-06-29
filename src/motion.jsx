@@ -100,7 +100,7 @@ export function useSmoothScroll() {
         gsap = gm.gsap || gm.default;
         ScrollTrigger = sm.ScrollTrigger || sm.default;
         gsap.registerPlugin(ScrollTrigger);
-        lenis = new Lenis({ duration: 1.15, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true, wheelMultiplier: 1 });
+        lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1 });
         _lenis = lenis;
         lenis.on("scroll", ScrollTrigger.update);
         ticker = (time) => lenis.raf(time * 1000);
