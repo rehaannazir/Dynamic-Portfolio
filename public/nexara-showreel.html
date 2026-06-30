@@ -524,29 +524,21 @@
     g.gain.exponentialRampToValueAtTime(0.0001, t+0.45);
     o.start(t); o.stop(t+0.5);
   }
-  soundBtn.addEventListener('click', () => {
-    soundOn = !soundOn;
-    soundBtn.classList.toggle('on', soundOn);
-    soundBtn.setAttribute('aria-pressed', soundOn);
-    if(soundOn){
-      if(!actx) startAudio(); else { actx.resume(); master.gain.linearRampToValueAtTime(0.18, actx.currentTime+0.6); }
-    } else if(actx){
-      master.gain.linearRampToValueAtTime(0.0, actx.currentTime+0.4);
-    }
-  });
-
-  /* This reel stays interactive (so the sound button can request audio with a real user gesture),
-     but it must not trap scrolling. Forward wheel gestures up to the host page so its smooth-scroll
-     engine keeps the page scrolling buttery-smooth even while the pointer is over the video. */
-  try {
-    if (window.parent && window.parent !== window) {
-      window.addEventListener('wheel', (e) => {
-        window.parent.dispatchEvent(new WheelEvent('wheel', {
-          deltaX: e.deltaX, deltaY: e.deltaY, deltaMode: e.deltaMode, bubbles: true, cancelable: true
-        }));
-      }, { passive: true });
-    }
-  } catch (_) { /* cross-origin: ignore */ }
+  /* No sound button in the embedded reel — the iframe is non-interactive so the page scrolls
+     smoothly straight through it. The host page starts the ambient audio on the visitor's first
+     interaction (browser autoplay policy requires a user gesture). Expose a start hook + a
+     self-start for the unlikely case the reel ever receives a gesture directly. */
+  if (soundBtn) soundBtn.style.display = 'none';
+  window.nexaraStartAudio = function(){
+    if (soundOn) return true;
+    try {
+      soundOn = true;
+      if (!actx) startAudio(); else { actx.resume(); master.gain.linearRampToValueAtTime(0.18, actx.currentTime + 0.6); }
+      return true;
+    } catch (e) { soundOn = false; return false; }
+  };
+  ['pointerdown','keydown','touchstart'].forEach((t) =>
+    window.addEventListener(t, () => window.nexaraStartAudio(), { once: true, passive: true }));
 })();
 </script>
 </body>
