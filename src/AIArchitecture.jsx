@@ -171,6 +171,7 @@ export default function AIArchitecture({ fallback = null }) {
 
       const tmp = new THREE.Vector3();
       const step = 0.86 / N;
+      const FRAME_MS = 1000 / 32; // half-rate cap — ambient build animation
       let raf = 0, running = false, last = performance.now(), tsec = 0, pLerp = 0, slow = 0, qStep = 0;
       const start = () => { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(frame); };
       const stop = () => { if (!running) return; running = false; cancelAnimationFrame(raf); };
@@ -186,10 +187,11 @@ export default function AIArchitecture({ fallback = null }) {
       const frame = (now) => {
         if (!running) return;
         raf = requestAnimationFrame(frame);
+        if (now - last < FRAME_MS) return; // half-rate cap
         const dt = Math.min(now - last, 50);
         last = now;
 
-        if (qStep === 0) { if (dt > 26) slow++; else slow = Math.max(0, slow - 1); if (slow > 50) { dpr = Math.min(dpr, 1.3); renderer.setPixelRatio(dpr); qStep = 1; slow = 0; } }
+        if (qStep === 0) { if (dt > 40) slow++; else slow = Math.max(0, slow - 1); if (slow > 40) { dpr = Math.min(dpr, 1.2); renderer.setPixelRatio(dpr); qStep = 1; slow = 0; } }
 
         tsec += dt * 0.001;
         pLerp += (targetP - pLerp) * 0.12;

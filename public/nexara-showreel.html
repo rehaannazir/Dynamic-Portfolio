@@ -534,6 +534,19 @@
       master.gain.linearRampToValueAtTime(0.0, actx.currentTime+0.4);
     }
   });
+
+  /* This reel stays interactive (so the sound button can request audio with a real user gesture),
+     but it must not trap scrolling. Forward wheel gestures up to the host page so its smooth-scroll
+     engine keeps the page scrolling buttery-smooth even while the pointer is over the video. */
+  try {
+    if (window.parent && window.parent !== window) {
+      window.addEventListener('wheel', (e) => {
+        window.parent.dispatchEvent(new WheelEvent('wheel', {
+          deltaX: e.deltaX, deltaY: e.deltaY, deltaMode: e.deltaMode, bubbles: true, cancelable: true
+        }));
+      }, { passive: true });
+    }
+  } catch (_) { /* cross-origin: ignore */ }
 })();
 </script>
 </body>

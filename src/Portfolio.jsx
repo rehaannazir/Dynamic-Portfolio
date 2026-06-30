@@ -193,6 +193,8 @@ export default function Portfolio() {
         @media(prefers-reduced-motion:reduce){.glass-hover:hover{transform:translateY(-8px)}.glass-hover:hover::after{animation:none}.magnetic{transition:none}.float-soft,.float-soft-2,.floating,.breathe{animation:none}.light-sweep::after{display:none}}
         /* Freeze decorative animations WHILE the user scrolls — frees the main thread/GPU for smooth scrolling; they resume the instant scrolling stops. */
         html[data-scrolling] .float-soft,html[data-scrolling] .float-soft-2,html[data-scrolling] .floating,html[data-scrolling] .breathe,html[data-scrolling] .grad-text,html[data-scrolling] .marquee-track,html[data-scrolling] .light-sweep::after,html[data-scrolling] .bg-orb,html[data-scrolling] .ring-spin{animation-play-state:paused!important}
+        /* Drop the expensive backdrop blur WHILE scrolling (every glass card otherwise re-blurs the moving backdrop each frame). Snaps back crisp the instant scrolling stops. */
+        html[data-scrolling] .glass{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(12,12,20,0.66)}
         .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
         .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
         .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
@@ -1111,8 +1113,7 @@ function ShowreelSection() {
                 src="/nexara-showreel.html"
                 title="Nexara Showreel"
                 loading="lazy"
-                tabIndex={-1}
-                style={{ width: "100%", height: "100%", border: "none", display: "block", pointerEvents: "none" }}
+                style={{ width: "100%", height: "100%", border: "none", display: "block", pointerEvents: (isCoarse() || prefersReduced()) ? "none" : "auto" }}
               />
               {/* glass reflection sweep across the top */}
               <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.06), transparent)" }} />

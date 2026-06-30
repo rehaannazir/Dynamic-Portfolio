@@ -263,19 +263,21 @@ function initScene(THREE, addons, mount) {
     }
   };
 
-  /* ---- loop (runs ONLY while onscreen and tab-visible) ---- */
+  /* ---- loop (runs ONLY while onscreen and tab-visible, capped to ~30fps — it's ambient) ---- */
+  const FRAME_MS = 1000 / 32;
   let raf = 0, running = false, last = performance.now(), t = 0;
   const start = () => { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(animate); };
   const stop = () => { if (!running) return; running = false; cancelAnimationFrame(raf); };
   const animate = (now) => {
     if (!running) return;
     raf = requestAnimationFrame(animate);
+    if (now - last < FRAME_MS) return; // half-rate cap
     const dt = Math.min(now - last, 50);
     last = now;
 
     if (qualityStep < 2) {
-      if (dt > 24) slowFrames++; else slowFrames = Math.max(0, slowFrames - 1);
-      if (slowFrames > 60) { degrade(); slowFrames = 0; }
+      if (dt > 44) slowFrames++; else slowFrames = Math.max(0, slowFrames - 1); // dt>~44ms = under ~22fps
+      if (slowFrames > 45) { degrade(); slowFrames = 0; }
     }
 
     t += dt * 0.001;
