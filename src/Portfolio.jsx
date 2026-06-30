@@ -292,7 +292,7 @@ function Hero3D() {
     window.addEventListener("resize", resize);
 
     // Fibonacci sphere particles
-    const N = 100;
+    const N = 70;
     const pts = Array.from({ length: N }, (_, i) => {
       const phi = Math.acos(1 - 2 * (i + 0.5) / N);
       const theta = Math.PI * (1 + Math.sqrt(5)) * i;
@@ -329,7 +329,7 @@ function Hero3D() {
       });
     };
 
-    const tick = () => {
+    const draw = () => {
       const w = canvas.width/dpr, h = canvas.height/dpr;
       ctx.clearRect(0,0,w,h);
       const mobile = w < 768;
@@ -388,11 +388,28 @@ function Hero3D() {
         if (Math.sqrt(dx*dx+dy*dy) > r*1.5) drawOcta(ox,oy,o.sz,o.rx,o.ry);
       });
 
-      angle += 0.0035;
-      raf = requestAnimationFrame(tick);
     };
-    tick();
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+    // ~30fps cap + full stop when the hero is off-screen or the tab is hidden (no idle cost).
+    const FRAME_MS = 1000 / 30;
+    let running = false, lastT = 0, onscreen = false;
+    const loop = (now) => {
+      if (!running) return;
+      raf = requestAnimationFrame(loop);
+      if (now - lastT < FRAME_MS) return;
+      lastT = now;
+      angle += 0.007;
+      draw();
+    };
+    const sync = () => {
+      if (onscreen && !document.hidden) { if (!running) { running = true; lastT = 0; raf = requestAnimationFrame(loop); } }
+      else { running = false; cancelAnimationFrame(raf); }
+    };
+    const io = new IntersectionObserver(([e]) => { onscreen = e.isIntersecting; sync(); }, { threshold: 0 });
+    io.observe(canvas);
+    const onVis = () => sync();
+    document.addEventListener("visibilitychange", onVis);
+    sync();
+    return () => { running = false; cancelAnimationFrame(raf); io.disconnect(); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("resize", resize); };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ pointerEvents:"none", zIndex:0 }} />;
 }
@@ -1110,6 +1127,17 @@ function ShowreelSection() {
     };
     evts.forEach((e) => window.addEventListener(e, tryStart, { passive: true }));
     return remove;
+  }, []);
+  // Drive the reel's animation: it only runs while actually on-screen (paused otherwise) — so it
+  // costs nothing when scrolled past and far less while scrolling through it.
+  useEffect(() => {
+    const el = iframeRef.current; if (!el) return;
+    let visible = false;
+    const apply = () => { try { el.contentWindow && el.contentWindow.nexaraSetVisible && el.contentWindow.nexaraSetVisible(visible); } catch { /* not ready */ } };
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; apply(); }, { rootMargin: "150px 0px", threshold: 0 });
+    io.observe(el);
+    el.addEventListener("load", apply);
+    return () => { io.disconnect(); el.removeEventListener("load", apply); };
   }, []);
   return (
     <section className="max-w-6xl mx-auto px-5 py-16">
