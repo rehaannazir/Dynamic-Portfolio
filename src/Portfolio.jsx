@@ -1093,6 +1093,24 @@ function TechEcosystem() {
 }
 
 function ShowreelSection() {
+  const iframeRef = useRef(null);
+  // The reel iframe stays non-interactive (so scrolling passes straight through it). Start its
+  // ambient audio on the visitor's first interaction with the page — browsers forbid audio before
+  // a user gesture, so this is the earliest it can legally play. No button, then stays on.
+  useEffect(() => {
+    let done = false;
+    const evts = ["wheel", "pointerdown", "keydown", "touchstart"];
+    const remove = () => evts.forEach((e) => window.removeEventListener(e, tryStart));
+    const tryStart = () => {
+      if (done) return;
+      try {
+        const w = iframeRef.current && iframeRef.current.contentWindow;
+        if (w && typeof w.nexaraStartAudio === "function" && w.nexaraStartAudio()) { done = true; remove(); }
+      } catch { /* not ready yet — keep listening */ }
+    };
+    evts.forEach((e) => window.addEventListener(e, tryStart, { passive: true }));
+    return remove;
+  }, []);
   return (
     <section className="max-w-6xl mx-auto px-5 py-16">
       <Reveal variant="clip">
@@ -1110,10 +1128,12 @@ function ShowreelSection() {
             <div aria-hidden="true" className="ring-spin" style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.5) 60deg, rgba(139,92,246,0.5) 130deg, transparent 240deg)", animation: "spinSlow 18s linear infinite" }} />
             <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)", aspectRatio: "16/9", background: "#05050b" }}>
               <iframe
+                ref={iframeRef}
                 src="/nexara-showreel.html"
                 title="Nexara Showreel"
                 loading="lazy"
-                style={{ width: "100%", height: "100%", border: "none", display: "block", pointerEvents: (isCoarse() || prefersReduced()) ? "none" : "auto" }}
+                tabIndex={-1}
+                style={{ width: "100%", height: "100%", border: "none", display: "block", pointerEvents: "none" }}
               />
               {/* glass reflection sweep across the top */}
               <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1/3 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.06), transparent)" }} />
