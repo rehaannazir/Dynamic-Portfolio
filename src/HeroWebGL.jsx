@@ -8,14 +8,17 @@ import { onScrollFrame } from "./motion";
    (reduced-motion, coarse pointer / mobile, no WebGL, low power).
    ============================================================ */
 
+/* High-end only. The WebGL hero is the single biggest continuous GPU cost, so it runs only on
+   genuinely capable machines; every other visitor gets the lightweight 2D-canvas hero fallback. */
 function detectCapability() {
   if (typeof window === "undefined") return false;
   try {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
     if (window.matchMedia("(pointer: coarse)").matches) return false;
-    const cores = navigator.hardwareConcurrency || 8;
-    const mem = navigator.deviceMemory || 8;
-    if (cores <= 4 || mem <= 4) return false;
+    const cores = navigator.hardwareConcurrency || 0;
+    const mem = navigator.deviceMemory; // undefined on some browsers
+    if (cores < 8) return false;                      // need a high core count
+    if (mem !== undefined && mem < 8) return false;   // and >=8GB when the browser reports it
     const c = document.createElement("canvas");
     const gl = c.getContext("webgl2") || c.getContext("webgl");
     if (!gl) return false;

@@ -26,6 +26,7 @@
 
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;background:#000;overflow:hidden}
+  html.reel-paused *,html.reel-paused *::before,html.reel-paused *::after{animation-play-state:paused!important}
   body{
     display:flex;align-items:center;justify-content:center;
     font-family:'Inter',system-ui,sans-serif;color:var(--text);
@@ -476,15 +477,38 @@
     }
   }
 
+  /* The host page tells us when the reel is actually on-screen. We only animate while visible
+     (and the tab is active), capped to ~30fps, and we pause every CSS animation too — so the reel
+     costs nothing while you've scrolled past it, and far less while scrolling through it. */
+  let wantVisible = true, running = false, rafId = 0, lastFrame = 0, pausedAt = 0, startRef = start;
+  const FRAME_MS = 1000 / 30;
   function frame(now){
-    const t = (now - start) % CYCLE;
+    if(!running) return;
+    rafId = requestAnimationFrame(frame);
+    if(now - lastFrame < FRAME_MS) return;
+    lastFrame = now;
+    const t = (now - startRef) % CYCLE;
     const i = Math.min(COUNT-1, Math.floor(t / SEG));
     setScene(i);
     subTick(i, t - i*SEG);
     fill.style.width = (t / CYCLE * 100).toFixed(2) + '%';
-    requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+  function evalState(){
+    const shouldRun = wantVisible && !document.hidden;
+    if(shouldRun && !running){
+      running = true;
+      if(pausedAt){ startRef += performance.now() - pausedAt; pausedAt = 0; }
+      document.documentElement.classList.remove('reel-paused');
+      lastFrame = 0; rafId = requestAnimationFrame(frame);
+    } else if(!shouldRun && running){
+      running = false; pausedAt = performance.now();
+      cancelAnimationFrame(rafId);
+      document.documentElement.classList.add('reel-paused');
+    }
+  }
+  window.nexaraSetVisible = (v) => { wantVisible = !!v; evalState(); };
+  document.addEventListener('visibilitychange', evalState);
+  evalState();
 
   /* ---------- Optional ambient audio (Web Audio, generated) ---------- */
   let soundOn = false, actx = null, master = null, drone = [];
