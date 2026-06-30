@@ -120,6 +120,19 @@ export default function Portfolio() {
     if (prefersReduced()) return;
     return onScrollFrame({ write: (y) => document.documentElement.style.setProperty("--sy", String(y)) });
   }, []);
+  // Pause EVERY section's animations (CSS + SVG/SMIL) while it's off-screen — nothing animates
+  // unless you're actually looking at it. Big idle-CPU/GPU saving across the whole page.
+  useEffect(() => {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const off = !e.isIntersecting;
+        e.target.toggleAttribute("data-offscreen", off);
+        e.target.querySelectorAll("svg").forEach((svg) => { try { off ? svg.pauseAnimations() : svg.unpauseAnimations(); } catch { /* not an animated SVG */ } });
+      });
+    }, { rootMargin: "200px 0px" });
+    document.querySelectorAll("main section").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [page, article]);
   useEffect(() => {
     const onPop = () => { const s = getStateFromPath(); setPage(s.page); setArticle(s.article); };
     window.addEventListener("popstate", onPop);
@@ -195,6 +208,8 @@ export default function Portfolio() {
         html[data-scrolling] .float-soft,html[data-scrolling] .float-soft-2,html[data-scrolling] .floating,html[data-scrolling] .breathe,html[data-scrolling] .grad-text,html[data-scrolling] .marquee-track,html[data-scrolling] .light-sweep::after,html[data-scrolling] .bg-orb,html[data-scrolling] .ring-spin{animation-play-state:paused!important}
         /* Drop the expensive backdrop blur WHILE scrolling (every glass card otherwise re-blurs the moving backdrop each frame). Snaps back crisp the instant scrolling stops. */
         html[data-scrolling] .glass{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(12,12,20,0.66)}
+        /* Freeze all animations in any section that's scrolled off-screen — zero idle cost when unseen. */
+        section[data-offscreen] *,section[data-offscreen] *::before,section[data-offscreen] *::after{animation-play-state:paused!important}
         .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
         .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
         .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
