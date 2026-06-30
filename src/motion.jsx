@@ -11,6 +11,16 @@ import { useEffect, useRef, useState } from "react";
 
 export const prefersReduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const isCoarse = () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+/* High-end gate: only powerful machines get the smooth-scroll engine (Lenis+GSAP) and the WebGL
+   scenes. Everyone else gets instant native scrolling and the lightweight visuals. */
+export const isHighEnd = () => {
+  if (typeof navigator === "undefined") return false;
+  const cores = navigator.hardwareConcurrency || 0;
+  const mem = navigator.deviceMemory; // undefined on some browsers
+  if (cores < 8) return false;
+  if (mem !== undefined && mem < 8) return false;
+  return true;
+};
 
 /* ============================================================
    ANIMATION MANAGER
@@ -91,7 +101,8 @@ export function smoothTo(target, { offset = 0, duration } = {}) {
 }
 export function useSmoothScroll() {
   useEffect(() => {
-    if (isCoarse() || prefersReduced()) return; // native scroll on touch / reduced-motion
+    // Ordinary devices, touch, and reduced-motion all use instant native scroll (no Lenis/GSAP loop).
+    if (isCoarse() || prefersReduced() || !isHighEnd()) return;
     let raf = 0, lenis = null, alive = true, ticker = null, gsap = null, ScrollTrigger = null;
     Promise.all([import("lenis"), import("gsap"), import("gsap/ScrollTrigger")])
       .then(([lm, gm, sm]) => {
@@ -137,7 +148,7 @@ export function useSmoothScroll() {
 export function useScrub(build, deps = []) {
   const ref = useRef(null);
   useEffect(() => {
-    const el = ref.current; if (!el || prefersReduced() || isCoarse()) return;
+    const el = ref.current; if (!el || prefersReduced() || isCoarse() || !isHighEnd()) return;
     let ctx = null, cancelled = false;
     gsapReady.then(({ gsap, ScrollTrigger }) => {
       if (cancelled || !ref.current) return;
