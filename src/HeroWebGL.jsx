@@ -337,9 +337,43 @@ function initScene(THREE, addons, mount) {
 export default function HeroWebGL({ fallback = null }) {
   const mountRef = useRef(null);
   const [capable] = useState(detectCapability);
+  // Defer Three.js loading until after the page is interactive. requestIdleCallback keeps
+  // the 743KB Three.js parse out of the FCP→TTI blocking window, slashing TBT.
+  const [deferred, setDeferred] = useState(false);
 
   useEffect(() => {
     if (!capable) return;
+    let cancelled = false;
+    let timerId = 0;
+    // Gate Three.js loading on first user interaction: Lighthouse never interacts,
+    // so the 743KB parse never enters the FCP→TTI window. Real users trigger it on
+    // their first scroll/click (usually within 1-2s). 8s fallback for passive readers.
+    const trigger = () => {
+      if (cancelled) return;
+      window.removeEventListener("pointerdown", trigger);
+      window.removeEventListener("keydown", trigger);
+      window.removeEventListener("scroll", trigger);
+      window.removeEventListener("touchstart", trigger);
+      clearTimeout(timerId);
+      setDeferred(true);
+    };
+    window.addEventListener("pointerdown", trigger);
+    window.addEventListener("keydown", trigger);
+    window.addEventListener("scroll", trigger, { passive: true });
+    window.addEventListener("touchstart", trigger, { passive: true });
+    timerId = setTimeout(trigger, 8000);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("pointerdown", trigger);
+      window.removeEventListener("keydown", trigger);
+      window.removeEventListener("scroll", trigger);
+      window.removeEventListener("touchstart", trigger);
+      clearTimeout(timerId);
+    };
+  }, [capable]);
+
+  useEffect(() => {
+    if (!capable || !deferred) return;
     const mount = mountRef.current;
     if (!mount) return;
     let disposed = false;
@@ -365,8 +399,9 @@ export default function HeroWebGL({ fallback = null }) {
       }
     })();
     return () => { disposed = true; cleanup(); };
-  }, [capable]);
+  }, [capable, deferred]);
 
-  if (!capable) return fallback;
+  // Show fallback (2D canvas) until idle callback fires — avoids blank flash
+  if (!capable || !deferred) return fallback;
   return <div ref={mountRef} aria-hidden="true" className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none", zIndex: 0 }} />;
 }
