@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense, Fragment } from "react";
 import { Helmet } from "react-helmet-async";
-import rehanPhoto from "./assets/rehan.jpg";
 import PythonAutomationPost from "./PythonAutomationPost";
 
 const HeroWebGL = lazy(() => import("./HeroWebGL"));
@@ -439,7 +438,7 @@ function Hero3D() {
 
 /* ===================== HOME ===================== */
 function Home({ setPage, mounted }) {
-  const PROFILE_PIC = rehanPhoto;
+  const PROFILE_PIC = "/rehan.jpg";
   const workRef = useMagnetic();
   const touchRef = useMagnetic();
   const projects = [
