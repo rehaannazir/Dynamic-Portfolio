@@ -203,7 +203,9 @@ function HeroCanvas() {
       camera.position.z = 6;
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      // Cap DPR at 1.5 (same ceiling as HeroWebGL) — using 2 roughly doubles
+      // fill-rate cost for a barely perceptible quality delta on most screens.
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setClearColor(0x000000, 0);
 
       const count = 3500;
@@ -241,10 +243,20 @@ function HeroCanvas() {
       const onMouse = (e) => { mx = (e.clientX / window.innerWidth - 0.5) * 2; my = -(e.clientY / window.innerHeight - 0.5) * 2; };
       window.addEventListener("mousemove", onMouse, { passive: true });
 
-      let animId, tick = 0;
-      const animate = () => {
-        animId = requestAnimationFrame(animate);
-        tick += 0.0004;
+      // Frame-rate cap (~30 fps) + full stop when off-screen or tab hidden.
+      // Without this the canvas renders at native 60+ fps at all times,
+      // burning GPU continuously as the user reads the article.
+      const FRAME_MS = 1000 / 30;
+      let raf = 0, running = false, lastT = performance.now(), tick = 0;
+      const startLoop = () => { if (running) return; running = true; lastT = performance.now(); raf = requestAnimationFrame(loop); };
+      const stopLoop  = () => { if (!running) return; running = false; cancelAnimationFrame(raf); raf = 0; };
+      const loop = (now) => {
+        if (!running) return;
+        raf = requestAnimationFrame(loop);
+        if (now - lastT < FRAME_MS) return;
+        const dt = Math.min(now - lastT, 50); lastT = now;
+        // Scale tick by actual elapsed time so animation speed is frame-rate-independent.
+        tick += 0.0004 * (dt / 16.67);
         pts.rotation.y = tick + mx * 0.08;
         pts.rotation.x = tick * 0.38 + my * 0.06;
         ring2.rotation.y = tick * 0.6;
@@ -253,7 +265,14 @@ function HeroCanvas() {
         camera.lookAt(scene.position);
         renderer.render(scene, camera);
       };
-      animate();
+
+      let onscreen = false;
+      const sync = () => { if (onscreen && !document.hidden) startLoop(); else stopLoop(); };
+      const io = new IntersectionObserver(([e]) => { onscreen = e.isIntersecting; sync(); }, { threshold: 0 });
+      io.observe(canvas);
+      const onVis = () => sync();
+      document.addEventListener("visibilitychange", onVis);
+      sync();
 
       const onResize = () => {
         if (!canvas.parentElement) return;
@@ -263,10 +282,16 @@ function HeroCanvas() {
       window.addEventListener("resize", onResize, { passive: true });
 
       cleanRef.current = () => {
-        cancelAnimationFrame(animId);
+        stopLoop();
+        io.disconnect();
+        document.removeEventListener("visibilitychange", onVis);
         window.removeEventListener("mousemove", onMouse);
         window.removeEventListener("resize", onResize);
-        renderer.dispose(); geo.dispose(); mat.dispose(); ringGeo.dispose(); ringMat.dispose();
+        // Dispose ALL geometry and material objects to prevent WebGL memory leaks.
+        geo.dispose(); mat.dispose();
+        ringGeo.dispose(); ringMat.dispose();
+        ring2Geo.dispose(); ring2Mat.dispose();
+        renderer.dispose();
       };
     });
     return () => { mounted = false; cleanRef.current?.(); };
@@ -292,7 +317,7 @@ function WorkflowCanvas() {
       camera.position.z = 7;
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setClearColor(0x000000, 0);
 
       const nodes = [
@@ -306,30 +331,37 @@ function WorkflowCanvas() {
       ];
       const edges = [[0,1],[0,2],[1,3],[2,3],[3,4],[3,5],[4,6],[5,6]];
 
+      // Track all Three.js objects for correct disposal.
+      const toDispose = [];
       const nodeMeshes = nodes.map(({ p, c }) => {
         const geo = new THREE.SphereGeometry(0.24, 16, 16);
         const mat = new THREE.MeshBasicMaterial({ color: c });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(...p);
         scene.add(mesh);
+        toDispose.push(geo, mat);
         const hGeo = new THREE.SphereGeometry(0.38, 10, 10);
         const hMat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.1, side: THREE.BackSide });
         const halo = new THREE.Mesh(hGeo, hMat);
         halo.position.set(...p);
         scene.add(halo);
+        toDispose.push(hGeo, hMat);
         return mesh;
       });
 
       edges.forEach(([a, b]) => {
         const pts = [new THREE.Vector3(...nodes[a].p), new THREE.Vector3(...nodes[b].p)];
         const geo = new THREE.BufferGeometry().setFromPoints(pts);
-        scene.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.28 })));
+        const mat = new THREE.LineBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.28 });
+        scene.add(new THREE.Line(geo, mat));
+        toDispose.push(geo, mat);
       });
 
+      const tGeo = new THREE.SphereGeometry(0.065, 6, 6);
+      const tMat = new THREE.MeshBasicMaterial({ color: 0xddd6fe });
+      toDispose.push(tGeo, tMat);
       const travelers = edges.map(([a, b]) => {
-        const geo = new THREE.SphereGeometry(0.065, 6, 6);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xddd6fe });
-        const mesh = new THREE.Mesh(geo, mat);
+        const mesh = new THREE.Mesh(tGeo, tMat); // shared geo/mat
         scene.add(mesh);
         return { mesh, from: nodes[a].p, to: nodes[b].p, t: Math.random(), speed: 0.005 + Math.random() * 0.004 };
       });
@@ -338,20 +370,33 @@ function WorkflowCanvas() {
       const onMouse = (e) => { mx = e.clientX / window.innerWidth - 0.5; };
       window.addEventListener("mousemove", onMouse, { passive: true });
 
-      let animId, tick = 0;
-      const animate = () => {
-        animId = requestAnimationFrame(animate);
-        tick += 0.02;
+      const FRAME_MS = 1000 / 30;
+      let raf = 0, running = false, lastT = performance.now(), tick = 0;
+      const startLoop = () => { if (running) return; running = true; lastT = performance.now(); raf = requestAnimationFrame(loop); };
+      const stopLoop  = () => { if (!running) return; running = false; cancelAnimationFrame(raf); raf = 0; };
+      const loop = (now) => {
+        if (!running) return;
+        raf = requestAnimationFrame(loop);
+        if (now - lastT < FRAME_MS) return;
+        lastT = now;
+        tick += 0.6; // ~0.02 per frame × 30fps
         travelers.forEach((tr) => {
           tr.t = (tr.t + tr.speed) % 1;
           const [fx,fy,fz] = tr.from, [tx,ty,tz] = tr.to;
           tr.mesh.position.set(fx+(tx-fx)*tr.t, fy+(ty-fy)*tr.t, fz+(tz-fz)*tr.t);
         });
-        nodeMeshes.forEach((m, i) => { const s = 1 + 0.11 * Math.sin(tick + i * 0.8); m.scale.setScalar(s); });
+        nodeMeshes.forEach((m, i) => { const s = 1 + 0.11 * Math.sin(tick * 0.02 + i * 0.8); m.scale.setScalar(s); });
         scene.rotation.y = mx * 0.22;
         renderer.render(scene, camera);
       };
-      animate();
+
+      let onscreen = false;
+      const sync = () => { if (onscreen && !document.hidden) startLoop(); else stopLoop(); };
+      const io = new IntersectionObserver(([e]) => { onscreen = e.isIntersecting; sync(); }, { threshold: 0 });
+      io.observe(canvas);
+      const onVis = () => sync();
+      document.addEventListener("visibilitychange", onVis);
+      sync();
 
       const onResize = () => {
         if (!canvas.parentElement) return;
@@ -360,9 +405,12 @@ function WorkflowCanvas() {
       };
       window.addEventListener("resize", onResize, { passive: true });
       cleanRef.current = () => {
-        cancelAnimationFrame(animId);
+        stopLoop();
+        io.disconnect();
+        document.removeEventListener("visibilitychange", onVis);
         window.removeEventListener("mousemove", onMouse);
         window.removeEventListener("resize", onResize);
+        toDispose.forEach((o) => o.dispose?.());
         renderer.dispose();
       };
     });
@@ -389,9 +437,10 @@ function NeuralCanvas() {
       camera.position.z = 5;
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setClearColor(0x000000, 0);
 
+      const toDispose = [];
       const NC = 65;
       const nPos = Array.from({ length: NC }, () => ({
         x: (Math.random() - 0.5) * 7, y: (Math.random() - 0.5) * 4.5,
@@ -404,9 +453,13 @@ function NeuralCanvas() {
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(np.x, np.y, np.z);
         scene.add(mesh);
+        toDispose.push(geo, mat);
         return mesh;
       });
+
       const lineGroup = new THREE.Group();
+      const lineMat = new THREE.LineBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.13 });
+      toDispose.push(lineMat);
       for (let a = 0; a < NC; a++) {
         for (let b = a + 1; b < NC; b++) {
           const pa = nPos[a], pb = nPos[b];
@@ -415,20 +468,20 @@ function NeuralCanvas() {
             const geo = new THREE.BufferGeometry().setFromPoints([
               new THREE.Vector3(pa.x, pa.y, pa.z), new THREE.Vector3(pb.x, pb.y, pb.z),
             ]);
-            lineGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
-              color: 0x818cf8, transparent: true, opacity: 0.13 * (1 - d / 2.4),
-            })));
+            lineGroup.add(new THREE.Line(geo, lineMat));
+            toDispose.push(geo);
           }
         }
       }
       scene.add(lineGroup);
 
+      const pGeo = new THREE.SphereGeometry(0.04, 6, 6);
+      const pMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+      toDispose.push(pGeo, pMat);
       const pulses = Array.from({ length: 22 }, () => {
         let a = Math.floor(Math.random() * NC), b;
         do { b = Math.floor(Math.random() * NC); } while (b === a);
-        const geo = new THREE.SphereGeometry(0.04, 6, 6);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
-        const mesh = new THREE.Mesh(geo, mat);
+        const mesh = new THREE.Mesh(pGeo, pMat); // shared geo/mat
         scene.add(mesh);
         return { mesh, from: nPos[a], to: nPos[b], t: Math.random(), speed: 0.009 + Math.random() * 0.008 };
       });
@@ -437,11 +490,17 @@ function NeuralCanvas() {
       const onMouse = (e) => { mx = e.clientX / window.innerWidth - 0.5; my = -(e.clientY / window.innerHeight - 0.5); };
       window.addEventListener("mousemove", onMouse, { passive: true });
 
-      let animId, tick = 0;
-      const animate = () => {
-        animId = requestAnimationFrame(animate);
-        tick += 0.015;
-        nPos.forEach((np, i) => { nMeshes[i].position.y = np.y + 0.09 * Math.sin(tick + np.ph); });
+      const FRAME_MS = 1000 / 30;
+      let raf = 0, running = false, lastT = performance.now(), tick = 0;
+      const startLoop = () => { if (running) return; running = true; lastT = performance.now(); raf = requestAnimationFrame(loop); };
+      const stopLoop  = () => { if (!running) return; running = false; cancelAnimationFrame(raf); raf = 0; };
+      const loop = (now) => {
+        if (!running) return;
+        raf = requestAnimationFrame(loop);
+        if (now - lastT < FRAME_MS) return;
+        lastT = now;
+        tick += 0.45; // ~0.015 per frame × 30fps
+        nPos.forEach((np, i) => { nMeshes[i].position.y = np.y + 0.09 * Math.sin(tick * 0.015 + np.ph); });
         pulses.forEach((p) => {
           p.t = (p.t + p.speed) % 1;
           p.mesh.position.set(
@@ -454,7 +513,14 @@ function NeuralCanvas() {
         scene.rotation.x = my * 0.22;
         renderer.render(scene, camera);
       };
-      animate();
+
+      let onscreen = false;
+      const sync = () => { if (onscreen && !document.hidden) startLoop(); else stopLoop(); };
+      const io = new IntersectionObserver(([e]) => { onscreen = e.isIntersecting; sync(); }, { threshold: 0 });
+      io.observe(canvas);
+      const onVis = () => sync();
+      document.addEventListener("visibilitychange", onVis);
+      sync();
 
       const onResize = () => {
         if (!canvas.parentElement) return;
@@ -463,9 +529,12 @@ function NeuralCanvas() {
       };
       window.addEventListener("resize", onResize, { passive: true });
       cleanRef.current = () => {
-        cancelAnimationFrame(animId);
+        stopLoop();
+        io.disconnect();
+        document.removeEventListener("visibilitychange", onVis);
         window.removeEventListener("mousemove", onMouse);
         window.removeEventListener("resize", onResize);
+        toDispose.forEach((o) => o.dispose?.());
         renderer.dispose();
       };
     });
@@ -482,11 +551,22 @@ function AnimatedTitle() {
   useEffect(() => { const t = setTimeout(() => setVis(true), 150); return () => clearTimeout(t); }, []);
   const words = ["WHY", "PYTHON", "FOR", "AUTOMATION"];
   let idx = 0;
+  // One shimmer animation on the parent h1 instead of one per character.
+  // Previously each character ran its own `shimmer` keyframe, producing 21+
+  // independent CSS animations. A single animation on the ancestor is visually
+  // identical but eliminates the redundant work entirely.
   return (
     <h1 className="font-black text-center leading-none select-none"
-      style={{ fontSize: "clamp(2.4rem,7.5vw,5.5rem)", letterSpacing: "-0.03em" }}>
+      style={{
+        fontSize: "clamp(2.4rem,7.5vw,5.5rem)", letterSpacing: "-0.03em",
+        background: "linear-gradient(135deg,#fff 0%,#a5b4fc 38%,#c084fc 65%,#f472b6 100%)",
+        backgroundSize: "200% auto",
+        WebkitBackgroundClip: "text", backgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        animation: vis ? "shimmer 5s linear infinite" : "none",
+      }}>
       {words.map((w, wi) => (
-        <span key={wi} className={wi > 0 ? "block" : "block"}>
+        <span key={wi} className="block">
           {w.split("").map((ch) => {
             const d = idx++ * 0.038;
             return (
@@ -494,11 +574,6 @@ function AnimatedTitle() {
                 opacity: vis ? 1 : 0,
                 transform: vis ? "translateY(0)" : "translateY(48px)",
                 transition: `opacity 0.65s ease ${d}s, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${d}s`,
-                background: "linear-gradient(135deg,#fff 0%,#a5b4fc 38%,#c084fc 65%,#f472b6 100%)",
-                backgroundSize: "200% auto",
-                WebkitBackgroundClip: "text", backgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                animation: vis ? "shimmer 5s linear infinite" : "none",
               }}>{ch}</span>
             );
           })}
