@@ -70,11 +70,19 @@ function Counter({ to, suffix = "" }) {
   const ref = useRef(null), [n, setN] = useState(0), done = useRef(false);
   useEffect(() => {
     const el = ref.current; if (!el) return;
+    let alive = true;
     const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !done.current) { done.current = true; const dur = 1500, s = performance.now();
-        const t = (x) => { const p = Math.min((x - s) / dur, 1); setN(Math.round((1 - Math.pow(1 - p, 3)) * to)); if (p < 1) requestAnimationFrame(t); }; requestAnimationFrame(t); }
+      if (e.isIntersecting && !done.current) {
+        done.current = true;
+        const dur = 1500, s = performance.now();
+        // `alive` guard prevents setState after unmount if the rAF fires
+        // after the component has been removed from the tree.
+        const t = (x) => { if (!alive) return; const p = Math.min((x - s) / dur, 1); setN(Math.round((1 - Math.pow(1 - p, 3)) * to)); if (p < 1) requestAnimationFrame(t); };
+        requestAnimationFrame(t);
+      }
     }, { threshold: 0.4 });
-    io.observe(el); return () => io.disconnect();
+    io.observe(el);
+    return () => { alive = false; io.disconnect(); };
   }, [to]);
   return <span ref={ref}>{n}{suffix}</span>;
 }
@@ -681,9 +689,17 @@ function BlogVisual({ cat }) {
 function WhoamiCard() {
   const [line, setLine] = useState(0);
   const total = 8;
+  const containerRef = useRef(null);
   useEffect(() => {
-    const t = setInterval(() => setLine(l => (l + 1) % total), 1600);
-    return () => clearInterval(t);
+    // Only cycle the highlight while the card is actually in the viewport.
+    // Prevents 1.6s React re-renders (and their style recalcs) when scrolled away.
+    let timer = null;
+    const start = () => { if (!timer) timer = setInterval(() => setLine(l => (l + 1) % total), 1600); };
+    const stop  = () => { clearInterval(timer); timer = null; };
+    const io = new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { rootMargin: "120px" });
+    if (containerRef.current) io.observe(containerRef.current);
+    start();
+    return () => { stop(); io.disconnect(); };
   }, []);
   const hl = (i) => ({
     display: "block",
@@ -696,7 +712,7 @@ function WhoamiCard() {
     paddingRight: 4,
   });
   return (
-    <div className="glass rounded-2xl overflow-hidden">
+    <div ref={containerRef} className="glass rounded-2xl overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
         <span className="w-3 h-3 rounded-full bg-red-400/70"/><span className="w-3 h-3 rounded-full bg-yellow-400/70"/><span className="w-3 h-3 rounded-full bg-green-400/70"/>
         <span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span>
@@ -717,27 +733,35 @@ function WhoamiCard() {
 }
 
 /* ===================== LIVE LOGS ===================== */
+// Defined outside the component so it's never recreated on re-render.
+const _LIVE_LOGS = [
+  { m: "POST", p: "/agent/run",        s: "200", ms: "34ms",  c: "#34d399" },
+  { m: "GET",  p: "/rag/query",        s: "200", ms: "89ms",  c: "#34d399" },
+  { m: "POST", p: "/vapi/call",        s: "200", ms: "12ms",  c: "#34d399" },
+  { m: "TOOL", p: "crm.upsert(lead)", s: "✓",   ms: "",      c: "#a78bfa" },
+  { m: "POST", p: "/llm/generate",    s: "200", ms: "1.2s",  c: "#34d399" },
+  { m: "CREW", p: "task.complete()",  s: "✓",   ms: "",      c: "#c084fc" },
+  { m: "POST", p: "/embed/batch",     s: "200", ms: "234ms", c: "#34d399" },
+  { m: "AGENT",p: "tool_call[search]",s: "→",   ms: "",      c: "#60a5fa" },
+  { m: "GET",  p: "/health",          s: "200", ms: "2ms",   c: "#34d399" },
+  { m: "POST", p: "/n8n/webhook",     s: "200", ms: "67ms",  c: "#34d399" },
+];
 function LiveLogs() {
-  const all = [
-    { m: "POST", p: "/agent/run",        s: "200", ms: "34ms",  c: "#34d399" },
-    { m: "GET",  p: "/rag/query",        s: "200", ms: "89ms",  c: "#34d399" },
-    { m: "POST", p: "/vapi/call",        s: "200", ms: "12ms",  c: "#34d399" },
-    { m: "TOOL", p: "crm.upsert(lead)", s: "✓",   ms: "",      c: "#a78bfa" },
-    { m: "POST", p: "/llm/generate",    s: "200", ms: "1.2s",  c: "#34d399" },
-    { m: "CREW", p: "task.complete()",  s: "✓",   ms: "",      c: "#c084fc" },
-    { m: "POST", p: "/embed/batch",     s: "200", ms: "234ms", c: "#34d399" },
-    { m: "AGENT",p: "tool_call[search]",s: "→",   ms: "",      c: "#60a5fa" },
-    { m: "GET",  p: "/health",          s: "200", ms: "2ms",   c: "#34d399" },
-    { m: "POST", p: "/n8n/webhook",     s: "200", ms: "67ms",  c: "#34d399" },
-  ];
-  const [rows, setRows] = useState(all.slice(0, 5));
+  const [rows, setRows] = useState(_LIVE_LOGS.slice(0, 5));
+  const containerRef = useRef(null);
   useEffect(() => {
-    let i = 5;
-    const t = setInterval(() => { setRows(r => [...r.slice(-4), all[i % all.length]]); i++; }, 2400);
-    return () => clearInterval(t);
+    // Pause updates when scrolled off-screen — avoids React re-renders and
+    // array allocations every 2.4 s while nothing is visible.
+    let i = 5, timer = null;
+    const start = () => { if (!timer) timer = setInterval(() => { setRows(r => [...r.slice(-4), _LIVE_LOGS[i % _LIVE_LOGS.length]]); i++; }, 2400); };
+    const stop  = () => { clearInterval(timer); timer = null; };
+    const io = new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { rootMargin: "120px" });
+    if (containerRef.current) io.observe(containerRef.current);
+    start();
+    return () => { stop(); io.disconnect(); };
   }, []);
   return (
-    <div className="mono text-[11px] space-y-2">
+    <div ref={containerRef} className="mono text-[11px] space-y-2">
       {rows.map((l, i) => (
         <div key={i} className="flex items-center gap-2 transition-all duration-700" style={{ opacity: 0.28 + i * 0.15 }}>
           <span style={{ color: l.c, minWidth: 40 }}>{l.m}</span>
@@ -1193,14 +1217,24 @@ function ShowreelSection() {
 /* ===================== ABOUT SECTION ===================== */
 function AboutSection() {
   const [phase, setPhase] = useState(0);
+  const [inView, setInView] = useState(false);
   const panelRef = useParallax(0.08);
+  const sectionRef = useRef(null);
+  // Gate the phase-cycling setTimeout on viewport visibility so it doesn't
+  // keep firing (and diffing the terminal content) when the section is off-screen.
   useEffect(() => {
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "150px" });
+    if (sectionRef.current) io.observe(sectionRef.current);
+    return () => io.disconnect();
+  }, []);
+  useEffect(() => {
+    if (!inView) return;
     const t = setTimeout(() => setPhase(p => (p+1) % 3), 3800);
     return () => clearTimeout(t);
-  }, [phase]);
+  }, [phase, inView]);
   const barH = [3,5,8,12,7,14,10,6,11,9,13,7,5,9];
   return (
-    <section id="about" className="max-w-6xl mx-auto px-5 py-20">
+    <section id="about" ref={sectionRef} className="max-w-6xl mx-auto px-5 py-20">
       <div className="grid lg:grid-cols-2 gap-14 items-center">
         {/* Left: floating terminal panel — scroll parallax + idle float (separate nodes) */}
         <Reveal variant="left" duration={1.7}>

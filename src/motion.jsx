@@ -262,7 +262,7 @@ export const REVEAL_VARIANTS = {
   plain: { hidden: { transform: "translateY(30px)" } },
 };
 export function Reveal({ children, delay = 0, className = "", variant = "up", duration = 1.5, style = {} }) {
-  const ref = useRef(null), [vis, setVis] = useState(false);
+  const ref = useRef(null), [vis, setVis] = useState(false), [done, setDone] = useState(false);
   const reduced = typeof window !== "undefined" && prefersReduced();
   useEffect(() => {
     if (reduced) { setVis(true); return; }
@@ -276,7 +276,20 @@ export function Reveal({ children, delay = 0, className = "", variant = "up", du
   const props = ["opacity", "transform", "filter", "clip-path"].map((p) => `${p} ${duration}s ${ease} ${delay}s`).join(", ");
   const hidden = { opacity: 0, transform: "translateY(0)", filter: "blur(0)", ...v.hidden };
   const shown = { opacity: 1, transform: "translateY(0)", filter: "blur(0)", clipPath: "inset(0 0 0% 0)", ...(v.shown || {}) };
-  return <div ref={ref} className={className} style={{ ...(vis ? shown : hidden), transition: props, willChange: "transform, opacity, filter", ...style }}>{children}</div>;
+  // willChange is set only while the reveal is pending/in-progress. Once the entrance transition
+  // fires (onTransitionEnd) we remove it so the browser can release those compositing layers.
+  // Keeping willChange permanently on every revealed element (dozens on the homepage) is the
+  // single largest driver of progressive performance degradation over a long session.
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{ ...(vis ? shown : hidden), transition: props, ...(done ? {} : { willChange: "transform, opacity, filter" }), ...style }}
+      onTransitionEnd={vis && !done ? () => setDone(true) : undefined}
+    >
+      {children}
+    </div>
+  );
 }
 /* Alias — RevealPreset reads nicely at call sites that pick a named entrance. */
 export const RevealPreset = Reveal;
