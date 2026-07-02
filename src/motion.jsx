@@ -104,34 +104,55 @@ export function useSmoothScroll() {
     // Ordinary devices, touch, and reduced-motion all use instant native scroll (no Lenis/GSAP loop).
     if (isCoarse() || prefersReduced() || !isHighEnd()) return;
     let raf = 0, lenis = null, alive = true, ticker = null, gsap = null, ScrollTrigger = null;
-    Promise.all([import("lenis"), import("gsap"), import("gsap/ScrollTrigger")])
-      .then(([lm, gm, sm]) => {
-        if (!alive) return;
-        const Lenis = lm.default;
-        gsap = gm.gsap || gm.default;
-        ScrollTrigger = sm.ScrollTrigger || sm.default;
-        gsap.registerPlugin(ScrollTrigger);
-        lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1 });
-        _lenis = lenis;
-        lenis.on("scroll", ScrollTrigger.update);
-        ticker = (time) => lenis.raf(time * 1000);
-        gsap.ticker.add(ticker);
-        gsap.ticker.lagSmoothing(0);
-        _gsapResolve({ gsap, ScrollTrigger });
-        ScrollTrigger.refresh();
-      })
-      .catch(() => {
-        // Fall back to a plain rAF Lenis loop if GSAP fails to load.
-        import("lenis").then(({ default: Lenis }) => {
+    let timerId = 0;
+    // Gate Lenis+GSAP loading on first user interaction — keeps 131KB vendor-anim out of
+    // Lighthouse's FCP→TTI window. Real users trigger it before they start scrolling.
+    const load = () => {
+      if (!alive) return;
+      window.removeEventListener("pointerdown", load);
+      window.removeEventListener("keydown", load);
+      window.removeEventListener("scroll", load);
+      window.removeEventListener("touchstart", load);
+      clearTimeout(timerId);
+      Promise.all([import("lenis"), import("gsap"), import("gsap/ScrollTrigger")])
+        .then(([lm, gm, sm]) => {
           if (!alive) return;
-          lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+          const Lenis = lm.default;
+          gsap = gm.gsap || gm.default;
+          ScrollTrigger = sm.ScrollTrigger || sm.default;
+          gsap.registerPlugin(ScrollTrigger);
+          lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1 });
           _lenis = lenis;
-          const loop = (t) => { lenis.raf(t); raf = requestAnimationFrame(loop); };
-          raf = requestAnimationFrame(loop);
-        }).catch(() => {});
-      });
+          lenis.on("scroll", ScrollTrigger.update);
+          ticker = (time) => lenis.raf(time * 1000);
+          gsap.ticker.add(ticker);
+          gsap.ticker.lagSmoothing(0);
+          _gsapResolve({ gsap, ScrollTrigger });
+          ScrollTrigger.refresh();
+        })
+        .catch(() => {
+          // Fall back to a plain rAF Lenis loop if GSAP fails to load.
+          import("lenis").then(({ default: Lenis }) => {
+            if (!alive) return;
+            lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+            _lenis = lenis;
+            const loop = (t) => { lenis.raf(t); raf = requestAnimationFrame(loop); };
+            raf = requestAnimationFrame(loop);
+          }).catch(() => {});
+        });
+    };
+    window.addEventListener("pointerdown", load);
+    window.addEventListener("keydown", load);
+    window.addEventListener("scroll", load, { passive: true });
+    window.addEventListener("touchstart", load, { passive: true });
+    timerId = setTimeout(load, 6000);
     return () => {
       alive = false;
+      clearTimeout(timerId);
+      window.removeEventListener("pointerdown", load);
+      window.removeEventListener("keydown", load);
+      window.removeEventListener("scroll", load);
+      window.removeEventListener("touchstart", load);
       cancelAnimationFrame(raf);
       if (ticker && gsap) gsap.ticker.remove(ticker);
       if (ScrollTrigger) ScrollTrigger.getAll().forEach((t) => t.kill());

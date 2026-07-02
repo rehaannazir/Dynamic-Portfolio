@@ -1,9 +1,5 @@
-import { useState, useEffect, useRef, lazy, Suspense, Fragment } from "react";
+import { useState, useEffect, useRef, lazy, Suspense, Fragment, memo, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import PythonAutomationPost from "./PythonAutomationPost";
-
-const HeroWebGL = lazy(() => import("./HeroWebGL"));
-import AIArchitecture from "./AIArchitecture";
 import {
   Workflow, Cpu, MessageSquare, TrendingUp, Code, Zap, Star,
   ArrowRight, ArrowUpRight, ArrowLeft, GitFork, Link, Mail, MessageCircle, Menu, X,
@@ -16,6 +12,10 @@ import {
   useMagnetic, useSpotlight, useScrub, onFrame, onScrollFrame, Reveal, FloatingCard, LightSweep, SectionTransition,
 } from "./motion";
 
+const HeroWebGL = lazy(() => import("./HeroWebGL"));
+const AIArchitecture = lazy(() => import("./AIArchitecture"));
+const PythonAutomationPost = lazy(() => import("./PythonAutomationPost"));
+
 const SITE_URL = "https://rehannazir.com";
 
 /* ===================== CUSTOM GLOWING CURSOR ===================== */
@@ -23,9 +23,15 @@ function CustomCursor() {
   const dot = useRef(null), ring = useRef(null);
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
-    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
+    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, prevRx = mx, prevRy = my;
     const move = (e) => { mx = e.clientX; my = e.clientY; if (dot.current) dot.current.style.transform = `translate(${mx}px,${my}px)`; };
-    const tick = () => { rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16; if (ring.current) ring.current.style.transform = `translate(${rx}px,${ry}px)`; };
+    const tick = () => {
+      rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16;
+      if (ring.current && (Math.abs(rx - prevRx) > 0.1 || Math.abs(ry - prevRy) > 0.1)) {
+        ring.current.style.transform = `translate(${rx}px,${ry}px)`;
+        prevRx = rx; prevRy = ry;
+      }
+    };
     const over = (e) => { const hit = e.target.closest("a,button,[data-cursor],input,textarea,label"); ring.current?.classList.toggle("cursor-grow", !!hit); };
     addEventListener("mousemove", move); addEventListener("mouseover", over);
     const off = onFrame(tick); // shares the one central ticker; pauses when tab hidden
@@ -65,7 +71,7 @@ function ChapterRail() {
     </nav>
   );
 }
-function Counter({ to, suffix = "" }) {
+const Counter = memo(function Counter({ to, suffix = "" }) {
   const ref = useRef(null), [n, setN] = useState(0), done = useRef(false);
   useEffect(() => {
     const el = ref.current; if (!el) return;
@@ -84,8 +90,8 @@ function Counter({ to, suffix = "" }) {
     return () => { alive = false; io.disconnect(); };
   }, [to]);
   return <span ref={ref}>{n}{suffix}</span>;
-}
-function SectionLabel({ num, children }) {
+});
+const SectionLabel = memo(function SectionLabel({ num, children }) {
   return (
     <div className="flex items-center gap-3 mb-8">
       <span className="font-mono text-sm text-indigo-400">{num}</span><span className="font-mono text-sm text-slate-500">/</span>
@@ -93,15 +99,25 @@ function SectionLabel({ num, children }) {
       <span className="flex-1 h-px ml-2" style={{ background: "linear-gradient(90deg,rgba(139,92,246,0.4),transparent)" }} />
     </div>
   );
-}
+});
 function ReadingProgress() {
-  const [p, setP] = useState(0);
+  const barRef = useRef(null);
   useEffect(() => {
-    const on = () => { const h = document.documentElement; const max = h.scrollHeight - h.clientHeight; setP(max > 0 ? (h.scrollTop / max) * 100 : 0); };
-    on(); addEventListener("scroll", on, { passive: true }); addEventListener("resize", on);
-    return () => { removeEventListener("scroll", on); removeEventListener("resize", on); };
+    const update = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      if (barRef.current) barRef.current.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + "%";
+    };
+    update();
+    addEventListener("scroll", update, { passive: true });
+    addEventListener("resize", update);
+    return () => { removeEventListener("scroll", update); removeEventListener("resize", update); };
   }, []);
-  return <div className="fixed top-0 left-0 right-0 z-[60] h-0.5"><div className="h-full" style={{ width: p + "%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.8)" }} /></div>;
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[60] h-0.5">
+      <div ref={barRef} className="h-full" style={{ width: "0%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.8)" }} />
+    </div>
+  );
 }
 /* ===================== APP ===================== */
 function getStateFromPath(path) {
@@ -118,8 +134,6 @@ export default function Portfolio() {
   const [page, setPage] = useState(initial.page);
   const [article, setArticle] = useState(initial.article);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
   useSmoothScroll();
   useEffect(() => { setMenuOpen(false); smoothTo(0, { duration: 0.8 }); }, [page, article]);
   // Background depth — drift the ambient layer with scroll, via the shared scroll dispatcher.
@@ -148,12 +162,12 @@ export default function Portfolio() {
   // Pointer-reactive spotlight + subtle 3D tilt on every glass card (one delegated listener).
   useSpotlight();
   const hireRef = useMagnetic();
-  const navigate = (newPage) => {
+  const navigate = useCallback((newPage) => {
     const paths = { home: "/", services: "/services", reviews: "/reviews", blog: "/blog" };
     window.history.pushState({}, "", paths[newPage] || "/");
     setPage(newPage);
-  };
-  const goArticle = (slug) => { window.history.pushState({}, "", `/blog/${slug}`); setArticle(slug); setPage("article"); };
+  }, []);
+  const goArticle = useCallback((slug) => { window.history.pushState({}, "", `/blog/${slug}`); setArticle(slug); setPage("article"); }, []);
 
   const nav = [
     { id: "home", label: "home", num: "01" }, { id: "services", label: "services", num: "02" },
@@ -163,85 +177,6 @@ export default function Portfolio() {
   return (
     <div className="nocursor min-h-screen w-full text-slate-200 relative overflow-x-hidden"
       style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.035), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.04), transparent 60%), #000002", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
-      <style>{`
-        @property --bg{syntax:'<angle>';inherits:false;initial-value:0deg}
-        @keyframes floatSoft{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
-        @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
-        @keyframes borderSpin{to{--bg:360deg}}
-        @keyframes floatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}}
-        @keyframes floatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.05)}}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-        @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
-        @keyframes scrollX{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-        @keyframes spinSlow{to{transform:rotate(360deg)}}
-        @keyframes vdash{to{stroke-dashoffset:-200}}
-        @keyframes vpulse{0%,100%{opacity:.35}50%{opacity:1}}
-        @keyframes vrow{0%,100%{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08)}50%{background:rgba(99,102,241,.16);border-color:rgba(139,92,246,.5)}}
-        @keyframes vgrow{from{transform:scaleY(.12)}to{transform:scaleY(1)}}
-        @keyframes vcandle{0%,100%{transform:scaleY(.72)}50%{transform:scaleY(1.12)}}
-        @keyframes vdraw{to{stroke-dashoffset:0}}
-        @keyframes xflash{0%,60%{opacity:0}70%,100%{opacity:1}}
-        @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(12px,-9px) scale(1.02)}66%{transform:translate(-9px,7px) scale(0.98)}}
-        @keyframes orb{0%,100%{opacity:.12;transform:scale(1)}50%{opacity:.22;transform:scale(1.08)}}
-        @keyframes aurora{0%,100%{transform:rotate(0deg) scale(1.05);opacity:.6}50%{transform:rotate(18deg) scale(1.18);opacity:.85}}
-        @keyframes beamShift{0%{transform:translateX(-12%)}100%{transform:translateX(12%)}}
-        @keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes cardFloat{0%,100%{transform:translateY(0px)}50%{transform:translateY(-7px)}}
-        @keyframes floatVar{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,var(--amp,-9px),0)}}
-        @keyframes sweepX{0%{transform:translateX(-120%) skewX(-18deg)}100%{transform:translateX(220%) skewX(-18deg)}}
-        @keyframes flowX{0%{left:-4%;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:104%;opacity:0}}
-        @keyframes flowY{0%{top:-8%;opacity:0}12%{opacity:1}88%{opacity:1}100%{top:108%;opacity:0}}
-        @media(prefers-reduced-motion:reduce){.card-float{animation:none!important}}
-        .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
-        .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
-        .glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08)}
-        .glass-hover{--rx:0deg;--ry:0deg;position:relative;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .7s cubic-bezier(.16,1,.3,1),box-shadow .7s cubic-bezier(.16,1,.3,1),background .7s cubic-bezier(.16,1,.3,1)}
-        .glass-hover::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,0.22),transparent 60%);transition:opacity .5s ease;z-index:2}
-        .glass-hover::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;pointer-events:none;background:conic-gradient(from var(--bg,0deg),transparent 0deg,rgba(139,92,246,.7) 60deg,rgba(96,165,250,.5) 120deg,transparent 200deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;transition:opacity .6s ease;z-index:3}
-        .glass-hover:hover::before{opacity:1}
-        .glass-hover:hover::after{opacity:1;animation:borderSpin 6s linear infinite}
-        .glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));border-color:rgba(139,92,246,0.55);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.08);background:rgba(255,255,255,0.06)}
-        .float-soft{animation:floatSoft 7s ease-in-out infinite;will-change:transform}
-        .float-soft-2{animation:floatSoft 9.5s ease-in-out infinite;will-change:transform}
-        .floating{animation:floatVar var(--fdur,7s) ease-in-out infinite;will-change:transform}
-        .breathe{animation:breathe 7s ease-in-out infinite;will-change:transform}
-        .light-sweep{overflow:hidden;border-radius:inherit}
-        .light-sweep::after{content:"";position:absolute;top:0;bottom:0;width:35%;left:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.10),transparent);animation:sweepX var(--swdur,7s) ease-in-out infinite;animation-delay:inherit}
-        .magnetic{transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .5s cubic-bezier(.16,1,.3,1)}
-        html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}.lenis.lenis-stopped{overflow:hidden}
-        @media(prefers-reduced-motion:reduce){.glass-hover:hover{transform:translateY(-8px)}.glass-hover:hover::after{animation:none}.magnetic{transition:none}.float-soft,.float-soft-2,.floating,.breathe{animation:none}.light-sweep::after{display:none}}
-        /* Freeze decorative animations WHILE the user scrolls — frees the main thread/GPU for smooth scrolling; they resume the instant scrolling stops. */
-        html[data-scrolling] .float-soft,html[data-scrolling] .float-soft-2,html[data-scrolling] .floating,html[data-scrolling] .breathe,html[data-scrolling] .grad-text,html[data-scrolling] .marquee-track,html[data-scrolling] .light-sweep::after,html[data-scrolling] .bg-orb,html[data-scrolling] .ring-spin{animation-play-state:paused!important}
-        /* Drop the expensive backdrop blur WHILE scrolling (every glass card otherwise re-blurs the moving backdrop each frame). Snaps back crisp the instant scrolling stops. */
-        html[data-scrolling] .glass{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(12,12,20,0.66)}
-        /* Freeze all animations in any section that's scrolled off-screen — zero idle cost when unseen. */
-        section[data-offscreen] *,section[data-offscreen] *::before,section[data-offscreen] *::after{animation-play-state:paused!important}
-        .grad-text{background:linear-gradient(110deg,#60a5fa,#818cf8,#c084fc,#60a5fa);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 8s linear infinite}
-        .grid-bg{background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:56px 56px}
-        .btn-glow{transition:all .5s cubic-bezier(.16,1,.3,1)}
-        .btn-glow:hover{box-shadow:0 0 38px -2px rgba(99,102,241,0.9);transform:translateY(-3px)}
-        .marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-        .marquee-track{display:flex;gap:.75rem;width:max-content;animation:scrollX 70s linear infinite}
-        .faq-answer{overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1)}
-        .prose-blog p{color:#cbd5e1;line-height:1.85;margin:1.1rem 0}
-        .prose-blog h2{color:#fff;font-size:1.55rem;font-weight:700;margin:2.8rem 0 1rem;scroll-margin-top:96px;letter-spacing:-0.01em}
-        .prose-blog h3{color:#e2e8f0;font-size:1.08rem;font-weight:600;margin:2rem 0 0.6rem;scroll-margin-top:96px}
-        .prose-blog strong{color:#e9d5ff}
-        .prose-blog code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:0.82em;background:rgba(99,102,241,0.14);color:#a5b4fc;padding:2px 6px;border-radius:5px;border:1px solid rgba(99,102,241,0.2)}
-        .prose-blog blockquote{border-left:2px solid #818cf8;padding-left:1.2rem;margin:1.8rem 0;color:#94a3b8;font-style:italic}
-        .prose-blog ul{color:#cbd5e1;line-height:1.85;padding-left:1.4rem;margin:0.8rem 0}
-        .prose-blog ul li{margin:0.35rem 0}
-        .prose-blog a{color:#60a5fa;text-decoration:underline;text-underline-offset:3px}
-        .cursor-dot{position:fixed;top:0;left:0;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#ddd6fe;pointer-events:none;z-index:99999;mix-blend-mode:screen}
-        .cursor-ring{position:fixed;top:0;left:0;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;pointer-events:none;z-index:99998;background:radial-gradient(circle,rgba(139,92,246,0.4),rgba(59,130,246,0.18) 50%,transparent 72%);box-shadow:0 0 34px 8px rgba(99,102,241,0.32);transition:width .28s,height .28s,margin .28s;mix-blend-mode:screen}
-        .cursor-grow{width:84px;height:84px;margin:-42px 0 0 -42px}
-        @media (pointer:fine){.nocursor,.nocursor *{cursor:none !important}}
-        @media (pointer:coarse){.cursor-dot,.cursor-ring{display:none}}
-        .nocursor *:not(input):not(textarea):not(select):not([contenteditable]){-webkit-user-select:none;user-select:none}
-        ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:#07070d}::-webkit-scrollbar-thumb{background:linear-gradient(#3b82f6,#8b5cf6);border-radius:8px}
-      `}</style>
-
       <CustomCursor />
       {page === "article" && <ReadingProgress />}
       {page === "home" && <ChapterRail />}
@@ -282,7 +217,7 @@ export default function Portfolio() {
       </header>
 
       <main className="relative z-10" key={page + (article || "")}>
-        {page === "home" && <Home setPage={navigate} mounted={mounted} />}
+        {page === "home" && <Home setPage={navigate} />}
         {page === "services" && <Services setPage={navigate} />}
         {page === "reviews" && <Reviews />}
         {page === "blog" && <Blog openArticle={goArticle} />}
@@ -437,7 +372,7 @@ function Hero3D() {
 }
 
 /* ===================== HOME ===================== */
-function Home({ setPage, mounted }) {
+const Home = memo(function Home({ setPage }) {
   const PROFILE_PIC = "/rehan.jpg";
   const workRef = useMagnetic();
   const touchRef = useMagnetic();
@@ -475,7 +410,7 @@ function Home({ setPage, mounted }) {
         <Suspense fallback={<Hero3D />}><HeroWebGL fallback={<Hero3D />} /></Suspense>
         <div className="relative z-10 max-w-6xl mx-auto px-5 pt-20 pb-24 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className={mounted ? "fade-up" : ""}><div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs mono text-indigo-200"><span className="w-2 h-2 rounded-full" style={{ background: "#34d399", boxShadow: "0 0 10px #34d399" }} />Available · Open to projects worldwide</div></div>
+            <div className="fade-up"><div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs mono text-indigo-200"><span className="w-2 h-2 rounded-full" style={{ background: "#34d399", boxShadow: "0 0 10px #34d399" }} />Available · Open to projects worldwide</div></div>
             <h1 className="fade-up text-5xl md:text-6xl font-bold tracking-tight text-white mt-6" style={{ animationDelay: ".05s", lineHeight: 1.05 }}>I'm Rehan</h1>
             <h1 className="fade-up text-5xl md:text-6xl font-bold tracking-tight mt-1" style={{ animationDelay: ".12s", lineHeight: 1.05 }}><span className="grad-text">I build AI systems</span></h1>
             <p className="fade-up grad-text text-lg md:text-xl font-semibold mt-4 mono" style={{ animationDelay: ".18s" }}>AI Engineer &amp; Automation Specialist</p>
@@ -490,7 +425,7 @@ function Home({ setPage, mounted }) {
               <div className="absolute inset-0 opacity-50" style={{ background: "radial-gradient(400px 160px at 50% 0%, rgba(139,92,246,0.25), transparent 70%)" }} />
               <div className="relative text-center flex flex-col items-center">
                 <div className="block mx-auto w-36 h-36 rounded-full relative">
-                  <div className="absolute -inset-1 rounded-full" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", animation: "spinSlow 22s linear infinite", filter: "blur(2px)", opacity: 0.8 }} />
+                  <div className="absolute -inset-1 rounded-full" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", animation: "spinSlow 22s linear infinite", opacity: 0.8 }} />
                   <div className="absolute inset-0 rounded-full overflow-hidden border-2 border-white/10 flex items-center justify-center" style={{ background: "#0c0c16" }}>
                     {PROFILE_PIC ? <img src={PROFILE_PIC} alt="Rehan Nazir — AI Engineer and Automation Specialist, Lahore Pakistan" width="144" height="144" className="w-full h-full object-cover" fetchpriority="high" /> : <div className="flex flex-col items-center text-slate-500 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
                   </div>
@@ -535,7 +470,7 @@ function Home({ setPage, mounted }) {
         <Reveal><SectionLabel num="02">Tech stack</SectionLabel></Reveal>
         <Reveal variant="clip"><h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Tools I reach for to ship end-to-end.</h2></Reveal>
         <Reveal delay={0.08}><p className="text-slate-400 max-w-2xl mb-10">Not a pile of logos — a pipeline. This is how an idea actually flows from code to something running in production.</p></Reveal>
-        <AIArchitecture fallback={<TechEcosystem />} />
+        <Suspense fallback={<TechEcosystem />}><AIArchitecture fallback={<TechEcosystem />} /></Suspense>
         <Reveal delay={0.1}><div className="marquee py-2 mt-10"><div className="marquee-track">{[...stack, ...stack].map((s, i) => (<span key={i} className="px-5 py-2.5 rounded-full text-sm mono glass text-slate-200 whitespace-nowrap">{s}</span>))}</div></div></Reveal>
       </section>
 
@@ -551,7 +486,7 @@ function Home({ setPage, mounted }) {
       <ContactSection />
     </>
   );
-}
+});
 
 /* ===================== SERVICES ===================== */
 function Services({ setPage }) {
@@ -685,31 +620,31 @@ function BlogVisual({ cat }) {
 }
 
 /* ===================== WHOAMI CARD ===================== */
-function WhoamiCard() {
-  const [line, setLine] = useState(0);
-  const total = 8;
+const _HL_BASE = { display:"block", borderRadius:4, paddingLeft:6, marginLeft:-6, paddingRight:4, transition:"background 1s ease, box-shadow 1s ease" };
+const WhoamiCard = memo(function WhoamiCard() {
   const containerRef = useRef(null);
   useEffect(() => {
-    // Only cycle the highlight while the card is actually in the viewport.
-    // Prevents 1.6s React re-renders (and their style recalcs) when scrolled away.
+    const container = containerRef.current;
+    if (!container) return;
+    const spans = container.querySelectorAll("[data-hl]");
+    let current = 0;
+    const highlight = (idx) => {
+      spans.forEach((s, i) => {
+        s.style.background = i === idx ? "rgba(99,102,241,0.18)" : "transparent";
+        s.style.boxShadow = i === idx ? "inset 2px 0 0 #818cf8" : "inset 2px 0 0 transparent";
+      });
+    };
+    highlight(0);
     let timer = null;
-    const start = () => { if (!timer) timer = setInterval(() => setLine(l => (l + 1) % total), 1600); };
+    const start = () => { if (!timer) timer = setInterval(() => { current = (current + 1) % spans.length; highlight(current); }, 1600); };
     const stop  = () => { clearInterval(timer); timer = null; };
     const io = new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { rootMargin: "120px" });
-    if (containerRef.current) io.observe(containerRef.current);
+    io.observe(container);
+    const onVis = () => { if (document.hidden) stop(); else start(); };
+    document.addEventListener("visibilitychange", onVis);
     start();
-    return () => { stop(); io.disconnect(); };
+    return () => { stop(); io.disconnect(); document.removeEventListener("visibilitychange", onVis); };
   }, []);
-  const hl = (i) => ({
-    display: "block",
-    background: line === i ? "rgba(99,102,241,0.18)" : "transparent",
-    boxShadow: line === i ? "inset 2px 0 0 #818cf8" : "inset 2px 0 0 transparent",
-    transition: "background 1s ease, box-shadow 1s ease",
-    borderRadius: 4,
-    paddingLeft: 6,
-    marginLeft: -6,
-    paddingRight: 4,
-  });
   return (
     <div ref={containerRef} className="glass rounded-2xl overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
@@ -717,19 +652,19 @@ function WhoamiCard() {
         <span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span>
       </div>
       <div className="p-4 mono text-xs space-y-1.5">
-        <span style={hl(0)} className="text-slate-500">// whoami.ts</span>
-        <span style={hl(1)}><span className="text-indigo-400">const</span> <span className="text-sky-300">engineer</span> <span className="text-slate-400">=</span> {"{"}</span>
-        <span style={hl(2)} className="pl-4 text-slate-300">name: <span className="text-emerald-300">"Rehan Nazir"</span>,</span>
-        <span style={hl(3)} className="pl-4 text-slate-300">role: <span className="text-emerald-300">"AI &amp; Automation Eng"</span>,</span>
-        <span style={hl(4)} className="pl-4 text-slate-300">stack: [<span className="text-emerald-300">"FastAPI"</span>, <span className="text-emerald-300">"n8n"</span>, <span className="text-emerald-300">"LLMs"</span>],</span>
-        <span style={hl(5)} className="pl-4 text-slate-300">shipping: <span className="text-purple-300">true</span>,</span>
-        <span style={hl(6)}>{"}"};
+        <span data-hl style={_HL_BASE} className="text-slate-500">// whoami.ts</span>
+        <span data-hl style={_HL_BASE}><span className="text-indigo-400">const</span> <span className="text-sky-300">engineer</span> <span className="text-slate-400">=</span> {"{"}</span>
+        <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">name: <span className="text-emerald-300">"Rehan Nazir"</span>,</span>
+        <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">role: <span className="text-emerald-300">"AI &amp; Automation Eng"</span>,</span>
+        <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">stack: [<span className="text-emerald-300">"FastAPI"</span>, <span className="text-emerald-300">"n8n"</span>, <span className="text-emerald-300">"LLMs"</span>],</span>
+        <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">shipping: <span className="text-purple-300">true</span>,</span>
+        <span data-hl style={_HL_BASE}>{"}"};
         </span>
-        <span style={hl(7)} className="text-slate-500">{"// → ready to build "}<span className="inline-block w-2 h-3.5 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></span>
+        <span data-hl style={_HL_BASE} className="text-slate-500">{"// → ready to build "}<span className="inline-block w-2 h-3.5 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></span>
       </div>
     </div>
   );
-}
+});
 
 /* ===================== LIVE LOGS ===================== */
 // Defined outside the component so it's never recreated on re-render.
@@ -745,33 +680,52 @@ const _LIVE_LOGS = [
   { m: "GET",  p: "/health",          s: "200", ms: "2ms",   c: "#34d399" },
   { m: "POST", p: "/n8n/webhook",     s: "200", ms: "67ms",  c: "#34d399" },
 ];
-function LiveLogs() {
-  const [rows, setRows] = useState(_LIVE_LOGS.slice(0, 5));
+const LiveLogs = memo(function LiveLogs() {
   const containerRef = useRef(null);
   useEffect(() => {
-    // Pause updates when scrolled off-screen — avoids React re-renders and
-    // array allocations every 2.4 s while nothing is visible.
-    let i = 5, timer = null;
-    const start = () => { if (!timer) timer = setInterval(() => { setRows(r => [...r.slice(-4), _LIVE_LOGS[i % _LIVE_LOGS.length]]); i++; }, 2400); };
+    let idx = 5;
+    let activeLogs = _LIVE_LOGS.slice(0, 5);
+    const render = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rows = el.children;
+      for (let i = 0; i < activeLogs.length; i++) {
+        const log = activeLogs[i];
+        const row = rows[i];
+        if (!row) continue;
+        const cols = row.children;
+        if (cols[0]) { cols[0].textContent = log.m; cols[0].style.color = log.c; }
+        if (cols[1]) cols[1].textContent = log.p;
+        if (cols[2]) { cols[2].textContent = log.s; cols[2].style.color = log.c; }
+        if (cols[3]) cols[3].textContent = log.ms || "";
+        row.style.opacity = 0.28 + i * 0.15;
+      }
+    };
+    render();
+    let timer = null;
+    const tick = () => { activeLogs = [...activeLogs.slice(-4), _LIVE_LOGS[idx % _LIVE_LOGS.length]]; idx++; render(); };
+    const start = () => { if (!timer) timer = setInterval(tick, 2400); };
     const stop  = () => { clearInterval(timer); timer = null; };
     const io = new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { rootMargin: "120px" });
     if (containerRef.current) io.observe(containerRef.current);
+    const onVis = () => { if (document.hidden) stop(); else start(); };
+    document.addEventListener("visibilitychange", onVis);
     start();
-    return () => { stop(); io.disconnect(); };
+    return () => { stop(); io.disconnect(); document.removeEventListener("visibilitychange", onVis); };
   }, []);
   return (
     <div ref={containerRef} className="mono text-[11px] space-y-2">
-      {rows.map((l, i) => (
+      {_LIVE_LOGS.slice(0, 5).map((l, i) => (
         <div key={i} className="flex items-center gap-2 transition-all duration-700" style={{ opacity: 0.28 + i * 0.15 }}>
           <span style={{ color: l.c, minWidth: 40 }}>{l.m}</span>
           <span className="text-slate-400 flex-1 truncate">{l.p}</span>
           <span style={{ color: l.c }}>{l.s}</span>
-          {l.ms && <span className="text-slate-600 text-[9px]">{l.ms}</span>}
+          <span className="text-slate-600 text-[9px]">{l.ms || ""}</span>
         </div>
       ))}
     </div>
   );
-}
+});
 
 /* ===================== AI PIPELINE VIZ ===================== */
 function AIPipelineViz() {
@@ -1214,26 +1168,67 @@ function ShowreelSection() {
 }
 
 /* ===================== ABOUT SECTION ===================== */
-function AboutSection() {
-  const [phase, setPhase] = useState(0);
-  const [inView, setInView] = useState(false);
-  const panelRef = useParallax(0.08);
-  const sectionRef = useRef(null);
-  // Gate the phase-cycling setTimeout on viewport visibility so it doesn't
-  // keep firing (and diffing the terminal content) when the section is off-screen.
+/* Terminal body: DOM-mutation cycling (no React re-renders). The `phase` cycling
+   that previously called setPhase every 3.8s — triggering full re-render of the
+   large AboutSection tree — is now pure DOM style toggling isolated here. */
+const TerminalSequence = memo(function TerminalSequence() {
+  const rootRef = useRef(null);
+  const phase1Ref = useRef(null);
+  const phase2Ref = useRef(null);
   useEffect(() => {
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "150px" });
-    if (sectionRef.current) io.observe(sectionRef.current);
-    return () => io.disconnect();
+    const root = rootRef.current;
+    if (!root) return;
+    let phase = 0, timer = null, visible = true;
+    const show = (el) => { if (el) { el.style.display = "block"; } };
+    const hide = (el) => { if (el) el.style.display = "none"; };
+    const update = () => {
+      phase = (phase + 1) % 3;
+      if (phase === 0) { hide(phase1Ref.current); hide(phase2Ref.current); }
+      else if (phase === 1) { show(phase1Ref.current); hide(phase2Ref.current); }
+      else { show(phase2Ref.current); }
+    };
+    const tick = () => { if (visible) update(); timer = setTimeout(tick, 3800); };
+    timer = setTimeout(tick, 3800);
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { rootMargin: "150px" });
+    io.observe(root);
+    const onVis = () => { if (document.hidden) visible = false; };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { clearTimeout(timer); io.disconnect(); document.removeEventListener("visibilitychange", onVis); };
   }, []);
-  useEffect(() => {
-    if (!inView) return;
-    const t = setTimeout(() => setPhase(p => (p+1) % 3), 3800);
-    return () => clearTimeout(t);
-  }, [phase, inView]);
+  return (
+    <div ref={rootRef} className="p-4 mono text-xs leading-relaxed space-y-3 overflow-hidden">
+      <div>
+        <div><span className="text-emerald-400">$ </span><span className="text-slate-300">whoami</span></div>
+        <div className="mt-1 text-white font-bold ml-4">Rehan Nazir</div>
+      </div>
+      <div ref={phase1Ref} style={{display:"none",animation:"slideIn 0.5s ease both"}}>
+        <div><span className="text-emerald-400">$ </span><span className="text-slate-300">philosophy</span></div>
+        <div className="mt-1 ml-4 space-y-0.5 text-slate-400">
+          <div>Build fast. Ship clean.</div>
+          <div>Build with AI. Deliver value.</div>
+          <div>Own every layer.</div>
+        </div>
+      </div>
+      <div ref={phase2Ref} style={{display:"none",animation:"slideIn 0.5s ease both"}}>
+        <div><span className="text-emerald-400">$ </span><span className="text-slate-300">status</span></div>
+        <div className="flex items-center gap-2 mt-1 ml-4">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" style={{animation:"vpulse 1.5s ease-in-out infinite"}}/>
+          <span className="text-emerald-300">Available for select projects</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-1">
+        <span className="text-emerald-400">$ </span>
+        <span className="inline-block w-2 h-3.5 ml-1 align-middle" style={{background:"#a78bfa",animation:"blink 1s step-end infinite"}}/>
+      </div>
+    </div>
+  );
+});
+
+function AboutSection() {
+  const panelRef = useParallax(0.08);
   const barH = [3,5,8,12,7,14,10,6,11,9,13,7,5,9];
   return (
-    <section id="about" ref={sectionRef} className="max-w-6xl mx-auto px-5 py-20">
+    <section id="about" className="max-w-6xl mx-auto px-5 py-20">
       <div className="grid lg:grid-cols-2 gap-14 items-center">
         {/* Left: floating terminal panel — scroll parallax + idle float (separate nodes) */}
         <Reveal variant="left" duration={1.7}>
@@ -1268,35 +1263,7 @@ function AboutSection() {
                 <span className="w-2.5 h-2.5 rounded-full bg-red-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-green-400/70"/>
                 <span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span>
               </div>
-              <div className="p-4 mono text-xs leading-relaxed space-y-3 overflow-hidden">
-                <div>
-                  <div><span className="text-emerald-400">$ </span><span className="text-slate-300">whoami</span></div>
-                  <div className="mt-1 text-white font-bold ml-4">Rehan Nazir</div>
-                </div>
-                {phase >= 1 && (
-                  <div style={{animation:"slideIn 0.5s ease both"}}>
-                    <div><span className="text-emerald-400">$ </span><span className="text-slate-300">philosophy</span></div>
-                    <div className="mt-1 ml-4 space-y-0.5 text-slate-400">
-                      <div>Build fast. Ship clean.</div>
-                      <div>Build with AI. Deliver value.</div>
-                      <div>Own every layer.</div>
-                    </div>
-                  </div>
-                )}
-                {phase >= 2 && (
-                  <div style={{animation:"slideIn 0.5s ease both"}}>
-                    <div><span className="text-emerald-400">$ </span><span className="text-slate-300">status</span></div>
-                    <div className="flex items-center gap-2 mt-1 ml-4">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" style={{animation:"vpulse 1.5s ease-in-out infinite"}}/>
-                      <span className="text-emerald-300">Available for select projects</span>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-1">
-                  <span className="text-emerald-400">$ </span>
-                  <span className="inline-block w-2 h-3.5 ml-1 align-middle" style={{background:"#a78bfa",animation:"blink 1s step-end infinite"}}/>
-                </div>
-              </div>
+              <TerminalSequence />
             </div>
             {/* INFERENCE — bottom left */}
             <div className="absolute left-0 bottom-0 z-20 glass rounded-xl p-3" style={{width:156,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
@@ -1630,7 +1597,11 @@ function BlogPost({ slug, back, openArticle }) {
     );
   }
 
-  return <PythonAutomationPost back={back} openArticle={openArticle} />;
+  return (
+    <Suspense fallback={<div className="max-w-6xl mx-auto px-5 pt-12 pb-24 flex items-center justify-center" style={{ minHeight: "60vh" }}><div className="text-slate-400 mono text-sm animate-pulse">Loading article…</div></div>}>
+      <PythonAutomationPost back={back} openArticle={openArticle} />
+    </Suspense>
+  );
 
   /* dead code removed — isMain now delegates to PythonAutomationPost */
   if (false) return (
@@ -2024,7 +1995,7 @@ function ContactSection() {
 }
 
 /* ===================== FOOTER ===================== */
-function Footer({ setPage }) {
+const Footer = memo(function Footer({ setPage }) {
   const navLinks = [
     { id: "home", label: "Home", num: "01" },
     { id: "services", label: "Services", num: "02" },
@@ -2154,4 +2125,4 @@ function Footer({ setPage }) {
       </div>
     </footer>
   );
-}
+});
