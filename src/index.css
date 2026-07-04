@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Self-hosted JetBrains Mono — latin subset only, weights 400 and 500.
+   Eliminates the Google Fonts external dependency chain (2 DNS lookups + request chain). */
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
 :root {
   --text: #6b6375;
   --text-h: #08060d;

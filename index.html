@@ -43,14 +43,14 @@
     <meta name="geo.region" content="PK-PB" />
     <meta name="geo.placename" content="Lahore, Punjab, Pakistan" />
 
-    <!-- LCP image: preload so the browser fetches it before JS executes -->
-    <link rel="preload" as="image" href="/rehan.jpeg" fetchpriority="high" />
-
-    <!-- Fonts: preconnect + async load (non-render-blocking) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
+    <!-- LCP image: preload the AVIF; browsers that support AVIF get <2KB vs 62KB JPEG.
+         Non-AVIF browsers skip this preload and load via the <picture> element at runtime. -->
+    <link rel="preload" as="image" href="/rehan-144.avif"
+          imagesrcset="/rehan-144.avif 144w, /rehan-288.avif 288w, /rehan-432.avif 432w"
+          imagesizes="144px" type="image/avif" fetchpriority="high" />
+    <!-- Fonts: JetBrains Mono is self-hosted (see index.css @fontsource imports).
+         Inter is not loaded — the CSS uses system-ui which resolves before Inter on every OS,
+         making the Google Fonts Inter load unnecessary. -->
 
     <!-- JSON-LD: Person -->
     <script type="application/ld+json">
