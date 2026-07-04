@@ -106,7 +106,8 @@ function ReadingProgress() {
     const update = () => {
       const h = document.documentElement;
       const max = h.scrollHeight - h.clientHeight;
-      if (barRef.current) barRef.current.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + "%";
+      const pct = max > 0 ? h.scrollTop / max : 0;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${pct})`;
     };
     update();
     addEventListener("scroll", update, { passive: true });
@@ -115,7 +116,7 @@ function ReadingProgress() {
   }, []);
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-0.5">
-      <div ref={barRef} className="h-full" style={{ width: "0%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.8)" }} />
+      <div ref={barRef} className="h-full origin-left" style={{ transform: "scaleX(0)", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.8)" }} />
     </div>
   );
 }
@@ -181,10 +182,10 @@ export default function Portfolio() {
       {page === "article" && <ReadingProgress />}
       {page === "home" && <ChapterRail />}
 
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%)", animation: "floatA 38s ease-in-out infinite" }} />
-        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.1),transparent 70%)", animation: "floatB 46s ease-in-out infinite" }} />
-        <div className="bg-orb absolute rounded-full blur-3xl" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.06),transparent 70%)", animation: "drift 55s ease-in-out infinite" }} />
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0, contain: "paint" }}>
+        <div className="bg-orb absolute rounded-full" style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "radial-gradient(circle,rgba(59,130,246,0.14),transparent 70%)", filter: "blur(20px)", animation: "floatA 38s ease-in-out infinite" }} />
+        <div className="bg-orb absolute rounded-full" style={{ width: 600, height: 600, bottom: "-15%", right: "-10%", background: "radial-gradient(circle,rgba(139,92,246,0.12),transparent 70%)", filter: "blur(20px)", animation: "floatB 46s ease-in-out infinite" }} />
+        <div className="bg-orb absolute rounded-full" style={{ width: 300, height: 300, top: "40%", left: "60%", background: "radial-gradient(circle,rgba(192,132,252,0.07),transparent 70%)", filter: "blur(16px)", animation: "drift 55s ease-in-out infinite" }} />
         <div className="bg-orb absolute inset-0" style={{ background: "conic-gradient(from 200deg at 80% 12%, transparent 0deg, rgba(99,102,241,0.05) 60deg, transparent 130deg, rgba(139,92,246,0.04) 220deg, transparent 300deg)", animation: "aurora 60s ease-in-out infinite", opacity: 0.45 }} />
         <div className="absolute inset-x-0 bottom-0 h-[60vh]" style={{ background: "radial-gradient(60% 100% at 50% 120%, rgba(99,102,241,0.06), transparent 70%)", transform: "translateY(calc(var(--sy,0) * -0.05px))" }} />
         <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(165,180,252,0.10) 1px, transparent 1.4px)", backgroundSize: "46px 46px", opacity: 0.35, maskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(80% 60% at 50% 30%, #000, transparent 75%)", transform: "translateY(calc(var(--sy,0) * 0.04px))" }} />
@@ -1006,7 +1007,7 @@ function ProjectShowcase({ p, i }) {
     const copyKids = el.querySelectorAll("[data-copy] > *");
     // One timeline + one ScrollTrigger for the whole row (batched, not per-element).
     const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 82%", end: "top 40%", scrub: 0.6 } });
-    tl.from(viz, { autoAlpha: 0, y: 70, filter: "blur(12px)", ease: "none" }, 0)
+    tl.from(viz, { autoAlpha: 0, y: 70, ease: "none" }, 0)
       .from(copyKids, { autoAlpha: 0, y: 36, stagger: 0.08, ease: "none" }, 0.1);
   });
   return (
@@ -1067,10 +1068,10 @@ function EcoConnector({ animate, delay }) {
   return (
     <div className="flex md:flex-col items-center justify-center md:px-1" aria-hidden="true">
       <div className="hidden md:block relative w-full h-px" style={{ minWidth: 26, background: "linear-gradient(90deg, rgba(129,140,248,0.12), rgba(192,132,252,0.4), rgba(129,140,248,0.12))" }}>
-        {animate && <span className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ ...dot, animation: `flowX 2.6s linear ${delay}s infinite` }} />}
+        {animate && <span className="absolute w-1.5 h-1.5 rounded-full" style={{ ...dot, top: "50%", marginTop: -3, animation: `flowX 2.6s linear ${delay}s infinite` }} />}
       </div>
       <div className="md:hidden relative h-5 w-px" style={{ background: "linear-gradient(180deg, rgba(129,140,248,0.12), rgba(192,132,252,0.4))" }}>
-        {animate && <span className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full" style={{ ...dot, animation: `flowY 2.6s linear ${delay}s infinite` }} />}
+        {animate && <span className="absolute w-1.5 h-1.5 rounded-full" style={{ ...dot, left: "50%", marginLeft: -3, animation: `flowY 2.6s linear ${delay}s infinite` }} />}
       </div>
     </div>
   );
@@ -1143,9 +1144,9 @@ function ShowreelSection() {
             re-rasterization every frame, which is what made scrolling here stutter. The gentle
             "breathing" now lives on the blurred glow only (cheap), never on the iframe. */}
         <div className="relative" style={{ transformOrigin: "center" }}>
-          <div aria-hidden="true" className="absolute -inset-6 rounded-[2rem] blur-2xl breathe" style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(99,102,241,0.28), transparent 70%)", opacity: 0.7 }} />
+          <div aria-hidden="true" className="absolute -inset-6 rounded-[2rem] breathe" style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(99,102,241,0.28), transparent 70%)", filter: "blur(24px)", opacity: 0.7 }} />
           <div className="relative rounded-2xl p-px overflow-hidden" style={{ boxShadow: "0 40px 90px -30px rgba(0,0,0,0.8), 0 0 50px -16px rgba(99,102,241,0.45)" }}>
-            <div aria-hidden="true" className="ring-spin" style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.5) 60deg, rgba(139,92,246,0.5) 130deg, transparent 240deg)", animation: "spinSlow 18s linear infinite" }} />
+            <div aria-hidden="true" className="ring-spin" style={{ position: "absolute", top: "-15%", left: "-15%", width: "130%", height: "130%", background: "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.5) 60deg, rgba(139,92,246,0.5) 130deg, transparent 240deg)", animation: "spinSlow 18s linear infinite" }} />
             <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)", aspectRatio: "16/9", background: "#05050b" }}>
               <iframe
                 ref={iframeRef}
@@ -1961,7 +1962,7 @@ function ContactSection() {
         </Reveal>
         <Reveal delay={0.1}>
           <div className="relative rounded-2xl overflow-hidden" style={{ padding: "1.5px" }}>
-            <div style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%", background: "conic-gradient(from 0deg, transparent 0deg, #3b82f6 70deg, #8b5cf6 150deg, transparent 260deg)", animation: "spinSlow 14s linear infinite", opacity: anyFocus ? 0.95 : 0.35, transition: "opacity 1s" }} />
+            <div style={{ position: "absolute", top: "-15%", left: "-15%", width: "130%", height: "130%", background: "conic-gradient(from 0deg, transparent 0deg, #3b82f6 70deg, #8b5cf6 150deg, transparent 260deg)", animation: "spinSlow 14s linear infinite", opacity: anyFocus ? 0.95 : 0.35, transition: "opacity 1s" }} />
             <div className="relative rounded-2xl p-6" style={{ background: "rgba(9,9,17,0.94)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
               <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/5">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
@@ -2015,8 +2016,8 @@ const Footer = memo(function Footer({ setPage }) {
 
       {/* ambient glow blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute bottom-0 left-1/4 w-96 h-40 rounded-full blur-3xl opacity-20" style={{ background: "radial-gradient(circle,#3b82f6,transparent 70%)" }} />
-        <div className="absolute bottom-0 right-1/4 w-96 h-40 rounded-full blur-3xl opacity-20" style={{ background: "radial-gradient(circle,#8b5cf6,transparent 70%)" }} />
+        <div className="absolute bottom-0 left-1/4 w-96 h-40 rounded-full opacity-20" style={{ background: "radial-gradient(circle,#3b82f6,transparent 70%)", filter: "blur(20px)" }} />
+        <div className="absolute bottom-0 right-1/4 w-96 h-40 rounded-full opacity-20" style={{ background: "radial-gradient(circle,#8b5cf6,transparent 70%)", filter: "blur(20px)" }} />
       </div>
 
       <div className="relative max-w-6xl mx-auto px-6 pt-14 pb-8">

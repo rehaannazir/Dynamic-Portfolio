@@ -269,17 +269,17 @@ export function useSpotlight() {
 }
 
 /* ---------- Reveal presets — varied entrances so no two sections reveal alike ---------- */
+// filter: blur() removed from all variants — blur compositing forces a GPU paint pass per frame
+// for every animating element simultaneously. Pure transform+opacity is fully compositor-only.
 export const REVEAL_VARIANTS = {
-  up:    { hidden: { transform: "translateY(44px)",                                   filter: "blur(8px)"  } },
-  blur:  { hidden: { transform: "translateY(22px)",                                   filter: "blur(16px)" } },
-  scale: { hidden: { transform: "translateY(26px) scale(.93)",                        filter: "blur(7px)"  } },
-  left:  { hidden: { transform: "translateX(-52px)",                                  filter: "blur(6px)"  } },
-  right: { hidden: { transform: "translateX(52px)",                                   filter: "blur(6px)"  } },
-  rotate:{ hidden: { transform: "perspective(1200px) rotateX(12deg) translateY(34px)", filter: "blur(5px)" } },
-  depth: { hidden: { transform: "perspective(1200px) translateZ(-120px) translateY(30px)", filter: "blur(6px)" } },
-  clip:  { hidden: { transform: "translateY(20px)", filter: "blur(4px)", clipPath: "inset(0 0 100% 0)" }, shown: { clipPath: "inset(0 0 0% 0)" } },
-  // transform-light: opacity + translate only (no scale/blur) — safe for elements that wrap an
-  // <iframe>/<video>, where scale/filter would force an expensive per-frame re-rasterization.
+  up:    { hidden: { transform: "translateY(44px)"                                    } },
+  blur:  { hidden: { transform: "translateY(22px)"                                    } },
+  scale: { hidden: { transform: "translateY(26px) scale(.93)"                         } },
+  left:  { hidden: { transform: "translateX(-52px)"                                   } },
+  right: { hidden: { transform: "translateX(52px)"                                    } },
+  rotate:{ hidden: { transform: "perspective(1200px) rotateX(12deg) translateY(34px)" } },
+  depth: { hidden: { transform: "perspective(1200px) translateZ(-120px) translateY(30px)" } },
+  clip:  { hidden: { transform: "translateY(20px)", clipPath: "inset(0 0 100% 0)" }, shown: { clipPath: "inset(0 0 0% 0)" } },
   plain: { hidden: { transform: "translateY(30px)" } },
 };
 export function Reveal({ children, delay = 0, className = "", variant = "up", duration = 1.5, style = {} }) {
@@ -294,18 +294,15 @@ export function Reveal({ children, delay = 0, className = "", variant = "up", du
   if (reduced) return <div ref={ref} className={className} style={style}>{children}</div>;
   const v = REVEAL_VARIANTS[variant] || REVEAL_VARIANTS.up;
   const ease = "cubic-bezier(.16,1,.3,1)";
-  const props = ["opacity", "transform", "filter", "clip-path"].map((p) => `${p} ${duration}s ${ease} ${delay}s`).join(", ");
-  const hidden = { opacity: 0, transform: "translateY(0)", filter: "blur(0)", ...v.hidden };
-  const shown = { opacity: 1, transform: "translateY(0)", filter: "blur(0)", clipPath: "inset(0 0 0% 0)", ...(v.shown || {}) };
-  // willChange is set only while the reveal is pending/in-progress. Once the entrance transition
-  // fires (onTransitionEnd) we remove it so the browser can release those compositing layers.
-  // Keeping willChange permanently on every revealed element (dozens on the homepage) is the
-  // single largest driver of progressive performance degradation over a long session.
+  const props = ["opacity", "transform", "clip-path"].map((p) => `${p} ${duration}s ${ease} ${delay}s`).join(", ");
+  const hidden = { opacity: 0, transform: "translateY(0)", ...v.hidden };
+  const shown = { opacity: 1, transform: "translateY(0)", clipPath: "inset(0 0 0% 0)", ...(v.shown || {}) };
+  // willChange removed from filter — only compositor-safe properties remain.
   return (
     <div
       ref={ref}
       className={className}
-      style={{ ...(vis ? shown : hidden), transition: props, ...(done ? {} : { willChange: "transform, opacity, filter" }), ...style }}
+      style={{ ...(vis ? shown : hidden), transition: props, ...(done ? {} : { willChange: "transform, opacity" }), ...style }}
       onTransitionEnd={vis && !done ? () => setDone(true) : undefined}
     >
       {children}
