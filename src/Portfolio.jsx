@@ -103,16 +103,19 @@ const SectionLabel = memo(function SectionLabel({ num, children }) {
 function ReadingProgress() {
   const barRef = useRef(null);
   useEffect(() => {
+    const h = document.documentElement;
+    let max = 0;
+    // scrollHeight/clientHeight are layout reads — compute them only on resize,
+    // not on every scroll event (which would force layout recalculation per frame).
+    const updateMax = () => { max = h.scrollHeight - h.clientHeight; };
     const update = () => {
-      const h = document.documentElement;
-      const max = h.scrollHeight - h.clientHeight;
-      const pct = max > 0 ? h.scrollTop / max : 0;
-      if (barRef.current) barRef.current.style.transform = `scaleX(${pct})`;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${max > 0 ? h.scrollTop / max : 0})`;
     };
+    updateMax();
     update();
     addEventListener("scroll", update, { passive: true });
-    addEventListener("resize", update);
-    return () => { removeEventListener("scroll", update); removeEventListener("resize", update); };
+    addEventListener("resize", updateMax, { passive: true });
+    return () => { removeEventListener("scroll", update); removeEventListener("resize", updateMax); };
   }, []);
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-0.5">
@@ -196,7 +199,11 @@ export default function Portfolio() {
         <div className="glass border-b border-white/5">
           <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
             <button onClick={() => setPage("home")} className="flex items-center gap-2">
-              <img src="/logo.png" alt="Nexara" className="w-9 h-9 object-contain" style={{ filter: "drop-shadow(0 0 8px rgba(99,102,241,0.6))" }} />
+              <picture>
+                <source type="image/avif" srcSet="/logo-40.avif 40w, /logo-80.avif 80w, /logo-120.avif 120w" sizes="36px" />
+                <source type="image/webp" srcSet="/logo-40.webp 40w, /logo-80.webp 80w, /logo-120.webp 120w" sizes="36px" />
+                <img src="/logo-40.png" alt="Nexara" width="36" height="36" className="w-9 h-9 object-contain" style={{ filter: "drop-shadow(0 0 8px rgba(99,102,241,0.6))" }} />
+              </picture>
               <span className="mono text-sm text-white">rehan.nazir<span className="text-indigo-400">()</span></span>
             </button>
             <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
@@ -428,7 +435,13 @@ const Home = memo(function Home({ setPage }) {
                 <div className="block mx-auto w-36 h-36 rounded-full relative">
                   <div className="absolute -inset-1 rounded-full" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", animation: "spinSlow 22s linear infinite", opacity: 0.8 }} />
                   <div className="absolute inset-0 rounded-full overflow-hidden border-2 border-white/10 flex items-center justify-center" style={{ background: "#0c0c16" }}>
-                    {PROFILE_PIC ? <img src={PROFILE_PIC} alt="Rehan Nazir — AI Engineer and Automation Specialist, Lahore Pakistan" width="144" height="144" className="w-full h-full object-cover" fetchpriority="high" /> : <div className="flex flex-col items-center text-slate-500 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
+                    {PROFILE_PIC ? (
+                      <picture>
+                        <source type="image/avif" srcSet="/rehan-144.avif 144w, /rehan-288.avif 288w, /rehan-432.avif 432w" sizes="144px" />
+                        <source type="image/webp" srcSet="/rehan-144.webp 144w, /rehan-288.webp 288w, /rehan-432.webp 432w" sizes="144px" />
+                        <img src="/rehan-144.jpg" alt="Rehan Nazir — AI Engineer and Automation Specialist, Lahore Pakistan" width="144" height="144" className="w-full h-full object-cover" fetchPriority="high" />
+                      </picture>
+                    ) : <div className="flex flex-col items-center text-slate-500 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
                   </div>
                 </div>
                 <h3 className="text-white font-semibold text-lg mt-5">Rehan Nazir</h3>
@@ -1604,271 +1617,6 @@ function BlogPost({ slug, back, openArticle }) {
     </Suspense>
   );
 
-  /* dead code removed — isMain now delegates to PythonAutomationPost */
-  if (false) return (
-    <article className="max-w-6xl mx-auto px-5 pt-12 pb-24" itemScope itemType="https://schema.org/BlogPosting">
-      <Helmet>
-        <title>Why Python is Ideal for Automation | Nexara</title>
-        <meta name="description" content="Discover why Python's simplicity and vast libraries make it the top choice for automation. Learn with real code examples and interactive 3D visuals." />
-        <link rel="canonical" href={`${SITE_URL}/blog/${meta.slug}`} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${SITE_URL}/blog/${meta.slug}`} />
-        <meta property="og:title" content="Why Python is Ideal for Automation | Nexara" />
-        <meta property="og:description" content="Discover why Python's simplicity and vast libraries make it the top choice for automation. Learn with real code examples and interactive 3D visuals." />
-        <meta name="keywords" content="python automation, python scripting, workflow automation, selenium, pandas, pyautogui, task automation, process automation" />
-        <meta property="article:author" content="Rehan Nazir" />
-        <meta property="article:published_time" content="2026-06-27" />
-        <meta property="article:section" content="Automation" />
-        <meta property="article:tag" content="python automation" />
-        <meta property="article:tag" content="python" />
-        <meta property="article:tag" content="automation" />
-        <meta property="article:tag" content="selenium" />
-        <meta property="article:tag" content="pandas" />
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          "headline": "Why Python is Ideal for Automation",
-          "description": "Discover why Python's simplicity and vast libraries make it the top choice for automation. Learn with real code examples and interactive 3D visuals.",
-          "datePublished": "2026-06-27",
-          "dateModified": "2026-06-27",
-          "url": `${SITE_URL}/blog/${meta.slug}`,
-          "author": {
-            "@type": "Person",
-            "name": "Rehan Nazir",
-            "url": SITE_URL,
-            "sameAs": ["https://github.com/rehaannazir","https://www.linkedin.com/in/rehan-nazir-530597332"]
-          },
-          "publisher": {
-            "@type": "Organization",
-            "name": "Nexara",
-            "url": SITE_URL
-          },
-          "articleSection": "Automation",
-          "timeRequired": "PT8M",
-          "keywords": ["python automation","python","automation","selenium","pandas","pyautogui","requests","workflow automation"],
-          "articleBody": "Python has quietly become the backbone of modern automation. From small scripts that rename hundreds of files in seconds to sophisticated pipelines that scrape, process, and store data around the clock — if there is a repetitive task, Python can handle it. Python's combination of readable syntax, a vast library ecosystem, cross-platform compatibility, and an enormous community makes it the clearest choice for automation.",
-          "mainEntityOfPage": { "@type": "WebPage", "@id": `${SITE_URL}/blog/${meta.slug}` }
-        })}</script>
-      </Helmet>
-      <Back />
-      {/* header */}
-      <Reveal>
-        <span className="text-xs mono px-3 py-1 rounded-full glass text-indigo-200" itemProp="articleSection">{meta.cat}</span>
-        <h1 className="text-3xl md:text-5xl font-bold text-white mt-5 leading-tight max-w-3xl" itemProp="headline">{meta.title}</h1>
-        <p className="text-lg text-slate-400 mt-4 max-w-2xl leading-relaxed" itemProp="description">A practical deep-dive into why Python is the top choice for automation — from its clean syntax and cross-platform reach to the libraries and code patterns that power real-world pipelines.</p>
-        <div className="flex items-center gap-3 mt-6">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-xs" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>RN</div>
-          <span className="text-sm text-slate-300" itemProp="author" itemScope itemType="https://schema.org/Person"><span itemProp="name">Rehan Nazir</span></span><span className="text-slate-600">·</span>
-          <time className="text-sm mono text-slate-500" itemProp="datePublished" dateTime={meta.isoDate}>{meta.date}</time><span className="text-slate-600">·</span><span className="text-sm mono text-slate-500">{meta.read} read</span>
-        </div>
-      </Reveal>
-      {/* hero diagram */}
-      <Reveal delay={0.1}><div className="glass rounded-3xl mt-8 p-4 h-64 relative overflow-hidden"><div className="absolute inset-0 grid-bg opacity-40" /><ArtHeroLoop /><p className="text-xs text-center text-slate-500 mt-1 relative" aria-label="Python automation ecosystem diagram">Python at the center — key automation libraries orbiting, ready to deploy.</p></div></Reveal>
-
-      {/* body grid */}
-      <div className="grid lg:grid-cols-[240px_1fr] gap-10 mt-12">
-        {/* TOC sidebar */}
-        <aside className="hidden lg:block">
-          <div className="sticky top-24">
-            <div className="flex items-center gap-2 mono text-xs text-slate-500 uppercase tracking-wide mb-4"><List className="w-4 h-4" /> On this page</div>
-            <nav className="flex flex-col gap-1 border-l border-white/8">
-              {sections.map((s) => (
-                <button key={s.id} onClick={() => go(s.id)} className={"text-left text-sm pl-4 py-1.5 -ml-px border-l transition-all " + (active === s.id ? "text-white border-indigo-400" : "text-slate-500 border-transparent hover:text-slate-300")} style={active === s.id ? { borderColor: "#818cf8" } : {}}>{s.t}</button>
-              ))}
-            </nav>
-          </div>
-        </aside>
-
-        {/* article content */}
-        <div className="prose-blog max-w-2xl">
-          <p>Python has quietly become the backbone of modern automation. From small scripts that rename hundreds of files in seconds to sophisticated pipelines that scrape, process, and store data around the clock — if there is a repetitive task, Python can handle it. Your instinct to reach for Python automation is an excellent one, and this guide explains exactly why.</p>
-
-          <h2 id="introduction">Introduction</h2>
-          <p>Automation is about removing yourself from the equation for every task that doesn't require human judgement. Python is uniquely positioned for this role: readable enough for beginners to get a working script in an afternoon, yet powerful enough to underpin production systems at Google, NASA, and Netflix.</p>
-          <p>This article walks through Python's structural advantages, its most important libraries, real code examples you can run today, how 3D interactive visuals built with Three.js can make technical content compelling, and SEO techniques to make your automation content findable. By the end you'll have both the technical confidence and the communication toolkit to build automation that works — and explain why it works.</p>
-
-          <h2 id="why-python">Why Python is Ideal for Automation</h2>
-          <p>Several languages can automate tasks. Python does it better for four structural reasons that compound over time:</p>
-          <div className="grid sm:grid-cols-2 gap-3 my-6 not-prose">
-            {[["Simple syntax", "Python reads almost like English. You describe what you want, not how the machine should do it — which means less debugging, faster iteration, and scripts that junior team members can maintain."], ["Cross-platform", "The same Python script runs on Windows, macOS, and Linux with no changes. Write once, run anywhere your clients or servers operate."], ["Open-source ecosystem", "Over 430,000 packages on PyPI mean there's a tested, community-maintained library for nearly every automation task already waiting for you."], ["Massive community", "Stack Overflow, GitHub, Reddit, and thousands of tutorials exist for almost every Python question you can ask. You are never debugging alone."]].map(([t, d]) => (
-              <div key={t} className="glass rounded-xl p-4"><div className="flex items-center gap-2 text-white font-semibold text-sm"><CircleCheck className="w-4 h-4 text-indigo-400" />{t}</div><p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{d}</p></div>
-            ))}
-          </div>
-
-          <h2 id="key-libraries">Key Python Libraries for Automation</h2>
-          <p>The right library makes a hard problem trivial. These six cover the most common <strong>Python automation</strong> categories used in production today:</p>
-          <div className="not-prose space-y-3 my-6">
-            {[["Selenium", "Browser automation — logs in, clicks buttons, fills forms, and scrapes JavaScript-rendered pages that static scrapers miss."], ["Pandas", "Data automation — reads CSVs, Excel files, and SQL tables; transforms, cleans, filters, and exports data at scale."], ["PyAutoGUI", "GUI automation — controls the mouse and keyboard to automate any desktop application without needing an API."], ["Requests", "HTTP automation — fetches web pages, calls REST APIs, and downloads files with a single readable line of code."], ["BeautifulSoup", "HTML parsing — turns raw HTML into structured data you can query, filter, and extract in minutes."], ["Schedule", "Task scheduling — runs any Python function on a cron-like schedule without a dedicated task runner or server."]].map(([name, desc]) => (
-              <div key={name} className="glass rounded-xl p-4 flex items-start gap-3">
-                <div className="mono text-xs px-2 py-0.5 rounded-full shrink-0 mt-0.5" style={{ background: "rgba(99,102,241,0.2)", color: "#a5b4fc" }}>{name}</div>
-                <p className="text-sm text-slate-300 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <h2 id="code-examples">Code Examples</h2>
-          <h3>File handling — writing automation output to disk</h3>
-          <p>The simplest automation starts with files. This snippet opens a log file, writes structured output, and closes it cleanly — a pattern used in every reporting and audit pipeline.</p>
-          <div className="not-prose my-6 rounded-xl overflow-hidden glass">
-            <div className="px-4 py-2 border-b border-white/5 mono text-xs text-slate-500">// file_writer.py — save automation results to disk</div>
-            <pre className="p-4 mono text-xs leading-relaxed overflow-x-auto text-slate-300">{`results = [
-    "Invoice #1042 — processed",
-    "Invoice #1043 — processed",
-    "Invoice #1044 — skipped (duplicate)",
-]
-
-with open("automation_log.txt", "w") as f:
-    for line in results:
-        f.write(line + "\\n")
-
-print("Log written successfully.")
-# → automation_log.txt created with 3 entries`}</pre>
-          </div>
-
-          <h3>Web requests — fetching live data with requests</h3>
-          <p>Most real Python automation pipelines pull data from the internet. The <code>requests</code> library makes this a one-liner. The example below calls a public API, parses the JSON response, and prints a live summary — the foundation of any data-collection workflow.</p>
-          <div className="not-prose my-6 rounded-xl overflow-hidden glass">
-            <div className="px-4 py-2 border-b border-white/5 mono text-xs text-slate-500">// web_fetch.py — pull live data from a REST API</div>
-            <pre className="p-4 mono text-xs leading-relaxed overflow-x-auto text-slate-300">{`import requests
-
-url = "https://api.coindesk.com/v1/bpi/currentprice.json"
-response = requests.get(url, timeout=10)
-response.raise_for_status()   # raises HTTPError if status != 2xx
-
-data = response.json()
-price = data["bpi"]["USD"]["rate"]
-print(f"Bitcoin price: \${price} USD")
-# → Bitcoin price: $65,432.18 USD`}</pre>
-          </div>
-          <Reveal><div className="my-8"><ArtCompare /></div></Reveal>
-
-          <h3>Scheduled automation — run a task every hour automatically</h3>
-          <p>Scripts are triggered manually. Systems trigger themselves. The <code>schedule</code> library turns any Python function into a recurring task with almost no boilerplate — a key step from scripting to genuine <strong>workflow automation</strong>.</p>
-          <div className="not-prose my-6 rounded-xl overflow-hidden glass">
-            <div className="px-4 py-2 border-b border-white/5 mono text-xs text-slate-500">// scheduler.py — run a job on a recurring schedule</div>
-            <pre className="p-4 mono text-xs leading-relaxed overflow-x-auto text-slate-300">{`import schedule, time, requests
-
-def check_price():
-    r = requests.get("https://api.coindesk.com/v1/bpi/currentprice.json")
-    price = r.json()["bpi"]["USD"]["rate"]
-    print(f"[{time.strftime('%H:%M')}] BTC: \${price}")
-
-schedule.every(1).hours.do(check_price)  # set the cadence
-
-while True:        # keeps running until you stop it
-    schedule.run_pending()
-    time.sleep(60)`}</pre>
-          </div>
-          <div className="glass rounded-xl p-4 my-6 flex gap-3 not-prose">
-            <TriangleAlert className="w-5 h-5 text-rose-300 shrink-0 mt-0.5" />
-            <p className="text-sm text-slate-300">Add a <code>try/except</code> block around the API call and a logging statement inside it. That single change is the difference between a script and a production-ready Python automation.</p>
-          </div>
-
-          <h2 id="interactive-visuals">3D Interactive Visuals with Three.js</h2>
-          <p>Static code explanations teach the syntax. Dynamic 3D visuals teach the concept. <strong>Three.js</strong>, a WebGL-based JavaScript library, lets you embed interactive 3D graphics directly in the browser — no plugin required. For automation content, a perpetually rotating 3D object is a natural metaphor: the system never stops, just like the job it performs.</p>
-          <p>The snippet below creates a glowing rotating cube. When rendered, it symbolises a <strong>continuous Python automation loop</strong> — the geometry never pauses, the animation never idles, the system never rests.</p>
-          <div className="not-prose my-6 rounded-xl overflow-hidden glass">
-            <div className="px-4 py-2 border-b border-white/5 mono text-xs text-slate-500">// three_js_cube.js — 3D rotating cube (continuous automation metaphor)</div>
-            <pre className="p-4 mono text-xs leading-relaxed overflow-x-auto text-slate-300">{`import * as THREE from 'three';
-
-// Scene setup
-const scene    = new THREE.Scene();
-const camera   = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-// Glowing cube — represents a running automation system
-const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-const material = new THREE.MeshStandardMaterial({
-  color: 0x6366f1,        // indigo — the colour of automation
-  emissive: 0x3b82f6,
-  emissiveIntensity: 0.4,
-});
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
-// Lighting
-scene.add(new THREE.AmbientLight(0x404040, 2));
-const pointLight = new THREE.PointLight(0x8b5cf6, 3, 10);
-pointLight.position.set(3, 3, 3);
-scene.add(pointLight);
-
-camera.position.z = 4;
-
-// Animate — rotates forever, just like your automation pipeline
-function animate() {
-  requestAnimationFrame(animate);
-  cube.rotation.x += 0.008;
-  cube.rotation.y += 0.012;
-  renderer.render(scene, camera);
-}
-animate();`}</pre>
-          </div>
-          <blockquote className="border-l-2 pl-5 my-7 italic text-slate-300" style={{ borderColor: "#818cf8" }}><Quote className="w-5 h-5 text-indigo-400 mb-2" />When this code runs in a browser, you see a glowing indigo cube rotating endlessly — a direct visual metaphor for Python automation: continuous, self-sustaining, always in motion.</blockquote>
-          <Reveal><div className="glass rounded-2xl p-4 my-8 relative overflow-hidden"><div className="absolute inset-0 grid-bg opacity-30" /><ArtPipeline /><p className="text-xs text-center text-slate-500 mt-1 relative" aria-label="Python automation pipeline diagram">Python automation pipeline: fetch → process → validate → output, looping on every trigger.</p></div></Reveal>
-
-          <h2 id="seo-best-practices">SEO Best Practices for Python Automation Content</h2>
-          <p>Writing great technical content is necessary but not sufficient — search engines need clear signals too. These four practices make Python automation articles rank:</p>
-          <div className="not-prose my-6 rounded-xl overflow-hidden glass">
-            <div className="px-4 py-2 border-b border-white/5 mono text-xs text-slate-500">// recommended meta tags for a Python automation article</div>
-            <pre className="p-4 mono text-xs leading-relaxed overflow-x-auto text-slate-300">{`<!-- Meta title: 50–60 characters, keyword first -->
-<title>Why Python is Ideal for Automation | Nexara</title>
-
-<!-- Meta description: 150–160 characters, keyword + benefit -->
-<meta name="description" content="Discover why Python's simplicity
-  and vast libraries make it the top choice for automation.
-  Learn with real code examples and interactive 3D visuals." />
-
-<!-- Open Graph for social sharing signals -->
-<meta property="og:title" content="Why Python is Ideal for Automation" />
-
-<!-- Semantic keywords for topic depth -->
-<meta name="keywords" content="python automation, python scripting,
-  selenium, pandas, pyautogui, task automation, workflow automation" />`}</pre>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-3 my-6 not-prose">
-            {[["Keyword placement", "Put the primary keyword — Python Automation — in the H1 title, first H2, first paragraph, and meta description. Search engines weight proximity and placement, not just raw frequency."], ["Semantic keywords", "Use synonyms and related terms throughout: workflow automation, Python scripting, task automation, process automation. This satisfies topic-depth signals."], ["Alt text on visuals", "Every diagram needs descriptive alt text: 'Python automation pipeline diagram' not 'image1.png'. Alt text is indexed and improves accessibility simultaneously."], ["Internal links & sharing", "Link to related posts and project pages to distribute authority. Encourage social sharing — each share is a signal that the content is worth surfacing higher in rankings."]].map(([t, d]) => (
-              <div key={t} className="glass rounded-xl p-4"><div className="text-white font-semibold text-sm flex items-center gap-2"><CircleCheck className="w-4 h-4 text-indigo-400" />{t}</div><p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{d}</p></div>
-            ))}
-          </div>
-
-          <h2 id="conclusion">Conclusion</h2>
-          <p>Python's combination of readable syntax, a vast library ecosystem, cross-platform compatibility, and an enormous community makes it the clearest choice for automation in 2026 and beyond. Whether you're automating a single file-saving task or building a multi-stage data pipeline that runs around the clock, Python has a tested, well-documented tool for every step.</p>
-          <p>With this guide you have the conceptual foundation, the code patterns, the library knowledge, the Three.js visual strategy, and the SEO toolkit to build Python automation that works — and communicate why it works to the audiences who need to hear it. Share this post to help other builders find their way to the same clarity.</p>
-
-          <h2 id="faq">Frequently Asked Questions</h2>
-          <div className="space-y-5 not-prose">
-            {[["Is Python the only language suitable for automation?", "No — PowerShell, Bash, and JavaScript all handle automation tasks. But Python wins on three axes: readability (fastest to learn), library breadth (widest coverage for data, web, and GUI tasks), and community size (most answered questions on Stack Overflow). For most teams Python is the lowest-friction path."], ["Do I need to be an expert to start automating with Python?", "Not at all. The most common automation tasks — reading files, calling APIs, scheduling jobs — require around twenty lines of code and a basic grasp of variables and loops. The community's tutorials fill in every gap, and the error messages are among the most descriptive of any language."], ["How do I handle errors in Python automation scripts?", "Wrap risky calls (file reads, API requests, database writes) in try/except blocks. Log what happened, retry transient failures with exponential backoff using the tenacity library, and send yourself an alert via Slack or email if the failure is unrecoverable. Python's standard logging module handles most of this with minimal setup."]].map(([q, a]) => (
-              <div key={q}><div className="text-white font-semibold flex items-start gap-2"><ChevronRight className="w-4 h-4 text-indigo-400 mt-1 shrink-0" />{q}</div><p className="text-sm text-slate-400 mt-1.5 leading-relaxed pl-6">{a}</p></div>
-            ))}
-          </div>
-
-          <h2 id="where-next">Where to go next</h2>
-          <p>Start with a small, real problem you already face — a daily report, a file-cleanup task, an API you check manually. Build the simplest Python solution that works. Then layer in scheduling, error handling, and logging until it runs itself. That's the complete Python automation journey, and every step compounds.</p>
-          <div className="grid sm:grid-cols-2 gap-3 mt-6 not-prose">
-            {POSTS.slice(1, 3).map((p) => (
-              <button key={p.slug} onClick={() => openArticle(p.slug)} className="glass glass-hover rounded-xl p-4 text-left" data-cursor>
-                <div className="mono text-[11px] text-indigo-300/80">{p.cat}</div>
-                <div className="text-white font-medium text-sm mt-1">{p.title}</div>
-                <div className="text-indigo-300 text-xs mono mt-2">Read article →</div>
-              </button>
-            ))}
-          </div>
-
-          {/* author */}
-          <div className="glass rounded-2xl p-6 mt-12 flex items-start gap-4 not-prose">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold shrink-0" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>RN</div>
-            <div>
-              <div className="text-white font-semibold">Rehan Nazir</div>
-              <p className="text-sm text-slate-400 mt-1">AI Engineer &amp; Automation Specialist. I build intelligent systems end to end under the Nexara brand — Python automation is where it all starts.</p>
-              <div className="flex gap-3 mt-3">{[["https://www.linkedin.com/in/rehan-nazir-530597332", Link], ["https://github.com/rehaannazir", GitFork], ["mailto:rehaan689nazir@gmail.com", Mail]].map(([href, Icon], i) => (<a key={i} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="w-9 h-9 rounded-lg glass glass-hover flex items-center justify-center text-slate-300 hover:text-white" data-cursor><Icon className="w-4 h-4" /></a>))}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
 }
 
 /* ===================== CONTACT ===================== */
@@ -2046,7 +1794,11 @@ const Footer = memo(function Footer({ setPage }) {
           {/* brand col */}
           <Reveal className="space-y-5">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Nexara" className="w-10 h-10 object-contain shrink-0" style={{ filter: "drop-shadow(0 0 8px rgba(99,102,241,0.6))" }} />
+              <picture>
+                <source type="image/avif" srcSet="/logo-40.avif 40w, /logo-80.avif 80w, /logo-120.avif 120w" sizes="40px" />
+                <source type="image/webp" srcSet="/logo-40.webp 40w, /logo-80.webp 80w, /logo-120.webp 120w" sizes="40px" />
+                <img src="/logo-40.png" alt="Nexara" width="40" height="40" className="w-10 h-10 object-contain shrink-0" style={{ filter: "drop-shadow(0 0 8px rgba(99,102,241,0.6))" }} />
+              </picture>
               <div>
                 <span className="mono text-base text-white font-medium">rehan.nazir<span className="text-indigo-400">()</span></span>
                 <div className="flex items-center gap-1.5 mt-0.5">

@@ -3,19 +3,46 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 
+// Inject a <link rel="preload"> for the CSS bundle at the top of <head> so the
+// browser starts downloading the stylesheet before it encounters the render-blocking
+// <link rel="stylesheet"> that Vite appends at the end of <head>.
+function preloadCssPlugin() {
+  return {
+    name: "preload-css",
+    transformIndexHtml: {
+      order: "post",
+      handler(html, ctx) {
+        if (!ctx.bundle) return html;
+        const css = Object.values(ctx.bundle).find(
+          (c) => c.type === "asset" && c.fileName.endsWith(".css"),
+        );
+        if (!css) return html;
+        return {
+          html,
+          tags: [
+            {
+              tag: "link",
+              attrs: { rel: "preload", as: "style", href: `/${css.fileName}` },
+              injectTo: "head-prepend",
+            },
+          ],
+        };
+      },
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
     ViteImageOptimizer({
-      // PNG — the logo.png is 1.6 MB; aggressive compression still keeps it sharp at nav size
-      png: { quality: 75 },
-      // JPEG — profile photo and any other JPEGs
+      png:  { quality: 75 },
       jpg:  { quality: 82 },
       jpeg: { quality: 82 },
-      // WebP — if any WebP assets are added later
       webp: { quality: 80 },
     }),
+    preloadCssPlugin(),
   ],
   server: {
     proxy: {
