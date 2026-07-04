@@ -373,7 +373,7 @@ function Hero3D() {
 
 /* ===================== HOME ===================== */
 const Home = memo(function Home({ setPage }) {
-  const PROFILE_PIC = "/rehan.jpg";
+  const PROFILE_PIC = "/rehan.jpeg";
   const workRef = useMagnetic();
   const touchRef = useMagnetic();
   const projects = [
