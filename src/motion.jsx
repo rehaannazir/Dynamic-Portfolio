@@ -286,7 +286,7 @@ export function Reveal({ children, delay = 0, className = "", variant = "up", du
   const ref = useRef(null), [vis, setVis] = useState(false), [done, setDone] = useState(false);
   const reduced = typeof window !== "undefined" && prefersReduced();
   useEffect(() => {
-    if (reduced) { setVis(true); return; }
+    if (reduced) return; // reduced-motion render path below never reads `vis`
     const el = ref.current; if (!el) return;
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); io.disconnect(); } }, { threshold: 0.12 });
     io.observe(el); return () => io.disconnect();
