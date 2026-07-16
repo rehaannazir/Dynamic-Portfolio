@@ -403,5 +403,5 @@ export default function HeroWebGL({ fallback = null }) {
 
   // Show fallback (2D canvas) until idle callback fires — avoids blank flash
   if (!capable || !deferred) return fallback;
-  return <div ref={mountRef} aria-hidden="true" className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none", zIndex: 0 }} />;
+  return <div ref={mountRef} aria-hidden="true" className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none", zIndex: 0, contain: "layout style" }} />;
 }
