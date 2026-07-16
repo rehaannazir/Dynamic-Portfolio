@@ -271,7 +271,7 @@ export default function AIArchitecture({ fallback = null }) {
   return (
     <div>
       <div ref={stageRef} className="relative h-screen overflow-hidden flex items-center justify-center">
-        <div ref={mountRef} className="absolute inset-0" aria-hidden="true" />
+        <div ref={mountRef} className="absolute inset-0" aria-hidden="true" style={{ contain: "layout style" }} />
         <div className="absolute inset-0 pointer-events-none">
           {STAGES.map((s, i) => (
             <div key={s.label} ref={(el) => (labelRefs.current[i] = el)} className="absolute top-0 left-0 text-center select-none" style={{ opacity: 0, willChange: "transform, opacity" }}>
