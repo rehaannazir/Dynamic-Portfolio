@@ -16,10 +16,10 @@ import { useEffect, useRef, useState } from "react";
 const STAGES = [
   { label: "Python",     sub: "foundation",    c: 0x60a5fa },
   { label: "FastAPI",    sub: "backend",       c: 0x6366f1 },
-  { label: "AI Agent",   sub: "reasoning",     c: 0x818cf8 },
-  { label: "Automation", sub: "orchestration", c: 0x8b5cf6 },
-  { label: "Cloud",      sub: "scale",         c: 0xa855f7 },
-  { label: "Deploy",     sub: "shipped",       c: 0xc084fc },
+  { label: "Automation",   sub: "recursive tasks",     c: 0x818cf8 },
+  { label: "RAG", sub: "", c: 0x8b5cf6 },
+  { label: "LANGRAPH",      sub: "Multi Agents",         c: 0xa855f7 },
+  { label: "LLM Integration",     sub: "brain",       c: 0xc084fc },
 ];
 
 /* This is a SECOND WebGL context (the hero is the first), so it's gated to genuinely high-end
@@ -281,7 +281,7 @@ export default function AIArchitecture({ fallback = null }) {
           ))}
         </div>
         <div className="absolute left-0 right-0 bottom-10 flex flex-col items-center gap-3 pointer-events-none px-5">
-          <p className="mono text-[10px] uppercase tracking-[0.35em] text-slate-500">assembling the system</p>
+          <p className="mono text-[10px] uppercase tracking-[0.35em] text-slate-500">loading the weapons</p>
           <div className="w-40 h-px bg-white/10 overflow-hidden rounded-full">
             <div ref={hudRef} className="h-full" style={{ width: "0%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.7)" }} />
           </div>

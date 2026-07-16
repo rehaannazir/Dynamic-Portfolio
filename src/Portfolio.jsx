@@ -180,7 +180,7 @@ export default function Portfolio() {
 
   return (
     <div className="nocursor min-h-screen w-full text-slate-200 relative overflow-x-hidden"
-      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.035), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.04), transparent 60%), #000002", fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
+      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.035), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.04), transparent 60%), #000000", fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
       <CustomCursor />
       {page === "article" && <ReadingProgress />}
       {page === "home" && <ChapterRail />}
@@ -940,7 +940,7 @@ function AboutSection() {
                 </div>
                 <span className="mono text-[9.5px] text-white font-medium">Deployed to production</span>
               </div>
-              <span className="mono text-[7.5px] text-slate-500 ml-6">vercel · 1m 24s · @nexara</span>
+              <span className="mono text-[7.5px] text-slate-500 ml-6">vercel · 1m 24s · @nyvexa</span>
             </div>
             {/* Main terminal — center */}
             <div className="absolute z-10 glass rounded-2xl overflow-hidden" style={{left:24,right:24,top:36,bottom:36,boxShadow:"0 24px 64px rgba(0,0,0,0.65)"}}>
