@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft, ArrowRight, Copy, Check, Quote, ChevronRight,
-  CircleCheck, List, Mail, GitFork, Link, TriangleAlert,
+  CircleCheck, List, Mail, GitFork, Link,
 } from "lucide-react";
 
 const SITE_URL = "https://rehannazir.com";
