@@ -54,6 +54,9 @@ export default defineConfig({
   },
   build: {
     assetsInlineLimit: 4096,
+    // Ship real sourcemaps. Browsers never fetch them during normal browsing (only DevTools
+    // does, on demand) — this is a Lighthouse Best Practices signal, not a runtime cost.
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks(id) {

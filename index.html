@@ -4,19 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Primary SEO -->
+    <!-- Primary SEO
+         title / description / canonical / og:url / og:title / og:description are intentionally
+         NOT duplicated here — every route sets its own via <Helmet> in Portfolio.jsx /
+         PythonAutomationPost.jsx. react-helmet-async only ever removes tags it added itself
+         (tracked via a data-rh attribute); it never touches tags baked into the static HTML.
+         Keeping a second static copy here would leave two <link rel="canonical"> (and duplicate
+         description/og tags) on every route once Helmet mounts — which is an invalid, conflicting
+         canonical and exactly what trips Lighthouse/Search Console's canonical check. -->
     <title>Rehan Nazir — AI Engineer & Automation Specialist | Lahore, Pakistan</title>
-    <meta name="description" content="Rehan Nazir is an AI Engineer and Automation Specialist based in Lahore, Pakistan. I build intelligent AI agents, FastAPI backends, n8n workflows, RAG chatbots and end-to-end automation systems that run themselves. Founder of Nexara." />
     <meta name="keywords" content="AI engineer Pakistan, automation specialist Lahore, FastAPI developer, n8n automation, AI agents, RAG chatbot, LLM engineer, Nexara, Rehan Nazir, freelance AI developer, workflow automation, Python developer" />
     <meta name="author" content="Rehan Nazir" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-    <link rel="canonical" href="https://rehannazir.com/" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://rehannazir.com/" />
-    <meta property="og:title" content="Rehan Nazir — AI Engineer & Automation Specialist" />
-    <meta property="og:description" content="I design and ship intelligent automation end to end — AI agents, chatbots and workflows that quietly do the work, so businesses scale without the busywork. Founder of Nexara." />
     <meta property="og:image" content="https://rehannazir.com/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />

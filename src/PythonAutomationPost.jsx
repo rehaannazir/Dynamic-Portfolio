@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft, ArrowRight, Copy, Check, Quote, ChevronRight,
@@ -21,6 +21,27 @@ const TOC = [
   { id: "complete-pipeline", t: "Complete Pipeline" },
   { id: "faq",               t: "FAQ" },
 ];
+
+/* ─────────────────────────────────────────────────────────
+   LAZY MOUNT — defers creating an expensive child (a WebGL scene) until
+   it's actually near the viewport. The hero canvas is needed immediately,
+   but the workflow/neural diagrams sit deep in the article body; without
+   this they'd each spin up a full Three.js scene + WebGLRenderer the
+   instant the article mounts, well before the reader has scrolled that far.
+───────────────────────────────────────────────────────── */
+function LazyMount({ children, rootMargin = "500px 0px" }) {
+  const ref = useRef(null);
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (show) return;
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShow(true); io.disconnect(); } }, { rootMargin });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [show, rootMargin]);
+  return <div ref={ref} style={{ width: "100%", height: "100%" }}>{show ? children : null}</div>;
+}
 
 /* ─────────────────────────────────────────────────────────
    FADE-IN REVEAL
@@ -120,7 +141,7 @@ function HLLine({ line }) {
 /* ─────────────────────────────────────────────────────────
    VS CODE BLOCK
 ───────────────────────────────────────────────────────── */
-function CodeBlock({ code, filename, note, lang = "python" }) {
+const CodeBlock = memo(function CodeBlock({ code, filename, note, lang = "python" }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText(code).catch(() => {});
@@ -143,14 +164,14 @@ function CodeBlock({ code, filename, note, lang = "python" }) {
             <div className="w-3 h-3 rounded-full" style={{ background: "#febc2e" }} />
             <div className="w-3 h-3 rounded-full" style={{ background: "#28c840" }} />
           </div>
-          {filename && <span className="mono text-xs text-slate-500">{filename}</span>}
+          {filename && <span className="mono text-xs text-slate-400">{filename}</span>}
         </div>
         <div className="flex items-center gap-3">
           <span className="mono text-[10px] px-2 py-0.5 rounded" style={{
             background: "rgba(99,102,241,0.14)", color: "#818cf8",
             border: "1px solid rgba(99,102,241,0.2)",
           }}>{lang.toUpperCase()}</span>
-          <button onClick={copy} className="flex items-center gap-1.5 mono text-xs transition-colors" style={{ color: copied ? "#34d399" : "#475569" }}>
+          <button onClick={copy} className="flex items-center gap-1.5 mono text-xs transition-colors" style={{ color: copied ? "#34d399" : "#94a3b8" }}>
             {copied ? <><Check className="w-3.5 h-3.5" />Copied</> : <><Copy className="w-3.5 h-3.5" />Copy</>}
           </button>
         </div>
@@ -182,12 +203,12 @@ function CodeBlock({ code, filename, note, lang = "python" }) {
       </div>
     </div>
   );
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    THREE.JS – HERO PARTICLE CANVAS
 ───────────────────────────────────────────────────────── */
-function HeroCanvas() {
+const HeroCanvas = memo(function HeroCanvas() {
   const canvasRef = useRef(null);
   const cleanRef = useRef(null);
   useEffect(() => {
@@ -297,12 +318,12 @@ function HeroCanvas() {
     return () => { mounted = false; cleanRef.current?.(); };
   }, []);
   return <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />;
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    THREE.JS – WORKFLOW NETWORK
 ───────────────────────────────────────────────────────── */
-function WorkflowCanvas() {
+const WorkflowCanvas = memo(function WorkflowCanvas() {
   const canvasRef = useRef(null);
   const cleanRef = useRef(null);
   useEffect(() => {
@@ -417,12 +438,12 @@ function WorkflowCanvas() {
     return () => { mounted = false; cleanRef.current?.(); };
   }, []);
   return <canvas ref={canvasRef} style={{ width: "100%", display: "block" }} />;
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    THREE.JS – NEURAL BRAIN
 ───────────────────────────────────────────────────────── */
-function NeuralCanvas() {
+const NeuralCanvas = memo(function NeuralCanvas() {
   const canvasRef = useRef(null);
   const cleanRef = useRef(null);
   useEffect(() => {
@@ -541,7 +562,7 @@ function NeuralCanvas() {
     return () => { mounted = false; cleanRef.current?.(); };
   }, []);
   return <canvas ref={canvasRef} style={{ width: "100%", display: "block" }} />;
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    ANIMATED TITLE
@@ -648,7 +669,7 @@ function Counter({ end, prefix = "", suffix = "" }) {
 /* ─────────────────────────────────────────────────────────
    ARCHITECTURE FLOW DIAGRAM
 ───────────────────────────────────────────────────────── */
-function ArchDiagram() {
+const ArchDiagram = memo(function ArchDiagram() {
   const steps = [
     { label: "Trigger",       sub: "event · schedule · webhook",     col: "#6366f1" },
     { label: "Python Logic",  sub: "your script runs here",          col: "#3b82f6" },
@@ -691,12 +712,12 @@ function ArchDiagram() {
       </div>
     </div>
   );
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    BROWSER FLOW DIAGRAM
 ───────────────────────────────────────────────────────── */
-function BrowserDiagram() {
+const BrowserDiagram = memo(function BrowserDiagram() {
   const steps = [["Open URL", "#6366f1"], ["Wait for element", "#3b82f6"], ["Click / Type", "#8b5cf6"], ["Extract data", "#10b981"], ["Save result", "#34d399"]];
   return (
     <div className="glass rounded-2xl p-5 my-6 not-prose relative overflow-hidden">
@@ -714,19 +735,19 @@ function BrowserDiagram() {
           </div>
         ))}
       </div>
-      <p className="text-xs text-slate-500 mono mt-3 relative">Selenium/Playwright drives the browser step by step — exactly as a human would, but at machine speed.</p>
+      <p className="text-xs text-slate-400 mono mt-3 relative">Selenium/Playwright drives the browser step by step — exactly as a human would, but at machine speed.</p>
     </div>
   );
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    DATA PIPELINE DIAGRAM
 ───────────────────────────────────────────────────────── */
-function DataDiagram() {
+const DataDiagram = memo(function DataDiagram() {
   const stages = [["CSV / Excel", "#6366f1"], ["pandas DataFrame", "#3b82f6"], ["Clean & Transform", "#8b5cf6"], ["Aggregate", "#a855f7"], ["Export / Report", "#10b981"]];
   return (
     <div className="not-prose glass rounded-2xl overflow-hidden my-6">
-      <div className="px-4 py-2 mono text-xs text-slate-500" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="px-4 py-2 mono text-xs text-slate-400" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         // pandas data pipeline
       </div>
       <div className="flex items-stretch overflow-x-auto">
@@ -749,12 +770,12 @@ function DataDiagram() {
       </div>
     </div>
   );
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    CALLOUT BOX
 ───────────────────────────────────────────────────────── */
-function Callout({ icon: Icon = CircleCheck, color = "#6366f1", children }) {
+const Callout = memo(function Callout({ icon: Icon = CircleCheck, color = "#6366f1", children }) {
   return (
     <div className="not-prose flex gap-3 rounded-xl p-4 my-6" style={{
       background: `${color}10`, border: `1px solid ${color}28`,
@@ -763,12 +784,12 @@ function Callout({ icon: Icon = CircleCheck, color = "#6366f1", children }) {
       <p className="text-sm text-slate-300 leading-relaxed">{children}</p>
     </div>
   );
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    FAQ ITEM
 ───────────────────────────────────────────────────────── */
-function FaqItem({ q, a }) {
+const FaqItem = memo(function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="not-prose border rounded-xl overflow-hidden transition-all" style={{ borderColor: open ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.07)", background: open ? "rgba(99,102,241,0.06)" : "transparent" }}>
@@ -781,7 +802,7 @@ function FaqItem({ q, a }) {
       </div>
     </div>
   );
-}
+});
 
 /* ─────────────────────────────────────────────────────────
    MAIN COMPONENT
@@ -854,13 +875,13 @@ export default function PythonAutomationPost({ back, openArticle }) {
             <span className="text-sm text-slate-300" itemProp="author" itemScope itemType="https://schema.org/Person">
               <span itemProp="name">Rehan Nazir</span>
             </span>
-            <span className="text-slate-600">·</span>
-            <time className="text-sm mono text-slate-500" itemProp="datePublished" dateTime="2026-06-27">27 Jun 2026</time>
-            <span className="text-slate-600">·</span>
-            <span className="text-sm mono text-slate-500">8 min read</span>
+            <span className="text-slate-400">·</span>
+            <time className="text-sm mono text-slate-400" itemProp="datePublished" dateTime="2026-06-27">27 Jun 2026</time>
+            <span className="text-slate-400">·</span>
+            <span className="text-sm mono text-slate-400">8 min read</span>
           </div>
 
-          <button onClick={() => go("introduction")} className="mt-10 inline-flex flex-col items-center gap-1 text-slate-600 hover:text-indigo-400 transition-colors">
+          <button onClick={() => go("introduction")} className="mt-10 inline-flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-400 transition-colors">
             <span className="text-xs mono">scroll to read</span>
             <svg width="20" height="20" viewBox="0 0 20 20" style={{ animation: "cardFloat 2s ease-in-out infinite" }}>
               <path d="M4,6 L10,14 L16,6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -881,7 +902,7 @@ export default function PythonAutomationPost({ back, openArticle }) {
             ].map(({ end, suffix, label }) => (
               <div key={label} className="text-center py-7 px-4">
                 <Counter end={end} suffix={suffix} />
-                <div className="text-slate-500 text-xs mono mt-1.5">{label}</div>
+                <div className="text-slate-400 text-xs mono mt-1.5">{label}</div>
               </div>
             ))}
           </div>
@@ -895,7 +916,7 @@ export default function PythonAutomationPost({ back, openArticle }) {
           {/* TOC SIDEBAR */}
           <aside className="hidden lg:block">
             <div className="sticky top-24">
-              <div className="flex items-center gap-2 mono text-xs text-slate-500 uppercase tracking-wide mb-4">
+              <div className="flex items-center gap-2 mono text-xs text-slate-400 uppercase tracking-wide mb-4">
                 <List className="w-4 h-4" /> On this page
               </div>
               <nav className="flex flex-col gap-0.5 border-l border-white/[0.07]">
@@ -904,7 +925,7 @@ export default function PythonAutomationPost({ back, openArticle }) {
                     className="text-left text-xs pl-4 py-1.5 -ml-px border-l transition-all mono"
                     style={{
                       borderColor: active === s.id ? "#818cf8" : "transparent",
-                      color: active === s.id ? "#e2e8f0" : "#4b5563",
+                      color: active === s.id ? "#e2e8f0" : "#94a3b8",
                     }}>
                     {s.t}
                   </button>
@@ -993,11 +1014,11 @@ export default function PythonAutomationPost({ back, openArticle }) {
             <FadeIn>
               <div className="glass rounded-2xl p-5 my-8 not-prose relative overflow-hidden">
                 <div className="absolute inset-0 grid-bg opacity-10" />
-                <p className="text-xs mono text-slate-500 mb-3 relative">// Three.js workflow graph — nodes pulse, particles travel connections in real time</p>
+                <p className="text-xs mono text-slate-400 mb-3 relative">// Three.js workflow graph — nodes pulse, particles travel connections in real time</p>
                 <div className="relative rounded-xl overflow-hidden" style={{ height: 300 }}>
-                  <WorkflowCanvas />
+                  <LazyMount><WorkflowCanvas /></LazyMount>
                 </div>
-                <p className="text-xs text-center text-slate-500 mono mt-2 relative">Trigger → fetch → schedule → Python core → store → notify → done. Move your mouse to rotate the graph.</p>
+                <p className="text-xs text-center text-slate-400 mono mt-2 relative">Trigger → fetch → schedule → Python core → store → notify → done. Move your mouse to rotate the graph.</p>
               </div>
             </FadeIn>
 
@@ -1432,9 +1453,9 @@ for u in users[:3]:
               <div className="glass rounded-2xl relative overflow-hidden my-8 not-prose">
                 <div className="absolute inset-0 grid-bg opacity-10" />
                 <div className="relative" style={{ height: 280 }}>
-                  <NeuralCanvas />
+                  <LazyMount><NeuralCanvas /></LazyMount>
                 </div>
-                <p className="text-xs text-center text-slate-500 mono pb-4 px-4 relative">Neural network: pulses travel between nodes like prompts flowing through an LLM agent. Move mouse to rotate.</p>
+                <p className="text-xs text-center text-slate-400 mono pb-4 px-4 relative">Neural network: pulses travel between nodes like prompts flowing through an LLM agent. Move mouse to rotate.</p>
               </div>
             </FadeIn>
 
@@ -1674,12 +1695,12 @@ while True:
                 </p>
                 <div className="flex gap-2 mt-3">
                   {[
-                    ["https://www.linkedin.com/in/rehan-nazir-530597332", Link],
-                    ["https://github.com/rehaannazir", GitFork],
-                    ["mailto:rehaan689nazir@gmail.com", Mail],
-                  ].map(([href, Icon], i) => (
+                    ["https://www.linkedin.com/in/rehan-nazir-530597332", Link, "Rehan Nazir on LinkedIn"],
+                    ["https://github.com/rehaannazir", GitFork, "Rehan Nazir on GitHub"],
+                    ["mailto:rehaan689nazir@gmail.com", Mail, "Email Rehan Nazir"],
+                  ].map(([href, Icon, label], i) => (
                     <a key={i} href={href} target={href.startsWith("http") ? "_blank" : undefined}
-                      rel="noreferrer"
+                      rel="noreferrer" aria-label={label}
                       className="w-9 h-9 rounded-lg glass glass-hover flex items-center justify-center text-slate-300 hover:text-white"
                       data-cursor>
                       <Icon className="w-4 h-4" />

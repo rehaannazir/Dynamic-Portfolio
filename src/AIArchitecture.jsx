@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { detectCapable } from "./motion";
 
 /* ============================================================
    AIArchitecture — the signature moment.
@@ -23,24 +24,9 @@ const STAGES = [
 ];
 
 /* This is a SECOND WebGL context (the hero is the first), so it's gated to genuinely high-end
-   machines only. Mid-range / older devices, touch, and reduced-motion get the lightweight DOM
-   pipeline fallback instead — no extra GPU context, no jank. */
-function detectCapable() {
-  if (typeof window === "undefined") return false;
-  try {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-    if (window.matchMedia("(pointer: coarse)").matches) return false;
-    const cores = navigator.hardwareConcurrency || 0;
-    const mem = navigator.deviceMemory; // undefined on some browsers
-    if (cores < 8) return false;                 // need a high core count
-    if (mem !== undefined && mem < 8) return false; // and ≥8GB when the browser reports it
-    const c = document.createElement("canvas");
-    if (!(c.getContext("webgl2") || c.getContext("webgl"))) return false;
-  } catch {
-    return false;
-  }
-  return true;
-}
+   machines only (detectCapable, shared with Portfolio.jsx via motion.jsx). Mid-range / older
+   devices, touch, and reduced-motion get the lightweight DOM pipeline fallback instead — no
+   extra GPU context, no jank. */
 
 const smooth = (e) => { e = Math.max(0, Math.min(1, e)); return e * e * (3 - 2 * e); };
 
@@ -65,9 +51,40 @@ export default function AIArchitecture({ fallback = null }) {
   const mountRef = useRef(null);
   const labelRefs = useRef([]);
   const hudRef = useRef(null);
-
+  // Same interaction-gate HeroWebGL uses for its own "three" import: this component shares
+  // the exact same vendor-three chunk. Without this gate, mounting AIArchitecture immediately
+  // fires that 743KB import regardless of user interaction, silently defeating HeroWebGL's
+  // deferral for the same capable-desktop visitors and pulling the parse back into TBT.
+  const [deferred, setDeferred] = useState(false);
   useEffect(() => {
     if (!ok) return;
+    let cancelled = false, timerId = 0;
+    const trigger = () => {
+      if (cancelled) return;
+      window.removeEventListener("pointerdown", trigger);
+      window.removeEventListener("keydown", trigger);
+      window.removeEventListener("scroll", trigger);
+      window.removeEventListener("touchstart", trigger);
+      clearTimeout(timerId);
+      setDeferred(true);
+    };
+    window.addEventListener("pointerdown", trigger);
+    window.addEventListener("keydown", trigger);
+    window.addEventListener("scroll", trigger, { passive: true });
+    window.addEventListener("touchstart", trigger, { passive: true });
+    timerId = setTimeout(trigger, 8000);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("pointerdown", trigger);
+      window.removeEventListener("keydown", trigger);
+      window.removeEventListener("scroll", trigger);
+      window.removeEventListener("touchstart", trigger);
+      clearTimeout(timerId);
+    };
+  }, [ok]);
+
+  useEffect(() => {
+    if (!ok || !deferred) return;
     const stage = stageRef.current, mount = mountRef.current;
     if (!stage || !mount) return;
     let disposed = false, cleanup = () => {};
@@ -264,7 +281,7 @@ export default function AIArchitecture({ fallback = null }) {
     }
 
     return () => { disposed = true; cleanup(); };
-  }, [ok]);
+  }, [ok, deferred]);
 
   if (!ok) return <div>{fallback}</div>;
 
@@ -276,12 +293,12 @@ export default function AIArchitecture({ fallback = null }) {
           {STAGES.map((s, i) => (
             <div key={s.label} ref={(el) => (labelRefs.current[i] = el)} className="absolute top-0 left-0 text-center select-none" style={{ opacity: 0, willChange: "transform, opacity" }}>
               <div className="text-white text-sm font-semibold leading-none">{s.label}</div>
-              <div className="mono text-[9px] uppercase tracking-wider text-slate-500 mt-1">{s.sub}</div>
+              <div className="mono text-[9px] uppercase tracking-wider text-slate-400 mt-1">{s.sub}</div>
             </div>
           ))}
         </div>
         <div className="absolute left-0 right-0 bottom-10 flex flex-col items-center gap-3 pointer-events-none px-5">
-          <p className="mono text-[10px] uppercase tracking-[0.35em] text-slate-500">loading the weapons</p>
+          <p className="mono text-[10px] uppercase tracking-[0.35em] text-slate-400">loading the weapons</p>
           <div className="w-40 h-px bg-white/10 overflow-hidden rounded-full">
             <div ref={hudRef} className="h-full" style={{ width: "0%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.7)" }} />
           </div>
