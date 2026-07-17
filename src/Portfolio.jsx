@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense, Fragment, memo, useCallbac
 import { Helmet } from "react-helmet-async";
 import {
   Workflow, Cpu, MessageSquare, TrendingUp, Code, Zap, Star,
-  ArrowRight, ArrowUpRight, ArrowLeft, GitFork, Link, Mail, MessageCircle, Menu, X,
+  ArrowRight, ArrowUpRight, ArrowLeft, GitFork, Link, Mail, Menu, X,
   CircleCheck, Layers, Calendar, Clock, Camera, ExternalLink,
   GitBranch, Activity, ChevronRight, BookOpen, User, Send,
   Cloud, Rocket, Bot
@@ -10,6 +10,7 @@ import {
 import {
   prefersReduced, isCoarse, useMotionState, smoothTo, useSmoothScroll, useParallax, useScrollDepth,
   useMagnetic, useSpotlight, useScrub, onFrame, onScrollFrame, Reveal, FloatingCard, LightSweep, SectionTransition,
+  detectCapable,
 } from "./motion";
 
 const HeroWebGL = lazy(() => import("./HeroWebGL"));
@@ -63,7 +64,7 @@ function ChapterRail() {
         const on = active === id;
         return (
           <button key={id} onClick={() => smoothTo(document.getElementById(id), { offset: -60 })} className="group flex items-center gap-2.5" data-cursor aria-label={label} aria-current={on ? "true" : undefined}>
-            <span className="mono text-[10px] uppercase tracking-wider transition-all duration-300 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0" style={{ color: on ? "#c7d2fe" : "#64748b" }}>{label}</span>
+            <span className="mono text-[10px] uppercase tracking-wider transition-all duration-300 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0" style={{ color: on ? "#c7d2fe" : "#94a3b8" }}>{label}</span>
             <span className="rounded-full transition-all duration-500" style={{ width: on ? 22 : 8, height: 8, background: on ? "linear-gradient(90deg,#3b82f6,#8b5cf6)" : "rgba(255,255,255,0.22)", boxShadow: on ? "0 0 12px rgba(99,102,241,0.8)" : "none" }} />
           </button>
         );
@@ -94,7 +95,7 @@ const Counter = memo(function Counter({ to, suffix = "" }) {
 const SectionLabel = memo(function SectionLabel({ num, children }) {
   return (
     <div className="flex items-center gap-3 mb-8">
-      <span className="font-mono text-sm text-indigo-400">{num}</span><span className="font-mono text-sm text-slate-500">/</span>
+      <span className="font-mono text-sm text-indigo-400">{num}</span><span className="font-mono text-sm text-slate-400">/</span>
       <span className="font-mono text-sm tracking-wide text-slate-400 uppercase">{children}</span>
       <span className="flex-1 h-px ml-2" style={{ background: "linear-gradient(90deg,rgba(139,92,246,0.4),transparent)" }} />
     </div>
@@ -384,6 +385,7 @@ const Home = memo(function Home({ setPage }) {
   const PROFILE_PIC = "/rehan.jpeg";
   const workRef = useMagnetic();
   const touchRef = useMagnetic();
+  const [aiCapable] = useState(detectCapable);
   const projects = [
     { n: "01", cat: "FastAPI · Gemini", title: "AI Content Automation API", desc: "Production backend that generates, categorizes and schedules content via LLMs behind a clean REST interface.", role: "Full Stack · AI · 2026", stack: ["FastAPI", "Gemini", "SQLAlchemy"], accent: "#60a5fa", viz: "Engineering", metrics: [["p95", "120ms"], ["uptime", "99.9%"], ["routes", "12"]] },
     { n: "02", cat: "n8n · LLMs", title: "B2B Sales Automation Flow", desc: "End-to-end lead enrichment and outreach pipeline that runs hands-free and hands off cleanly to the client.", role: "Automation · 2026", stack: ["n8n", "LLMs", "APIs"], link: "https://www.loom.com/share/68bfcd80b9de459e975966cc671d11cb", accent: "#8b5cf6", viz: "Workflow", metrics: [["leads/wk", "480"], ["manual steps", "0"], ["integrations", "6"]] },
@@ -441,7 +443,7 @@ const Home = memo(function Home({ setPage }) {
                         <source type="image/webp" srcSet="/rehan-144.webp 144w, /rehan-288.webp 288w, /rehan-432.webp 432w" sizes="144px" />
                         <img src="/rehan-144.jpg" alt="Rehan Nazir — AI Engineer and Automation Specialist, Lahore Pakistan" width="144" height="144" className="w-full h-full object-cover" fetchPriority="high" />
                       </picture>
-                    ) : <div className="flex flex-col items-center text-slate-500 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
+                    ) : <div className="flex flex-col items-center text-slate-400 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
                   </div>
                 </div>
                 <h3 className="text-white font-semibold text-lg mt-5">Rehan Nazir</h3>
@@ -457,16 +459,16 @@ const Home = memo(function Home({ setPage }) {
       <section className="max-w-6xl mx-auto px-5 pb-8">
         <div className="grid sm:grid-cols-3 gap-4">
           <Reveal variant="blur"><div className="float-soft h-full"><div className="glass glass-hover rounded-2xl p-5 h-full">
-            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">automation activity · 7d</span><GitBranch className="w-4 h-4 text-indigo-400" /></div>
-            <div className="text-2xl font-bold text-white mt-3">128 <span className="text-sm font-normal text-slate-500">flows run</span></div>
+            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-400">automation activity · 7d</span><GitBranch className="w-4 h-4 text-indigo-400" /></div>
+            <div className="text-2xl font-bold text-white mt-3">128 <span className="text-sm font-normal text-slate-400">flows run</span></div>
             <div className="flex gap-1 mt-3">{Array.from({ length: 14 }).map((_, i) => (<span key={i} className="flex-1 rounded" style={{ height: 4+Math.round((i % 5)*8)+"px", marginTop:"auto", background: `rgba(139,92,246,${0.18 + (i % 5) * 0.18})`, transition:"height 1s ease" }} />))}</div>
           </div></div></Reveal>
           <Reveal variant="blur" delay={0.1}><div className="float-soft-2 h-full" style={{ animationDelay: "1.2s" }}><div className="glass glass-hover rounded-2xl p-5 h-full">
-            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">inference · live</span><Activity className="w-4 h-4 text-indigo-400" /></div>
+            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-400">inference · live</span><Activity className="w-4 h-4 text-indigo-400" /></div>
             <div className="mt-3 space-y-1.5 mono text-xs">{[["POST","/api/generate","200"],["GET","/api/agents","200"],["POST","/api/embed","200"]].map(([m,p,s])=>(<div key={p} className="flex items-center gap-2"><span className="text-purple-300 w-9">{m}</span><span className="text-slate-400 flex-1 truncate">{p}</span><span className="text-emerald-400">{s}</span></div>))}</div>
           </div></div></Reveal>
           <Reveal variant="blur" delay={0.2}><div className="float-soft h-full" style={{ animationDelay: "2.4s" }}><div className="glass glass-hover rounded-2xl p-5 h-full">
-            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-500">nexara roadmap</span><span className="mono text-xs text-indigo-300">71%</span></div>
+            <div className="flex items-center justify-between"><span className="mono text-xs text-slate-400">nexara roadmap</span><span className="mono text-xs text-indigo-300">71%</span></div>
             <div className="mt-3 text-sm text-slate-400">10 / 14 milestones shipped</div>
             <div className="h-1.5 rounded-full bg-white/5 mt-3 overflow-hidden"><div className="h-full rounded-full" style={{ width:"71%", background:"linear-gradient(90deg,#3b82f6,#8b5cf6)", transition:"width 2s cubic-bezier(.16,1,.3,1)" }} /></div>
             <div className="mt-3 flex gap-1.5 flex-wrap">{["AI Agents","RAG","n8n","Vapi","SaaS"].map(t=>(<span key={t} className="px-2 py-0.5 rounded text-[10px] mono" style={{background:"rgba(99,102,241,0.1)",color:"#a5b4fc"}}>{t}</span>))}</div>
@@ -484,7 +486,13 @@ const Home = memo(function Home({ setPage }) {
         <Reveal><SectionLabel num="02">Tech stack</SectionLabel></Reveal>
         <Reveal variant="clip"><h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Tools I reach for to ship end-to-end.</h2></Reveal>
         <Reveal delay={0.08}><p className="text-slate-400 max-w-2xl mb-10">Not a pile of logos — a pipeline. This is how an idea actually flows from code to something running in production.</p></Reveal>
-        <Suspense fallback={<TechEcosystem />}><AIArchitecture fallback={<TechEcosystem />} /></Suspense>
+        {/* aiCapable is known synchronously (no async work) — reserving 100vh up front for the
+            small slice of visitors who'll get the WebGL scene means the page never jumps by a
+            full viewport height once the lazy AIArchitecture chunk resolves and replaces the
+            short TechEcosystem fallback. This was the single largest CLS contributor on the page. */}
+        <div style={aiCapable ? { minHeight: "100vh" } : undefined}>
+          <Suspense fallback={<TechEcosystem />}><AIArchitecture fallback={<TechEcosystem />} /></Suspense>
+        </div>
         <Reveal delay={0.1}><div className="marquee py-2 mt-10"><div className="marquee-track">{[...stack, ...stack].map((s, i) => (<span key={i} className="px-5 py-2.5 rounded-full text-sm mono glass text-slate-200 whitespace-nowrap">{s}</span>))}</div></div></Reveal>
       </section>
 
@@ -583,9 +591,9 @@ function BlogVisual({ cat }) {
   );
   if (cat === "Engineering") return wrap(
     <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 mono text-[10px]">
-      <div className="text-slate-500">// content-api · live</div>
+      <div className="text-slate-400">// content-api · live</div>
       {[["POST", "/v1/generate"], ["GET", "/v1/content"], ["POST", "/v1/schedule"]].map((r, i) => (<div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-md border" style={{ animation: `vrow 6s ease-in-out ${i * 1.2}s infinite`, borderColor: "rgba(255,255,255,0.08)" }}><span className="text-purple-300 w-9">{r[0]}</span><span className="text-slate-300 flex-1 truncate">{r[1]}</span><span className="text-emerald-400">200</span></div>))}
-      <div className="text-slate-600">{"{ engine: gemini }"}<span className="inline-block w-1.5 h-3 ml-1 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></div>
+      <div className="text-slate-400">{"{ engine: gemini }"}<span className="inline-block w-1.5 h-3 ml-1 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></div>
     </div>
   );
   if (cat === "AI Agents") return wrap(
@@ -663,10 +671,10 @@ const WhoamiCard = memo(function WhoamiCard() {
     <div ref={containerRef} className="glass rounded-2xl overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
         <span className="w-3 h-3 rounded-full bg-red-400/70"/><span className="w-3 h-3 rounded-full bg-yellow-400/70"/><span className="w-3 h-3 rounded-full bg-green-400/70"/>
-        <span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span>
+        <span className="mono text-xs text-slate-400 ml-2">~/rehan — zsh</span>
       </div>
       <div className="p-4 mono text-xs space-y-1.5">
-        <span data-hl style={_HL_BASE} className="text-slate-500">// whoami.ts</span>
+        <span data-hl style={_HL_BASE} className="text-slate-400">// whoami.ts</span>
         <span data-hl style={_HL_BASE}><span className="text-indigo-400">const</span> <span className="text-sky-300">engineer</span> <span className="text-slate-400">=</span> {"{"}</span>
         <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">name: <span className="text-emerald-300">"Rehan Nazir"</span>,</span>
         <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">role: <span className="text-emerald-300">"AI &amp; Automation Eng"</span>,</span>
@@ -674,7 +682,7 @@ const WhoamiCard = memo(function WhoamiCard() {
         <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">shipping: <span className="text-purple-300">true</span>,</span>
         <span data-hl style={_HL_BASE}>{"}"};
         </span>
-        <span data-hl style={_HL_BASE} className="text-slate-500">{"// → ready to build "}<span className="inline-block w-2 h-3.5 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></span>
+        <span data-hl style={_HL_BASE} className="text-slate-400">{"// → ready to build "}<span className="inline-block w-2 h-3.5 align-middle" style={{ background: "#a78bfa", animation: "blink 1s step-end infinite" }} /></span>
       </div>
     </div>
   );
@@ -715,12 +723,12 @@ function ProjectShowcase({ p, i }) {
           {p.metrics.map(([label, val]) => (
             <div key={label} className="glass glass-hover rounded-xl px-3.5 py-2 min-w-[86px]" style={{ "--accent": p.accent }}>
               <div className="text-white font-semibold text-sm tabular-nums">{val}</div>
-              <div className="mono text-[9px] text-slate-500 uppercase tracking-wide mt-0.5">{label}</div>
+              <div className="mono text-[9px] text-slate-400 uppercase tracking-wide mt-0.5">{label}</div>
             </div>
           ))}
         </div>
         <div className="flex flex-wrap gap-1.5 mt-5">{p.stack.map((s) => (<span key={s} className="px-2.5 py-1 rounded-md text-[11px] mono" style={{ background: `${p.accent}1f`, color: "#dbe3ff", border: `1px solid ${p.accent}33` }}>{s}</span>))}</div>
-        <div className="mono text-xs text-slate-500 mt-5">{p.role}</div>
+        <div className="mono text-xs text-slate-400 mt-5">{p.role}</div>
       </div>
     </article>
   );
@@ -742,7 +750,7 @@ function EcoNode({ label, sub, Icon, c, index }) {
       </span>
       <div className="min-w-0">
         <div className="text-white text-sm font-semibold leading-tight">{label}</div>
-        <div className="mono text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">{sub}</div>
+        <div className="mono text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">{sub}</div>
       </div>
     </FloatingCard>
   );
@@ -819,7 +827,7 @@ function ShowreelSection() {
   return (
     <section className="max-w-6xl mx-auto px-5 py-16">
       <Reveal variant="clip">
-        <p className="mono text-[10px] text-slate-600 tracking-widest mb-4 uppercase">Agent loop · tool calling · automation &amp; more — in one breath.</p>
+        <p className="mono text-[10px] text-slate-400 tracking-widest mb-4 uppercase">Agent loop · tool calling · automation &amp; more — in one breath.</p>
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-10">Thirty seconds of <span className="grad-text">what I do</span>.</h2>
       </Reveal>
       <Reveal delay={0.15} variant="plain">
@@ -922,7 +930,7 @@ function AboutSection() {
             {/* GIT ACTIVITY — top left */}
             <div className="absolute left-0 top-0 z-20 glass rounded-xl p-3" style={{width:162,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
               <div className="flex items-center justify-between mb-2">
-                <span className="mono text-[8.5px] text-slate-500 uppercase tracking-wider">Git Activity</span>
+                <span className="mono text-[8.5px] text-slate-400 uppercase tracking-wider">Git Activity</span>
                 <span className="mono text-[8.5px] text-indigo-400">7D</span>
               </div>
               <div className="flex gap-px items-end" style={{height:34}}>
@@ -930,7 +938,7 @@ function AboutSection() {
                   <div key={i} style={{flex:1,height:h*2.4+"px",borderRadius:2,background:`rgba(139,92,246,${0.18+h/18})`,animation:`vpulse ${2+i*0.12}s ease-in-out ${i*0.08}s infinite`}}/>
                 ))}
               </div>
-              <div className="mono text-[10px] text-white font-bold mt-2">142 <span className="text-slate-500 font-normal">commits</span></div>
+              <div className="mono text-[10px] text-white font-bold mt-2">142 <span className="text-slate-400 font-normal">commits</span></div>
             </div>
             {/* DEPLOYED — top right */}
             <div className="absolute right-0 top-5 z-20 rounded-xl px-3 py-2.5" style={{width:192,background:"rgba(14,14,26,0.94)",border:"1px solid rgba(52,211,153,0.22)",boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
@@ -940,20 +948,20 @@ function AboutSection() {
                 </div>
                 <span className="mono text-[9.5px] text-white font-medium">Deployed to production</span>
               </div>
-              <span className="mono text-[7.5px] text-slate-500 ml-6">vercel · 1m 24s · @nyvexa</span>
+              <span className="mono text-[7.5px] text-slate-400 ml-6">vercel · 1m 24s · @nyvexa</span>
             </div>
             {/* Main terminal — center */}
             <div className="absolute z-10 glass rounded-2xl overflow-hidden" style={{left:24,right:24,top:36,bottom:36,boxShadow:"0 24px 64px rgba(0,0,0,0.65)"}}>
               <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/5">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-green-400/70"/>
-                <span className="mono text-xs text-slate-500 ml-2">~/rehan — zsh</span>
+                <span className="mono text-xs text-slate-400 ml-2">~/rehan — zsh</span>
               </div>
               <TerminalSequence />
             </div>
             {/* INFERENCE — bottom left */}
             <div className="absolute left-0 bottom-0 z-20 glass rounded-xl p-3" style={{width:156,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
               <div className="flex items-center justify-between mb-2">
-                <span className="mono text-[8.5px] text-slate-500 uppercase tracking-wider">Inference</span>
+                <span className="mono text-[8.5px] text-slate-400 uppercase tracking-wider">Inference</span>
                 <span className="mono text-[8.5px] text-purple-400">Claude</span>
               </div>
               <svg viewBox="0 0 120 44" className="w-full">
@@ -994,7 +1002,7 @@ function AboutSection() {
               <Reveal key={label} variant="up" delay={0.4 + i * 0.1}>
               <div className="glass-hover flex items-start gap-4 px-5 py-4 rounded-xl transition-all duration-700" style={{border:"1px solid rgba(255,255,255,0.055)"}}>
                 <span className="text-indigo-400 text-lg mt-0.5 shrink-0">{icon}</span>
-                <div><div className="text-white text-sm font-medium">{label}</div><div className="text-slate-500 text-xs mt-0.5">{desc}</div></div>
+                <div><div className="text-white text-sm font-medium">{label}</div><div className="text-slate-400 text-xs mt-0.5">{desc}</div></div>
               </div>
               </Reveal>
             ))}
@@ -1023,21 +1031,21 @@ function ShippedSection() {
         <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)",background:"rgba(255,255,255,0.022)"}}>
           <div className="hidden md:grid grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-3 border-b border-white/5">
             {["#","Project","Role","Stack","Year"].map(h=>(
-              <span key={h} className="mono text-[10px] text-slate-600 uppercase tracking-wider last:text-right">{h}</span>
+              <span key={h} className="mono text-[10px] text-slate-400 uppercase tracking-wider last:text-right">{h}</span>
             ))}
           </div>
           {shipped.map((p)=>(
             <div key={p.n} className="group grid grid-cols-[44px_1fr] md:grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-4 items-center border-b border-white/5 last:border-b-0 transition-all duration-700 hover:bg-white/[0.03]" data-cursor onClick={() => p.link && window.open(p.link, '_blank')} style={p.link ? {cursor:'pointer'} : {}}>
-              <span className="mono text-xs text-slate-600">{p.n}</span>
+              <span className="mono text-xs text-slate-400">{p.n}</span>
               <div className="min-w-0">
                 <div className="text-white font-medium text-sm group-hover:text-indigo-200 transition-colors duration-500">{p.title}</div>
-                <div className="mono text-[10px] text-slate-500 mt-0.5">{p.client}</div>
+                <div className="mono text-[10px] text-slate-400 mt-0.5">{p.client}</div>
               </div>
               <span className="hidden md:block mono text-xs text-slate-400">{p.role}</span>
               <div className="hidden md:flex flex-wrap gap-1.5">
                 {p.stack.map(s=>(<span key={s} className="px-2 py-0.5 rounded text-[10px] mono" style={{background:"rgba(99,102,241,0.1)",color:"#a5b4fc"}}>{s}</span>))}
               </div>
-              <span className="hidden md:block mono text-[11px] text-slate-500 text-right">{p.year}</span>
+              <span className="hidden md:block mono text-[11px] text-slate-400 text-right">{p.year}</span>
             </div>
           ))}
         </div>
@@ -1135,7 +1143,7 @@ function Blog({ openArticle }) {
             <span className="text-xs mono px-3 py-1 rounded-full glass w-fit text-indigo-200 mb-4">featured</span>
             <h2 className="text-2xl font-bold text-white">{feat.title}</h2>
             <p className="text-slate-400 mt-3 text-sm leading-relaxed">{feat.excerpt}</p>
-            <div className="flex items-center gap-4 mt-5 text-xs mono text-slate-500"><span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{feat.date}</span><span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{feat.read}</span></div>
+            <div className="flex items-center gap-4 mt-5 text-xs mono text-slate-400"><span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{feat.date}</span><span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{feat.read}</span></div>
             <button onClick={() => openArticle(feat.slug)} className="btn-glow mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white w-fit" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>Read article <ArrowRight className="w-4 h-4" /></button>
           </div>
         </div></Reveal>
@@ -1148,7 +1156,7 @@ function Blog({ openArticle }) {
               <div className="p-5 flex flex-col flex-1">
                 <h3 className="text-white font-semibold leading-snug group-hover:text-indigo-200 transition-colors">{p.title}</h3>
                 <p className="text-sm text-slate-400 mt-2 leading-relaxed flex-1">{p.excerpt}</p>
-                <div className="flex items-center gap-4 mt-4 text-xs mono text-slate-500"><span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{p.date}</span><span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{p.read}</span></div>
+                <div className="flex items-center gap-4 mt-4 text-xs mono text-slate-400"><span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{p.date}</span><span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{p.read}</span></div>
                 <button onClick={() => openArticle(p.slug)} className="mt-4 inline-flex items-center gap-1.5 text-sm mono text-indigo-300 hover:text-white transition-colors w-fit">Read article →</button>
               </div>
             </article>
@@ -1317,7 +1325,7 @@ function ContactSection() {
           <p className="text-slate-400 mt-5 leading-relaxed">Let's build something great together. I'm available for freelance projects, agency work and collaborations — anywhere in the world.</p>
           <div className="mt-7 space-y-3">
             {[[<Mail className="w-4 h-4" />, "Email", "rehaan689nazir@gmail.com"], [<Link className="w-4 h-4" />, "LinkedIn", "linkedin.com/in/rehan-nazir-530597332"], [<GitFork className="w-4 h-4" />, "GitHub", "github.com/rehaannazir"]].map(([ic, l, v], i) => (
-              <div key={i} className="flex items-center gap-3 glass glass-hover rounded-xl px-4 py-3" data-cursor><span className="w-9 h-9 rounded-lg flex items-center justify-center text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>{ic}</span><div><div className="text-xs text-slate-500 mono">{l}</div><div className="text-sm text-slate-200">{v}</div></div></div>
+              <div key={i} className="flex items-center gap-3 glass glass-hover rounded-xl px-4 py-3" data-cursor><span className="w-9 h-9 rounded-lg flex items-center justify-center text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>{ic}</span><div><div className="text-xs text-slate-400 mono">{l}</div><div className="text-sm text-slate-200">{v}</div></div></div>
             ))}
           </div>
         </Reveal>
@@ -1327,20 +1335,20 @@ function ContactSection() {
             <div className="relative rounded-2xl p-6" style={{ background: "rgba(9,9,17,0.94)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
               <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/5">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
-                <span className="mono text-xs text-slate-500 ml-1">new_message.tsx</span>
+                <span className="mono text-xs text-slate-400 ml-1">new_message.tsx</span>
                 <span className="ml-auto inline-flex items-center gap-1.5 text-[10px] mono text-emerald-300"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ animation: "vpulse 2s ease-in-out infinite" }} />online</span>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs mono text-slate-500 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-indigo-400" /> your_name</label>
+                  <label className="text-xs mono text-slate-400 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-indigo-400" /> your_name</label>
                   <input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} onFocus={() => setFocus("name")} onBlur={() => setFocus(null)} placeholder="Jane Doe" className="w-full mt-1.5 bg-white/5 rounded-lg px-4 py-2.5 text-sm text-white outline-none transition-all" style={{ border: "1px solid", borderColor: focus === "name" ? "#818cf8" : "rgba(255,255,255,0.1)", boxShadow: focus === "name" ? "0 0 0 3px rgba(99,102,241,0.16), 0 0 26px -6px rgba(139,92,246,0.7)" : "none" }} />
                 </div>
                 <div>
-                  <label className="text-xs mono text-slate-500 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-indigo-400" /> email</label>
+                  <label className="text-xs mono text-slate-400 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-indigo-400" /> email</label>
                   <input value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} onFocus={() => setFocus("email")} onBlur={() => setFocus(null)} placeholder="jane@company.com" className="w-full mt-1.5 bg-white/5 rounded-lg px-4 py-2.5 text-sm text-white outline-none transition-all" style={{ border: "1px solid", borderColor: focus === "email" ? "#818cf8" : "rgba(255,255,255,0.1)", boxShadow: focus === "email" ? "0 0 0 3px rgba(99,102,241,0.16), 0 0 26px -6px rgba(139,92,246,0.7)" : "none" }} />
                 </div>
                 <div>
-                  <div className="flex items-center justify-between"><label className="text-xs mono text-slate-500 flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5 text-indigo-400" /> project_details</label><span className="text-[10px] mono text-slate-600">{f.details.length}/500</span></div>
+                  <div className="flex items-center justify-between"><label className="text-xs mono text-slate-400 flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5 text-indigo-400" /> project_details</label><span className="text-[10px] mono text-slate-400">{f.details.length}/500</span></div>
                   <textarea value={f.details} onChange={(e) => setF({ ...f, details: e.target.value })} onFocus={() => setFocus("details")} onBlur={() => setFocus(null)} rows={4} maxLength={500} placeholder="What would you like to automate?" className="w-full mt-1.5 bg-white/5 rounded-lg px-4 py-2.5 text-sm text-white outline-none transition-all resize-none" style={{ border: "1px solid", borderColor: focus === "details" ? "#818cf8" : "rgba(255,255,255,0.1)", boxShadow: focus === "details" ? "0 0 0 3px rgba(99,102,241,0.16), 0 0 26px -6px rgba(139,92,246,0.7)" : "none" }} />
                 </div>
                 <button ref={sendRef} onClick={submit} disabled={sent || sending} className="btn-glow magnetic w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all" style={{ background: sent ? "linear-gradient(135deg,#10b981,#059669)" : "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
@@ -1367,7 +1375,6 @@ const Footer = memo(function Footer({ setPage }) {
   const socials = [
     { Icon: GitFork, label: "GitHub", href: "https://github.com/rehaannazir" },
     { Icon: Link, label: "LinkedIn", href: "https://www.linkedin.com/in/rehan-nazir-530597332" },
-    { Icon: MessageCircle, label: "Twitter", href: "#" },
     { Icon: Mail, label: "Email", href: "mailto:rehaan689nazir@gmail.com" },
   ];
   return (
@@ -1423,14 +1430,14 @@ const Footer = memo(function Footer({ setPage }) {
             <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
               AI Engineer &amp; Automation Specialist. Building intelligent, self-running systems. <span className="text-indigo-300">Design. Build. Deploy. AI.</span>
             </p>
-            <div className="mono text-xs text-slate-600 flex items-center gap-2">
+            <div className="mono text-xs text-slate-400 flex items-center gap-2">
               <span className="text-indigo-400">//</span> Lahore, Pakistan · 2026
             </div>
           </Reveal>
 
           {/* navigate col */}
           <Reveal delay={0.08}>
-            <div className="mono text-xs uppercase tracking-widest text-slate-500 mb-5 flex items-center gap-2">
+            <div className="mono text-xs uppercase tracking-widest text-slate-400 mb-5 flex items-center gap-2">
               <span className="text-indigo-400">#</span> Navigate
             </div>
             <div className="flex flex-col gap-1">
@@ -1442,7 +1449,7 @@ const Footer = memo(function Footer({ setPage }) {
                   data-cursor>
                   <span className="mono text-[11px] text-indigo-400/60 group-hover:text-indigo-400 transition-colors w-5">{num}</span>
                   <span className="text-sm text-slate-400 group-hover:text-white transition-colors">{label}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 ml-auto opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-400 ml-auto opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
                 </button>
               ))}
             </div>
@@ -1450,7 +1457,7 @@ const Footer = memo(function Footer({ setPage }) {
 
           {/* connect col */}
           <Reveal delay={0.16}>
-            <div className="mono text-xs uppercase tracking-widest text-slate-500 mb-5 flex items-center gap-2">
+            <div className="mono text-xs uppercase tracking-widest text-slate-400 mb-5 flex items-center gap-2">
               <span className="text-indigo-400">#</span> Connect
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -1477,10 +1484,10 @@ const Footer = memo(function Footer({ setPage }) {
         {/* bottom bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="mono text-xs text-slate-600">© 2026 Rehan Nazir — Nexara.</span>
+          <span className="mono text-xs text-slate-400">© 2026 Rehan Nazir — Nexara.</span>
           <div className="flex items-center gap-2">
             {["LLMs", "FAST API", "REST APIs", "AI Agents"].map((t) => (
-              <span key={t} className="mono text-[10px] px-2.5 py-1 rounded-full text-slate-500"
+              <span key={t} className="mono text-[10px] px-2.5 py-1 rounded-full text-slate-400"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 {t}
               </span>

@@ -21,6 +21,24 @@ export const isHighEnd = () => {
   if (mem !== undefined && mem < 8) return false;
   return true;
 };
+/* Same gate as isHighEnd(), plus reduced-motion / coarse-pointer / WebGL checks — used to decide
+   between the AIArchitecture WebGL scene and its lightweight DOM fallback. Exported (rather than
+   living inside AIArchitecture.jsx, which is lazy-loaded) so the parent can call it synchronously
+   on first render and reserve the WebGL scene's h-screen height up front — otherwise the page
+   jumps by a full viewport height the moment the lazy chunk resolves on capable machines. */
+export function detectCapable() {
+  if (typeof window === "undefined") return false;
+  try {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+    if (window.matchMedia("(pointer: coarse)").matches) return false;
+    if (!isHighEnd()) return false;
+    const c = document.createElement("canvas");
+    if (!(c.getContext("webgl2") || c.getContext("webgl"))) return false;
+  } catch {
+    return false;
+  }
+  return true;
+}
 
 /* ============================================================
    ANIMATION MANAGER
