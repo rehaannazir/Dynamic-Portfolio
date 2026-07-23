@@ -1,7 +1,7 @@
 /* ---- futuristic animated blog/project visuals ---- */
 export function BlogVisual({ cat }) {
   const wrap = (art) => (
-    <div className="absolute inset-0 overflow-hidden" style={{ background: "#0a0a0a" }}>
+    <div className="absolute inset-0 overflow-hidden" style={{ background: "#000000" }}>
       <div className="absolute inset-0 grid-bg opacity-40" />
       <div className="absolute inset-0" style={{ background: "radial-gradient(120% 80% at 50% 0%,rgba(99,102,241,0.14),transparent 60%)" }} />
       {art}

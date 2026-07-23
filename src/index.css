@@ -140,13 +140,13 @@ code {
 @media(prefers-reduced-motion:reduce){.card-float{animation:none!important}}
 .fade-up{animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) both}
 .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
-.glass{background:#0a0a0a;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.08)}
+.glass{background:#000000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.08)}
 .glass-hover{--rx:0deg;--ry:0deg;position:relative;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .5s ease,box-shadow .5s ease}
 .glass-hover::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,0.22),transparent 60%);transition:opacity .5s ease;z-index:2}
 .glass-hover::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;pointer-events:none;background:conic-gradient(from var(--bg,0deg),transparent 0deg,rgba(139,92,246,.7) 60deg,rgba(96,165,250,.5) 120deg,transparent 200deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;transition:opacity .6s ease;z-index:3}
 .glass-hover:hover::before{opacity:1}
 .glass-hover:hover::after{opacity:1;animation:borderSpin 6s linear infinite}
-.glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));border-color:rgba(139,92,246,0.55);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.08);background:#141414}
+.glass-hover:hover{transform:translateY(-8px) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));border-color:rgba(139,92,246,0.55);box-shadow:0 0 55px -8px rgba(99,102,241,0.5),0 28px 56px -14px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.08);background:#050505}
 .float-soft{animation:floatSoft 7s ease-in-out infinite}
 .float-soft-2{animation:floatSoft 9.5s ease-in-out infinite}
 .floating{animation:floatVar var(--fdur,7s) ease-in-out infinite}
