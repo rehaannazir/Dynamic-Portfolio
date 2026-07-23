@@ -20,7 +20,7 @@ export function FAQSection() {
       <div className="space-y-3 max-w-3xl">
         {faqs.map((faq,i)=>(
           <Reveal key={i} delay={i*0.06}>
-            <div className="rounded-xl overflow-hidden transition-all duration-700" style={{background:"rgba(255,255,255,0.028)",border:`1px solid ${open===i?"rgba(139,92,246,0.45)":"rgba(255,255,255,0.07)"}`}}>
+            <div className="rounded-xl overflow-hidden transition-all duration-700" style={{background:"#0a0a0a",border:`1px solid ${open===i?"rgba(139,92,246,0.45)":"rgba(255,255,255,0.07)"}`}}>
               <button onClick={()=>setOpen(open===i?null:i)} className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left" data-cursor aria-expanded={open===i}>
                 <span className="text-white font-medium text-sm">{faq.q}</span>
                 <span className="text-indigo-400 text-xl shrink-0 leading-none transition-transform duration-600" style={{transform:open===i?"rotate(45deg)":"rotate(0deg)"}}>{open===i?"×":"+"}</span>
