@@ -22,9 +22,13 @@ export function Hero({ back, go }) {
           <ArrowLeft className="w-4 h-4" /> All blog posts
         </button>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs mono text-indigo-200 mb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs mono text-indigo-200 mb-4">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" style={{ animation: "vpulse 2s ease-in-out infinite" }} />
           Automation · 8 min read
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] mono text-slate-400 mb-8" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+          Topic: Python for Automation
         </div>
 
         <AnimatedTitle />
