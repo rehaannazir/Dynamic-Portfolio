@@ -5,10 +5,12 @@ export function AnimatedTitle() {
   useEffect(() => { const t = setTimeout(() => setVis(true), 150); return () => clearTimeout(t); }, []);
   const words = ["WHY", "PYTHON", "FOR", "AUTOMATION"];
   let idx = 0;
-  // One shimmer animation on the parent h1 instead of one per character.
-  // Previously each character ran its own `shimmer` keyframe, producing 21+
-  // independent CSS animations. A single animation on the ancestor is visually
-  // identical but eliminates the redundant work entirely.
+  // Single shimmer animation + gradient clip on the parent h1 (not one per character) to
+  // avoid 21+ independent CSS animations. `background-clip: text` only paints through an
+  // ancestor's OWN text glyphs, not through descendant `inline-block` boxes — so the
+  // per-character wrappers below must stay `display: inline` (never `inline-block`), and
+  // the per-character stagger can only animate `opacity` (CSS transforms don't apply to
+  // non-replaced inline boxes), not a translateY slide.
   return (
     <h1 className="font-black text-center leading-none select-none"
       style={{
@@ -24,10 +26,10 @@ export function AnimatedTitle() {
           {w.split("").map((ch) => {
             const d = idx++ * 0.038;
             return (
-              <span key={ch + d} className="inline-block" style={{
+              <span key={ch + d} style={{
+                display: "inline",
                 opacity: vis ? 1 : 0,
-                transform: vis ? "translateY(0)" : "translateY(48px)",
-                transition: `opacity 0.65s ease ${d}s, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${d}s`,
+                transition: `opacity 0.65s ease ${d}s`,
               }}>{ch}</span>
             );
           })}
