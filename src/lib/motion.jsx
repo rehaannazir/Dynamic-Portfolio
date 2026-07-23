@@ -23,9 +23,10 @@ export const isHighEnd = () => {
 };
 /* Same gate as isHighEnd(), plus reduced-motion / coarse-pointer / WebGL checks — used to decide
    between the AIArchitecture WebGL scene and its lightweight DOM fallback. Exported (rather than
-   living inside AIArchitecture.jsx, which is lazy-loaded) so the parent can call it synchronously
-   on first render and reserve the WebGL scene's h-screen height up front — otherwise the page
-   jumps by a full viewport height the moment the lazy chunk resolves on capable machines. */
+   living inside pages/home/AIArchitecture.jsx, which is lazy-loaded) so the parent can call it
+   synchronously on first render and reserve the WebGL scene's h-screen height up front —
+   otherwise the page jumps by a full viewport height the moment the lazy chunk resolves on
+   capable machines. */
 export function detectCapable() {
   if (typeof window === "undefined") return false;
   try {

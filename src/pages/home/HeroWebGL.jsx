@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { onScrollFrame } from "./motion";
+import { onScrollFrame } from "@/lib/motion";
 
 /* ============================================================
    HeroWebGL — cinematic Three.js hero (real WebGL).
