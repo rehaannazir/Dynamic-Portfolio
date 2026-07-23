@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { detectCapable } from "./motion";
+import { detectCapable } from "@/lib/motion";
 
 /* ============================================================
    AIArchitecture — the signature moment.
@@ -24,9 +24,9 @@ const STAGES = [
 ];
 
 /* This is a SECOND WebGL context (the hero is the first), so it's gated to genuinely high-end
-   machines only (detectCapable, shared with Portfolio.jsx via motion.jsx). Mid-range / older
-   devices, touch, and reduced-motion get the lightweight DOM pipeline fallback instead — no
-   extra GPU context, no jank. */
+   machines only (detectCapable, shared with pages/Home.jsx via lib/motion.jsx). Mid-range /
+   older devices, touch, and reduced-motion get the lightweight DOM pipeline fallback instead —
+   no extra GPU context, no jank. */
 
 const smooth = (e) => { e = Math.max(0, Math.min(1, e)); return e * e * (3 - 2 * e); };
 

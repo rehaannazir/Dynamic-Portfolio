@@ -1,0 +1,26 @@
+# Rehan Nazir — AI Engineer & Automation Specialist
+
+> Rehan Nazir is an AI Engineer and Automation Specialist based in Lahore, Pakistan, and founder of Nexara. He builds AI agents, FastAPI backends, n8n workflows and RAG chatbots for clients worldwide.
+
+This site is a portfolio: selected work, service offerings, client reviews, and technical writing on AI engineering and automation.
+
+## Pages
+
+- [Home](https://rehannazir.com/): Introduction, selected projects, tech stack, and a 30-second showreel.
+- [Services](https://rehannazir.com/services): Custom workflow automation, AI agents, RAG chatbots, and FastAPI backend development.
+- [Reviews](https://rehannazir.com/reviews): Client testimonials.
+- [Blog](https://rehannazir.com/blog): Field notes on AI engineering, automation, and building an AI company.
+
+## Blog posts
+
+- [Why Python is Ideal for Automation](https://rehannazir.com/blog/python-ideal-for-automation): A complete guide to Python automation — os, pathlib, Selenium, pandas, asyncio, and AI agents.
+- [Building a production AI content API](https://rehannazir.com/blog/production-ai-content-api): Architecting a FastAPI + Gemini backend.
+- [RAG chatbots that actually help](https://rehannazir.com/blog/rag-chatbots-that-help): Grounding chatbots in real context with retrieval-augmented generation.
+- [n8n + LLMs: the freelancer's edge](https://rehannazir.com/blog/n8n-llms-freelancer-edge): Combining n8n orchestration with language models.
+- [From freelancing to an AI company](https://rehannazir.com/blog/freelancing-to-ai-company): Roadmap from done-for-you services to a productized SaaS.
+- [Algorithmic trading meets automation](https://rehannazir.com/blog/algo-trading-meets-automation): Where trading, ML, and automation overlap.
+
+## Contact
+
+- LinkedIn: https://www.linkedin.com/in/rehan-nazir-530597332
+- GitHub: https://github.com/rehaannazir

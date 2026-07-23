@@ -6,8 +6,8 @@
 
     <!-- Primary SEO
          title / description / canonical / og:url / og:title / og:description are intentionally
-         NOT duplicated here — every route sets its own via <Helmet> in Portfolio.jsx /
-         PythonAutomationPost.jsx. react-helmet-async only ever removes tags it added itself
+         NOT duplicated here — every route sets its own via <Helmet> in its page/section
+         component (src/pages/, src/blog/). react-helmet-async only ever removes tags it added itself
          (tracked via a data-rh attribute); it never touches tags baked into the static HTML.
          Keeping a second static copy here would leave two <link rel="canonical"> (and duplicate
          description/og tags) on every route once Helmet mounts — which is an invalid, conflicting
