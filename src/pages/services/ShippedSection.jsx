@@ -16,7 +16,7 @@ export function ShippedSection() {
       <Reveal><SectionLabel num="✦">Shipped</SectionLabel></Reveal>
       <Reveal delay={0.08}><h2 className="text-3xl md:text-4xl font-bold text-white mb-10">A few things I've <span className="grad-text">shipped</span>.</h2></Reveal>
       <Reveal delay={0.14}>
-        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)",background:"rgba(255,255,255,0.022)"}}>
+        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(255,255,255,0.07)",background:"#0a0a0a"}}>
           <div className="hidden md:grid grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-3 border-b border-white/5">
             {["#","Project","Role","Stack","Year"].map(h=>(
               <span key={h} className="mono text-[10px] text-slate-400 uppercase tracking-wider last:text-right">{h}</span>

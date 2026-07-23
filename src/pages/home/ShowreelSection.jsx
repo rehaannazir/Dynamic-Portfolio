@@ -46,7 +46,7 @@ export function ShowreelSection() {
           <div aria-hidden="true" className="absolute -inset-6 rounded-[2rem] breathe" style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(99,102,241,0.28), transparent 70%)", filter: "blur(24px)", opacity: 0.7 }} />
           <div className="relative rounded-2xl p-px overflow-hidden" style={{ boxShadow: "0 40px 90px -30px rgba(0,0,0,0.8), 0 0 50px -16px rgba(99,102,241,0.45)" }}>
             <div aria-hidden="true" className="ring-spin" style={{ position: "absolute", top: "-15%", left: "-15%", width: "130%", height: "130%", background: "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.5) 60deg, rgba(139,92,246,0.5) 130deg, transparent 240deg)", animation: "spinSlow 18s linear infinite" }} />
-            <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)", aspectRatio: "16/9", background: "#05050b" }}>
+            <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)", aspectRatio: "16/9", background: "#0a0a0a" }}>
               <iframe
                 ref={iframeRef}
                 src="/nexara-showreel.html"
