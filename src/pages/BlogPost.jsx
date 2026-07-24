@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { SITE_URL } from "@/constants";
 import { POSTS } from "@/blog/posts";
 import { PythonAutomationPost } from "@/blog/python-ideal-for-automation/articleLoader";
+import { RagProductionGuidePost } from "@/blog/rag-production-guide/articleLoader";
 
 /* Mirrors the real article's hero (`minHeight: 88vh`, centered column) so the swap from
    fallback to loaded content resizes nothing already painted above the fold. Content that
@@ -35,8 +36,9 @@ function BackToBlog({ back }) {
 export function BlogPost({ slug, back, openArticle }) {
   const meta = POSTS.find((p) => p.slug === slug) || POSTS[0];
   const isMain = slug === "python-ideal-for-automation";
+  const isRagGuide = slug === "rag-production-guide";
 
-  if (!isMain) {
+  if (!isMain && !isRagGuide) {
     return (
       <div className="max-w-3xl mx-auto px-5 pt-12 pb-24">
         <Helmet>
@@ -79,7 +81,9 @@ export function BlogPost({ slug, back, openArticle }) {
 
   return (
     <Suspense fallback={<ArticleSkeleton />}>
-      <PythonAutomationPost back={back} openArticle={openArticle} />
+      {isRagGuide
+        ? <RagProductionGuidePost back={back} openArticle={openArticle} />
+        : <PythonAutomationPost back={back} openArticle={openArticle} />}
     </Suspense>
   );
 }

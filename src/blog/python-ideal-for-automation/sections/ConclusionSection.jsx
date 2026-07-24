@@ -2,7 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/lib/motion";
 
 const RELATED = [
-  { slug: "production-ai-content-api", cat: "Engineering", title: "Building a production AI content API" },
+  { slug: "rag-production-guide", cat: "Engineering", title: "Retrieval-Augmented Generation: The Complete Engineering Guide" },
   { slug: "rag-chatbots-that-help",    cat: "AI Agents",   title: "RAG chatbots that actually help" },
   { slug: "n8n-llms-freelancer-edge",  cat: "Workflow",    title: "n8n + LLMs: the freelancer's edge" },
   { slug: "algo-trading-meets-automation", cat: "Trading", title: "Algorithmic trading meets automation" },

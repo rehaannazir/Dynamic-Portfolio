@@ -118,12 +118,12 @@ POSTS: list[Post] = [
         featured=True,
     ),
     Post(
-        slug="production-ai-content-api",
-        title="Building a production AI content API",
+        slug="rag-production-guide",
+        title="Retrieval-Augmented Generation: The Complete Engineering Guide",
         cat="Engineering",
-        date="28 May 2026",
-        read="8 min",
-        excerpt="Architecting a FastAPI + Gemini backend that's clean, scalable and ready to hand off to a client.",
+        date="24 Jul 2026",
+        read="8 min (1/87 chapters)",
+        excerpt="The complete, chapter-by-chapter guide to RAG — from information retrieval history to production-grade multi-tenant systems. Publishing chapter by chapter.",
     ),
     Post(
         slug="rag-chatbots-that-help",

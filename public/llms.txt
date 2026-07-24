@@ -14,7 +14,7 @@ This site is a portfolio: selected work, service offerings, client reviews, and 
 ## Blog posts
 
 - [Why Python is Ideal for Automation](https://rehannazir.com/blog/python-ideal-for-automation): A complete guide to Python automation — os, pathlib, Selenium, pandas, asyncio, and AI agents.
-- [Building a production AI content API](https://rehannazir.com/blog/production-ai-content-api): Architecting a FastAPI + Gemini backend.
+- [Retrieval-Augmented Generation: The Complete Engineering Guide](https://rehannazir.com/blog/rag-production-guide): A chapter-by-chapter RAG guide from IR history to production-grade multi-tenant systems, publishing chapter by chapter.
 - [RAG chatbots that actually help](https://rehannazir.com/blog/rag-chatbots-that-help): Grounding chatbots in real context with retrieval-augmented generation.
 - [n8n + LLMs: the freelancer's edge](https://rehannazir.com/blog/n8n-llms-freelancer-edge): Combining n8n orchestration with language models.
 - [From freelancing to an AI company](https://rehannazir.com/blog/freelancing-to-ai-company): Roadmap from done-for-you services to a productized SaaS.
