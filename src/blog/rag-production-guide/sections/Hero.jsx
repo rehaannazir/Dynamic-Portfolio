@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import { DifficultyBadge } from "../components/DifficultyBadge";
+import { TOC } from "../toc";
 
 /* Structural twin of the Python-automation article's Hero (same minHeight:88vh, same centered
    column, same bottom fade into #010104) so the swap between articles doesn't feel like a
@@ -49,7 +50,7 @@ export function Hero({ back, go }) {
             <span itemProp="name">Rehan Nazir</span>
           </span>
           <span className="text-slate-400">·</span>
-          <span className="text-sm mono text-slate-400">Chapter 1 of 87</span>
+          <span className="text-sm mono text-slate-400">{TOC.length} of 87 chapters live</span>
         </div>
 
         <div className="flex items-center justify-center gap-3 mt-10">

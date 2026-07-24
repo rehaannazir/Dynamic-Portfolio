@@ -6,6 +6,8 @@ import { Hero } from "./sections/Hero";
 import { StatsBar } from "./sections/StatsBar";
 import { TocSidebar } from "./sections/TocSidebar";
 import { HistoryOfIrSection } from "./sections/HistoryOfIrSection";
+import { WhyLlmsHallucinateSection } from "./sections/WhyLlmsHallucinateSection";
+import { EuclideanDistanceSection } from "./sections/EuclideanDistanceSection";
 
 /* ─────────────────────────────────────────────────────────
    RAG MASTER GUIDE — same composition pattern as
@@ -56,6 +58,8 @@ export default function RagProductionGuidePost({ back }) {
 
           <div className="prose-blog max-w-2xl min-w-0">
             <HistoryOfIrSection go={go} />
+            <WhyLlmsHallucinateSection go={go} />
+            <EuclideanDistanceSection go={go} />
           </div>
         </div>
       </div>

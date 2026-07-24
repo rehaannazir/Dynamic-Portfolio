@@ -1,5 +1,6 @@
 import { Reveal } from "@/lib/motion";
 import { Counter } from "../components/Counter";
+import { TOC } from "../toc";
 
 export function StatsBar() {
   return (
@@ -10,7 +11,7 @@ export function StatsBar() {
             { end: 87, suffix: "", label: "chapters planned" },
             { end: 11, suffix: "", label: "parts" },
             { end: 14, suffix: "hr", label: "full guide length" },
-            { end: 1, suffix: "", label: "published so far" },
+            { end: TOC.length, suffix: "", label: "published so far" },
           ].map(({ end, suffix, label }) => (
             <div key={label} className="text-center py-7 px-4">
               <Counter end={end} suffix={suffix} />

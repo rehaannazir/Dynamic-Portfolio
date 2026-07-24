@@ -122,7 +122,7 @@ POSTS: list[Post] = [
         title="Retrieval-Augmented Generation: The Complete Engineering Guide",
         cat="Engineering",
         date="24 Jul 2026",
-        read="8 min (1/87 chapters)",
+        read="23 min (3/87 chapters)",
         excerpt="The complete, chapter-by-chapter guide to RAG — from information retrieval history to production-grade multi-tenant systems. Publishing chapter by chapter.",
     ),
     Post(

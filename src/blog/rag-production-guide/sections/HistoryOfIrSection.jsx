@@ -1,4 +1,4 @@
-import { Lightbulb, TriangleAlert } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { Reveal } from "@/lib/motion";
 import { Callout } from "../components/Callout";
 import { ChapterHeader } from "../components/ChapterHeader";
@@ -49,7 +49,7 @@ export function HistoryOfIrSection({ go }) {
         <IrTimelineDiagram />
       </Reveal>
 
-      <Callout icon={Lightbulb} color="#3b82f6">
+      <Callout icon={Sparkles} color="#3b82f6">
         BM25 predates deep learning by decades — and it's still sitting inside most production hybrid-search stacks today. On queries with exact terms (product codes, names, error messages), it routinely outperforms pure vector search. You'll see it again, working alongside embeddings rather than replaced by them, in the hybrid search chapter later in this book.
       </Callout>
 
@@ -61,7 +61,7 @@ export function HistoryOfIrSection({ go }) {
         RAG sits at the end of this lineage, not outside it. It's what you get when semantic retrieval — the ability to find the right passage even when the words don't match — is paired with a language model that can read what was found and answer in fluent, natural language. The retrieval half of that pairing is a direct descendant of the inverted index and BM25. The generation half is new. The combination, formalized in a 2020 research paper, is what the rest of this book is about.
       </p>
 
-      <Callout icon={TriangleAlert} color="#f59e0b">
+      <Callout icon={X} color="#f59e0b">
         Common mistake: treating keyword search as a legacy technology RAG has made obsolete. It hasn't. Modern production systems almost always run lexical search (BM25) and semantic search (embeddings) side by side, because they fail on different queries — a lesson this book returns to directly in the hybrid search chapter.
       </Callout>
 
@@ -93,7 +93,7 @@ export function HistoryOfIrSection({ go }) {
         Retrieval has a history. Generation, on the other hand, has a very specific and very current problem — one you've almost certainly seen firsthand if you've used an LLM for more than five minutes. That problem is what the next chapter takes apart.
       </p>
 
-      <ChapterPrevNext prev={null} next={null} go={go} />
+      <ChapterPrevNext prev={null} next={{ id: "why-llms-hallucinate", title: "Why LLMs Hallucinate" }} go={go} />
     </>
   );
 }
