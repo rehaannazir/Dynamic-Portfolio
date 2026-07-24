@@ -115,7 +115,7 @@ response = llm.generate(
 
       <ChapterPrevNext
         prev={{ id: "history-of-ir", title: "History of Information Retrieval" }}
-        next={{ title: "Why RAG Exists", comingSoon: true }}
+        next={{ id: "why-rag-exists", title: "Why RAG Exists" }}
         go={go}
       />
     </>

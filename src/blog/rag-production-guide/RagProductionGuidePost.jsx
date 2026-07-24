@@ -7,6 +7,13 @@ import { StatsBar } from "./sections/StatsBar";
 import { TocSidebar } from "./sections/TocSidebar";
 import { HistoryOfIrSection } from "./sections/HistoryOfIrSection";
 import { WhyLlmsHallucinateSection } from "./sections/WhyLlmsHallucinateSection";
+import { WhyRagExistsSection } from "./sections/WhyRagExistsSection";
+import { EvolutionToRagSection } from "./sections/EvolutionToRagSection";
+import { VectorsSection } from "./sections/VectorsSection";
+import { EmbeddingsSection } from "./sections/EmbeddingsSection";
+import { DistanceMetricsSection } from "./sections/DistanceMetricsSection";
+import { CosineSimilaritySection } from "./sections/CosineSimilaritySection";
+import { DotProductSection } from "./sections/DotProductSection";
 import { EuclideanDistanceSection } from "./sections/EuclideanDistanceSection";
 
 /* ─────────────────────────────────────────────────────────
@@ -59,6 +66,13 @@ export default function RagProductionGuidePost({ back }) {
           <div className="prose-blog max-w-2xl min-w-0">
             <HistoryOfIrSection go={go} />
             <WhyLlmsHallucinateSection go={go} />
+            <WhyRagExistsSection go={go} />
+            <EvolutionToRagSection go={go} />
+            <VectorsSection go={go} />
+            <EmbeddingsSection go={go} />
+            <DistanceMetricsSection go={go} />
+            <CosineSimilaritySection go={go} />
+            <DotProductSection go={go} />
             <EuclideanDistanceSection go={go} />
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Info, TriangleAlert, X } from "lucide-react";
+import { TriangleAlert, X } from "lucide-react";
 import { Reveal } from "@/lib/motion";
 import { Callout } from "../components/Callout";
 import { ChapterHeader } from "../components/ChapterHeader";
@@ -10,11 +10,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import { EuclideanDiagram } from "../components/EuclideanDiagram";
 
 /* ── CHAPTER 10 — EUCLIDEAN DISTANCE ──────────────────────
-   Part II · Mathematical Foundations · Intermediate · 5 min
-   Depends on Ch.8 (Cosine Similarity) and Ch.9 (Dot Product) — neither is published yet, since
-   chapters are being written out of numeric order. The catch-up callout below exists so this
-   chapter doesn't assume content that hasn't shipped; ChapterHeader's "depends on" links will
-   light up automatically once Ch.8/9 are added to toc.js. */
+   Part II · Mathematical Foundations · Intermediate · 5 min · depends on Ch.8, Ch.9 */
 export function EuclideanDistanceSection({ go }) {
   return (
     <>
@@ -22,12 +18,8 @@ export function EuclideanDistanceSection({ go }) {
         depends={[
           { id: "cosine-similarity", label: "Cosine Similarity" },
           { id: "dot-product", label: "Dot Product" },
-        ]} go={go} color="#818cf8" />
+        ]} go={go} color="#8b5cf6" />
       <h2 id="euclidean-distance">Euclidean Distance</h2>
-
-      <Callout icon={Info} color="#64748b">
-        This chapter is being published ahead of Chapters 8 and 9. Quick catch-up: cosine similarity measures the <em>angle</em> between two vectors — how similar their direction is — while completely ignoring how long each vector is. Hold onto that one fact; it's the entire contrast this chapter is built on.
-      </Callout>
 
       <LearningGoalCard goals={[
         "Compute Euclidean (straight-line) distance between two vectors by hand",
@@ -114,7 +106,7 @@ print(cosine_similarity(short_review, long_review)) # -> 1.00  (identical direct
       </p>
 
       <ChapterPrevNext
-        prev={{ title: "Dot Product", comingSoon: true }}
+        prev={{ id: "dot-product", title: "Dot Product" }}
         next={{ title: "High-Dimensional Space", comingSoon: true }}
         go={go}
       />
