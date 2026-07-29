@@ -72,7 +72,7 @@ export function Hero3D() {
       // Outer halo rings (two concentric)
       [1.15, 1.35].forEach((scale, i) => {
         ctx.beginPath(); ctx.arc(cx, cy, r*scale, 0, Math.PI*2);
-        ctx.strokeStyle = `rgba(99,102,241,${0.06 - i*0.02})`; ctx.lineWidth = i===0 ? 1.5 : 0.8; ctx.stroke();
+        ctx.strokeStyle = `rgba(139,92,246,${0.06 - i*0.02})`; ctx.lineWidth = i===0 ? 1.5 : 0.8; ctx.stroke();
       });
 
       // Connections between nearby particles
@@ -88,7 +88,7 @@ export function Hero3D() {
 
       // Layered ambient glow
       const g1 = ctx.createRadialGradient(cx,cy,0,cx,cy,r*1.9);
-      g1.addColorStop(0,"rgba(99,102,241,0.08)"); g1.addColorStop(0.45,"rgba(59,130,246,0.04)"); g1.addColorStop(1,"rgba(0,0,0,0)");
+      g1.addColorStop(0,"rgba(139,92,246,0.08)"); g1.addColorStop(0.45,"rgba(124,58,237,0.04)"); g1.addColorStop(1,"rgba(0,0,0,0)");
       ctx.fillStyle=g1; ctx.beginPath(); ctx.arc(cx,cy,r*1.9,0,Math.PI*2); ctx.fill();
 
       // Second inner glow
@@ -100,7 +100,7 @@ export function Hero3D() {
       projected.forEach(({sx,sy,f,z}) => {
         const alpha=(z+1)/2, size=Math.max(0.6,2.1*f);
         ctx.beginPath(); ctx.arc(sx,sy,size,0,Math.PI*2);
-        ctx.fillStyle = z>0 ? `rgba(192,168,255,${alpha})` : `rgba(96,165,250,${alpha*0.7})`; ctx.fill();
+        ctx.fillStyle = z>0 ? `rgba(192,168,255,${alpha})` : `rgba(167,139,250,${alpha*0.7})`; ctx.fill();
         if (z>0.3) {
           const g=ctx.createRadialGradient(sx,sy,0,sx,sy,size*6);
           g.addColorStop(0,`rgba(167,139,250,${alpha*0.09})`); g.addColorStop(1,"rgba(0,0,0,0)");

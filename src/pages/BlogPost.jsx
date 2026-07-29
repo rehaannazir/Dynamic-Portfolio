@@ -28,7 +28,7 @@ function ArticleSkeleton() {
 
 function BackToBlog({ back }) {
   return (
-    <button onClick={back} className="inline-flex items-center gap-2 text-sm mono text-slate-400 hover:text-indigo-300 transition-colors mb-8"><ArrowLeft className="w-4 h-4" /> All blog posts</button>
+    <button onClick={back} className="inline-flex items-center gap-2 text-sm mono text-slate-400 hover:text-violet-300 transition-colors mb-8"><ArrowLeft className="w-4 h-4" /> All blog posts</button>
   );
 }
 
@@ -66,14 +66,14 @@ export function BlogPost({ slug, back, openArticle }) {
           })}</script>
         </Helmet>
         <BackToBlog back={back} />
-        <span className="text-xs mono px-3 py-1 rounded-full glass text-indigo-200">{meta.cat}</span>
+        <span className="text-xs mono px-3 py-1 rounded-full glass text-violet-200">{meta.cat}</span>
         <h1 className="text-3xl md:text-4xl font-bold text-white mt-5 leading-tight">{meta.title}</h1>
         <p className="text-slate-400 mt-4">{meta.excerpt}</p>
         <div className="glass rounded-2xl p-10 mt-10 text-center">
-          <BookOpen className="w-10 h-10 mx-auto text-indigo-300 mb-4" />
+          <BookOpen className="w-10 h-10 mx-auto text-violet-300 mb-4" />
           <h2 className="text-xl font-semibold text-white">This article is coming soon.</h2>
           <p className="text-slate-400 mt-2 max-w-md mx-auto text-sm">The full write-up for this post is still in drafts. The "Why Python is Ideal for Automation" article is fully built out — open that one to see the complete layout.</p>
-          <button onClick={() => openArticle("python-ideal-for-automation")} className="btn-glow mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>Read the finished article <ArrowRight className="w-4 h-4" /></button>
+          <button onClick={() => openArticle("python-ideal-for-automation")} className="btn-glow mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#7c3aed,#8b5cf6)" }}>Read the finished article <ArrowRight className="w-4 h-4" /></button>
         </div>
       </div>
     );

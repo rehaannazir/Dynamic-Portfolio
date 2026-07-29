@@ -300,7 +300,7 @@ export default function AIArchitecture({ fallback = null }) {
         <div className="absolute left-0 right-0 bottom-10 flex flex-col items-center gap-3 pointer-events-none px-5">
           <p className="mono text-[10px] uppercase tracking-[0.35em] text-slate-400">loading the weapons</p>
           <div className="w-40 h-px bg-white/10 overflow-hidden rounded-full">
-            <div ref={hudRef} className="h-full" style={{ width: "0%", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.7)" }} />
+            <div ref={hudRef} className="h-full" style={{ width: "0%", background: "linear-gradient(90deg,#7c3aed,#8b5cf6)", boxShadow: "0 0 10px rgba(139,92,246,0.7)" }} />
           </div>
         </div>
       </div>

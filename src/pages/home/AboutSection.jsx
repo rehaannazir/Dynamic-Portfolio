@@ -73,7 +73,7 @@ export function AboutSection() {
             <div className="absolute left-0 top-0 z-20 glass rounded-xl p-3" style={{width:162,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
               <div className="flex items-center justify-between mb-2">
                 <span className="mono text-[8.5px] text-slate-400 uppercase tracking-wider">Git Activity</span>
-                <span className="mono text-[8.5px] text-indigo-400">7D</span>
+                <span className="mono text-[8.5px] text-violet-400">7D</span>
               </div>
               <div className="flex gap-px items-end" style={{height:34}}>
                 {barH.map((h,i)=>(
@@ -109,7 +109,7 @@ export function AboutSection() {
               <svg viewBox="0 0 120 44" className="w-full">
                 {[[18,10],[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]].map(([x,y],i)=>(
                   <g key={i}>
-                    <circle cx={x} cy={y} r="3.5" fill={["#60a5fa","#a78bfa","#c084fc","#818cf8","#60a5fa","#a78bfa","#c084fc"][i]} style={{animation:`vpulse ${2+i*0.3}s ease-in-out ${i*0.22}s infinite`}}/>
+                    <circle cx={x} cy={y} r="3.5" fill={["#a78bfa","#a78bfa","#c084fc","#a78bfa","#a78bfa","#a78bfa","#c084fc"][i]} style={{animation:`vpulse ${2+i*0.3}s ease-in-out ${i*0.22}s infinite`}}/>
                     {i<6&&<line x1={x} y1={y} x2={[[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]][i][0]} y2={[[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]][i][1]} stroke="rgba(139,92,246,0.22)" strokeWidth="0.8"/>}
                   </g>
                 ))}
@@ -119,7 +119,7 @@ export function AboutSection() {
             <div className="absolute right-0 bottom-2 z-20 glass rounded-xl px-3 py-2.5" style={{width:184,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
               {[["POST","/api/agent"],["GET","/api/rag","200"],["POST","/api/embed"]].map(([m,p,s],i)=>(
                 <div key={i} className="flex items-center gap-2 py-1 mono text-[8.5px]">
-                  <span style={{color:m==="GET"?"#a78bfa":"#60a5fa",width:30,flexShrink:0}}>{m}</span>
+                  <span style={{color:m==="GET"?"#a78bfa":"#a78bfa",width:30,flexShrink:0}}>{m}</span>
                   <span className="text-slate-400 flex-1 truncate">{p}</span>
                   {s&&<span className="text-emerald-400">{s}</span>}
                 </div>
@@ -134,7 +134,7 @@ export function AboutSection() {
           <Reveal variant="right" delay={0.12}><h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">I live where <span className="grad-text">product meets AI</span>.</h2></Reveal>
           <Reveal variant="right" delay={0.2}><p className="text-slate-400 mt-5 leading-relaxed">I take ideas from a blank repo to a deployed, self-running system — designing the data model, wiring the APIs and the agents, and delivering something a business can actually rely on.</p></Reveal>
           <Reveal variant="right" delay={0.28}><p className="text-slate-400 mt-4 leading-relaxed">Lately that means <span className="text-slate-200">AI content APIs, n8n automations and chatbot agents</span> built on Python, FastAPI and the Gemini API — with a focus on clean handoff, not babysitting.</p></Reveal>
-          <Reveal variant="right" delay={0.34}><p className="mono text-sm text-indigo-300 mt-5">// currently — Founder @ Nexara</p></Reveal>
+          <Reveal variant="right" delay={0.34}><p className="mono text-sm text-violet-300 mt-5">// currently — Founder @ Nexara</p></Reveal>
           <div className="mt-8 flex flex-col gap-3">
             {[
               {icon:"◈",label:"End-to-end delivery",desc:"From data model to deployed interface."},
@@ -143,7 +143,7 @@ export function AboutSection() {
             ].map(({icon,label,desc},i)=>(
               <Reveal key={label} variant="up" delay={0.4 + i * 0.1}>
               <div className="glass-hover flex items-start gap-4 px-5 py-4 rounded-xl transition-all duration-700" style={{border:"1px solid rgba(255,255,255,0.055)"}}>
-                <span className="text-indigo-400 text-lg mt-0.5 shrink-0">{icon}</span>
+                <span className="text-violet-400 text-lg mt-0.5 shrink-0">{icon}</span>
                 <div><div className="text-white text-sm font-medium">{label}</div><div className="text-slate-400 text-xs mt-0.5">{desc}</div></div>
               </div>
               </Reveal>

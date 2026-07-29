@@ -23,8 +23,8 @@ export function ChapterRail() {
         const on = active === id;
         return (
           <button key={id} onClick={() => smoothTo(document.getElementById(id), { offset: -60 })} className="group flex items-center gap-2.5" data-cursor aria-label={label} aria-current={on ? "true" : undefined}>
-            <span className="mono text-[10px] uppercase tracking-wider transition-all duration-300 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0" style={{ color: on ? "#c7d2fe" : "#94a3b8" }}>{label}</span>
-            <span className="rounded-full transition-all duration-500" style={{ width: on ? 22 : 8, height: 8, background: on ? "linear-gradient(90deg,#3b82f6,#8b5cf6)" : "rgba(255,255,255,0.22)", boxShadow: on ? "0 0 12px rgba(99,102,241,0.8)" : "none" }} />
+            <span className="mono text-[10px] uppercase tracking-wider transition-all duration-300 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0" style={{ color: on ? "#ddd6fe" : "#94a3b8" }}>{label}</span>
+            <span className="rounded-full transition-all duration-500" style={{ width: on ? 22 : 8, height: 8, background: on ? "linear-gradient(90deg,#7c3aed,#8b5cf6)" : "rgba(255,255,255,0.22)", boxShadow: on ? "0 0 12px rgba(139,92,246,0.8)" : "none" }} />
           </button>
         );
       })}

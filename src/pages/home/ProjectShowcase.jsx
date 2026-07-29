@@ -41,7 +41,7 @@ export function ProjectShowcase({ p, i }) {
             </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-1.5 mt-5">{p.stack.map((s) => (<span key={s} className="px-2.5 py-1 rounded-md text-[11px] mono" style={{ background: `${p.accent}1f`, color: "#dbe3ff", border: `1px solid ${p.accent}33` }}>{s}</span>))}</div>
+        <div className="flex flex-wrap gap-1.5 mt-5">{p.stack.map((s) => (<span key={s} className="px-2.5 py-1 rounded-md text-[11px] mono" style={{ background: `${p.accent}1f`, color: "#ede9fe", border: `1px solid ${p.accent}33` }}>{s}</span>))}</div>
         <div className="mono text-xs text-slate-400 mt-5">{p.role}</div>
       </div>
     </article>

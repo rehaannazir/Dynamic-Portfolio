@@ -63,7 +63,7 @@ export default function Portfolio() {
 
   return (
     <div className="nocursor min-h-screen w-full text-slate-200 relative overflow-x-hidden"
-      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(59,130,246,0.035), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.04), transparent 60%), #000000", fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
+      style={{ background: "radial-gradient(1200px 600px at 12% -10%, rgba(124,58,237,0.035), transparent 60%), radial-gradient(1000px 700px at 92% 8%, rgba(139,92,246,0.04), transparent 60%), #000000", fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
       <CustomCursor />
       {page === "article" && <ReadingProgress />}
       {page === "home" && <ChapterRail />}

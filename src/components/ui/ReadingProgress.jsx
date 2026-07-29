@@ -19,7 +19,7 @@ export function ReadingProgress() {
   }, []);
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-0.5">
-      <div ref={barRef} className="h-full origin-left" style={{ transform: "scaleX(0)", background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", boxShadow: "0 0 10px rgba(99,102,241,0.8)" }} />
+      <div ref={barRef} className="h-full origin-left" style={{ transform: "scaleX(0)", background: "linear-gradient(90deg,#7c3aed,#8b5cf6)", boxShadow: "0 0 10px rgba(139,92,246,0.8)" }} />
     </div>
   );
 }

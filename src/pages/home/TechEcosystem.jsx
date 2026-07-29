@@ -27,10 +27,10 @@ function EcoConnector({ animate, delay }) {
   const dot = { background: "#ddd6fe", boxShadow: "0 0 10px 2px rgba(167,139,250,0.9)" };
   return (
     <div className="flex md:flex-col items-center justify-center md:px-1" aria-hidden="true">
-      <div className="hidden md:block relative w-full h-px" style={{ minWidth: 26, background: "linear-gradient(90deg, rgba(129,140,248,0.12), rgba(192,132,252,0.4), rgba(129,140,248,0.12))" }}>
+      <div className="hidden md:block relative w-full h-px" style={{ minWidth: 26, background: "linear-gradient(90deg, rgba(167,139,250,0.12), rgba(192,132,252,0.4), rgba(167,139,250,0.12))" }}>
         {animate && <span className="absolute w-1.5 h-1.5 rounded-full" style={{ ...dot, top: "50%", marginTop: -3, animation: `flowX 2.6s linear ${delay}s infinite` }} />}
       </div>
-      <div className="md:hidden relative h-5 w-px" style={{ background: "linear-gradient(180deg, rgba(129,140,248,0.12), rgba(192,132,252,0.4))" }}>
+      <div className="md:hidden relative h-5 w-px" style={{ background: "linear-gradient(180deg, rgba(167,139,250,0.12), rgba(192,132,252,0.4))" }}>
         {animate && <span className="absolute w-1.5 h-1.5 rounded-full" style={{ ...dot, left: "50%", marginLeft: -3, animation: `flowY 2.6s linear ${delay}s infinite` }} />}
       </div>
     </div>
@@ -41,9 +41,9 @@ export function TechEcosystem() {
   const { tier } = useMotionState();
   const animate = !reduced && tier !== "low";
   const stages = [
-    { label: "Python",     sub: "foundation", Icon: Code,     c: "#60a5fa" },
-    { label: "FastAPI",    sub: "the backend", Icon: Zap,      c: "#6366f1" },
-    { label: "AI Agents",  sub: "the brains",  Icon: Bot,      c: "#818cf8" },
+    { label: "Python",     sub: "foundation", Icon: Code,     c: "#a78bfa" },
+    { label: "FastAPI",    sub: "the backend", Icon: Zap,      c: "#8b5cf6" },
+    { label: "AI Agents",  sub: "the brains",  Icon: Bot,      c: "#a78bfa" },
     { label: "Automation", sub: "the glue",    Icon: Workflow, c: "#8b5cf6" },
     { label: "Cloud",      sub: "the scale",   Icon: Cloud,    c: "#a855f7" },
     { label: "Deploy",     sub: "shipped",     Icon: Rocket,   c: "#c084fc" },

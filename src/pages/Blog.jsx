@@ -52,7 +52,7 @@ export function Blog({ openArticle }) {
         <Reveal delay={0.1}><p className="max-w-2xl mt-5 text-slate-400">Field notes on AI engineering, automation systems and the road to building a real AI company.</p></Reveal>
         <Reveal delay={0.16}><div className="flex items-center gap-3 mt-6">
           {["All","Engineering","AI Agents","Workflow","Strategy"].map((t,i)=>(
-            <button key={t} className={`px-3.5 py-1.5 rounded-full text-xs mono transition-all duration-500 ${i===0?"text-white":"text-slate-400 hover:text-white"}`} style={i===0?{background:"linear-gradient(135deg,#3b82f6,#8b5cf6)"}:{border:"1px solid rgba(255,255,255,0.08)"}}>{t}</button>
+            <button key={t} className={`px-3.5 py-1.5 rounded-full text-xs mono transition-all duration-500 ${i===0?"text-white":"text-slate-400 hover:text-white"}`} style={i===0?{background:"linear-gradient(135deg,#7c3aed,#8b5cf6)"}:{border:"1px solid rgba(255,255,255,0.08)"}}>{t}</button>
           ))}
         </div></Reveal>
       </div></section>
@@ -60,11 +60,11 @@ export function Blog({ openArticle }) {
         <Reveal><div className="group glass glass-hover rounded-3xl overflow-hidden grid md:grid-cols-2" data-cursor>
           <div className="relative min-h-[220px] overflow-hidden"><BlogVisual cat={feat.cat} /></div>
           <div className="p-8 flex flex-col justify-center">
-            <span className="text-xs mono px-3 py-1 rounded-full glass w-fit text-indigo-200 mb-4">featured</span>
+            <span className="text-xs mono px-3 py-1 rounded-full glass w-fit text-violet-200 mb-4">featured</span>
             <h2 className="text-2xl font-bold text-white">{feat.title}</h2>
             <p className="text-slate-400 mt-3 text-sm leading-relaxed">{feat.excerpt}</p>
             <div className="flex items-center gap-4 mt-5 text-xs mono text-slate-400"><span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{feat.date}</span><span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{feat.read}</span></div>
-            <button onClick={() => openArticle(feat.slug)} onMouseEnter={prefetchMainArticle} onFocus={prefetchMainArticle} className="btn-glow mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white w-fit" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>Read article <ArrowRight className="w-4 h-4" /></button>
+            <button onClick={() => openArticle(feat.slug)} onMouseEnter={prefetchMainArticle} onFocus={prefetchMainArticle} className="btn-glow mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white w-fit" style={{ background: "linear-gradient(135deg,#7c3aed,#8b5cf6)" }}>Read article <ArrowRight className="w-4 h-4" /></button>
           </div>
         </div></Reveal>
       </section>
@@ -74,10 +74,10 @@ export function Blog({ openArticle }) {
             <article className="glass glass-hover rounded-2xl overflow-hidden group h-full flex flex-col" data-cursor>
               <div className="h-40 relative overflow-hidden"><BlogVisual cat={p.cat} /><span className="absolute top-3 left-3 z-10 text-[11px] mono px-2.5 py-1 rounded-full text-white" style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(6px)" }}>{p.cat}</span></div>
               <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-white font-semibold leading-snug group-hover:text-indigo-200 transition-colors">{p.title}</h3>
+                <h3 className="text-white font-semibold leading-snug group-hover:text-violet-200 transition-colors">{p.title}</h3>
                 <p className="text-sm text-slate-400 mt-2 leading-relaxed flex-1">{p.excerpt}</p>
                 <div className="flex items-center gap-4 mt-4 text-xs mono text-slate-400"><span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{p.date}</span><span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{p.read}</span></div>
-                <button onClick={() => openArticle(p.slug)} className="mt-4 inline-flex items-center gap-1.5 text-sm mono text-indigo-300 hover:text-white transition-colors w-fit">Read article →</button>
+                <button onClick={() => openArticle(p.slug)} className="mt-4 inline-flex items-center gap-1.5 text-sm mono text-violet-300 hover:text-white transition-colors w-fit">Read article →</button>
               </div>
             </article>
           </Reveal>

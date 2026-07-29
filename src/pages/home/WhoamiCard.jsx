@@ -11,8 +11,8 @@ export const WhoamiCard = memo(function WhoamiCard() {
     let current = 0;
     const highlight = (idx) => {
       spans.forEach((s, i) => {
-        s.style.background = i === idx ? "rgba(99,102,241,0.18)" : "transparent";
-        s.style.boxShadow = i === idx ? "inset 2px 0 0 #818cf8" : "inset 2px 0 0 transparent";
+        s.style.background = i === idx ? "rgba(139,92,246,0.18)" : "transparent";
+        s.style.boxShadow = i === idx ? "inset 2px 0 0 #a78bfa" : "inset 2px 0 0 transparent";
       });
     };
     highlight(0);
@@ -34,7 +34,7 @@ export const WhoamiCard = memo(function WhoamiCard() {
       </div>
       <div className="p-4 mono text-xs space-y-1.5">
         <span data-hl style={_HL_BASE} className="text-slate-400">// whoami.ts</span>
-        <span data-hl style={_HL_BASE}><span className="text-indigo-400">const</span> <span className="text-sky-300">engineer</span> <span className="text-slate-400">=</span> {"{"}</span>
+        <span data-hl style={_HL_BASE}><span className="text-violet-400">const</span> <span className="text-fuchsia-300">engineer</span> <span className="text-slate-400">=</span> {"{"}</span>
         <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">name: <span className="text-emerald-300">"Rehan Nazir"</span>,</span>
         <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">role: <span className="text-emerald-300">"AI &amp; Automation Eng"</span>,</span>
         <span data-hl style={_HL_BASE} className="pl-4 text-slate-300">stack: [<span className="text-emerald-300">"FastAPI"</span>, <span className="text-emerald-300">"n8n"</span>, <span className="text-emerald-300">"LLMs"</span>],</span>

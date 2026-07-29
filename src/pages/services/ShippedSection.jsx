@@ -26,12 +26,12 @@ export function ShippedSection() {
             <div key={p.n} className="group grid grid-cols-[44px_1fr] md:grid-cols-[44px_1fr_160px_1fr_60px] gap-4 px-6 py-4 items-center border-b border-white/5 last:border-b-0 transition-all duration-700 hover:bg-white/[0.03]" data-cursor onClick={() => p.link && window.open(p.link, '_blank')} style={p.link ? {cursor:'pointer'} : {}}>
               <span className="mono text-xs text-slate-400">{p.n}</span>
               <div className="min-w-0">
-                <div className="text-white font-medium text-sm group-hover:text-indigo-200 transition-colors duration-500">{p.title}</div>
+                <div className="text-white font-medium text-sm group-hover:text-violet-200 transition-colors duration-500">{p.title}</div>
                 <div className="mono text-[10px] text-slate-400 mt-0.5">{p.client}</div>
               </div>
               <span className="hidden md:block mono text-xs text-slate-400">{p.role}</span>
               <div className="hidden md:flex flex-wrap gap-1.5">
-                {p.stack.map(s=>(<span key={s} className="px-2 py-0.5 rounded text-[10px] mono" style={{background:"rgba(99,102,241,0.1)",color:"#a5b4fc"}}>{s}</span>))}
+                {p.stack.map(s=>(<span key={s} className="px-2 py-0.5 rounded text-[10px] mono" style={{background:"rgba(139,92,246,0.1)",color:"#c4b5fd"}}>{s}</span>))}
               </div>
               <span className="hidden md:block mono text-[11px] text-slate-400 text-right">{p.year}</span>
             </div>
