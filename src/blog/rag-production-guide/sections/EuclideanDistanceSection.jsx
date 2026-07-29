@@ -107,7 +107,7 @@ print(cosine_similarity(short_review, long_review)) # -> 1.00  (identical direct
 
       <ChapterPrevNext
         prev={{ id: "dot-product", title: "Dot Product" }}
-        next={{ title: "High-Dimensional Space", comingSoon: true }}
+        next={{ id: "high-dimensional-space", title: "High-Dimensional Space" }}
         go={go}
       />
     </>

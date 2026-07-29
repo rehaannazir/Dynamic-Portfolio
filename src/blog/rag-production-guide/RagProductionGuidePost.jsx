@@ -15,6 +15,16 @@ import { DistanceMetricsSection } from "./sections/DistanceMetricsSection";
 import { CosineSimilaritySection } from "./sections/CosineSimilaritySection";
 import { DotProductSection } from "./sections/DotProductSection";
 import { EuclideanDistanceSection } from "./sections/EuclideanDistanceSection";
+import { HighDimensionalSpaceSection } from "./sections/HighDimensionalSpaceSection";
+import { AnnIntuitionSection } from "./sections/AnnIntuitionSection";
+import { DocumentsSection } from "./sections/DocumentsSection";
+import { ChunkingSection } from "./sections/ChunkingSection";
+import { GeneratingEmbeddingsSection } from "./sections/GeneratingEmbeddingsSection";
+import { VectorStorageSection } from "./sections/VectorStorageSection";
+import { RetrievalSection } from "./sections/RetrievalSection";
+import { PromptConstructionSection } from "./sections/PromptConstructionSection";
+import { LlmResponseSection } from "./sections/LlmResponseSection";
+import { GroundingSection } from "./sections/GroundingSection";
 
 /* ─────────────────────────────────────────────────────────
    RAG MASTER GUIDE — same composition pattern as
@@ -74,6 +84,16 @@ export default function RagProductionGuidePost({ back }) {
             <CosineSimilaritySection go={go} />
             <DotProductSection go={go} />
             <EuclideanDistanceSection go={go} />
+            <HighDimensionalSpaceSection go={go} />
+            <AnnIntuitionSection go={go} />
+            <DocumentsSection go={go} />
+            <ChunkingSection go={go} />
+            <GeneratingEmbeddingsSection go={go} />
+            <VectorStorageSection go={go} />
+            <RetrievalSection go={go} />
+            <PromptConstructionSection go={go} />
+            <LlmResponseSection go={go} />
+            <GroundingSection go={go} />
           </div>
         </div>
       </div>
