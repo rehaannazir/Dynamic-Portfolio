@@ -2,15 +2,11 @@ import { memo, useEffect, useRef } from "react";
 import { isCoarse, prefersReduced } from "@/lib/motion";
 
 /* ===================== HERO PORTRAIT ===================== */
-/* The hero's only right-side visual: a cutout of the subject floating in space —
-   no card, no frame, no box. The source photo has a solid black backdrop, so a
-   plain mix-blend-mode:screen composite (photo pixel black -> whatever sits behind
-   shows through unchanged) reads as a true alpha cutout with zero extra processing,
-   while a blurred + hue-shifted duplicate of the same photo underneath produces a
-   silhouette-hugging purple rim-glow (the sharp layer on top fully re-covers its own
-   footprint, so the glow only ever peeks out past the edges — it never lands on the
-   face). Orbital rings / particles / ambient glow sit further back, at lower opacity,
-   so nothing crosses in front of the subject. */
+/* The hero's only right-side visual: a real alpha-cutout PNG (background already
+   removed) floating in space — no card, no frame, no box. Rim glow and grounding
+   shadow are both plain CSS drop-shadow, which follows the image's actual alpha
+   silhouette, so light hugs the real edges instead of a rectangle. Orbital rings,
+   particles and ambient glow sit behind at low opacity; nothing crosses the face. */
 
 const PARTICLES = Array.from({ length: 12 }, (_, i) => {
   const angle = (i / 12) * Math.PI * 2 + 0.3;
@@ -66,7 +62,7 @@ export const HeroPortrait = memo(function HeroPortrait() {
     };
   }, []);
 
-  const sources = (ext) => `/rehan-portrait-480.${ext} 480w, /rehan-portrait-720.${ext} 720w, /rehan-portrait-960.${ext} 960w, /rehan-portrait-1200.${ext} 1200w`;
+  const sources = (ext) => `/rehan-cutout-480.${ext} 480w, /rehan-cutout-720.${ext} 720w, /rehan-cutout-960.${ext} 960w, /rehan-cutout-1200.${ext} 1200w`;
   const sizes = "(min-width:1024px) 34vw, 72vw";
 
   return (
@@ -77,7 +73,7 @@ export const HeroPortrait = memo(function HeroPortrait() {
     >
       {/* ---- depth layer: sits behind the subject, never in front ---- */}
       <div aria-hidden="true" className="absolute inset-0 portrait-depth" style={{ transform: "translate3d(var(--px,0),var(--py,0),0)" }}>
-        <div className="absolute rounded-full blur-3xl portrait-ambient" style={{ width: "58%", left: "50%", top: "58%", aspectRatio: "1/1", transform: "translate(-50%,-50%)", background: "radial-gradient(circle, rgba(139,92,246,0.24), transparent 72%)", animation: "drift 26s ease-in-out infinite" }} />
+        <div className="absolute rounded-full blur-3xl" style={{ width: "58%", left: "50%", top: "58%", aspectRatio: "1/1", transform: "translate(-50%,-50%)", background: "radial-gradient(circle, rgba(139,92,246,0.24), transparent 72%)", animation: "drift 26s ease-in-out infinite" }} />
 
         <svg aria-hidden="true" className="absolute" viewBox="0 0 400 400" style={{ left: "50%", top: "62%", width: "150%", height: "46%", transform: "translate(-50%,-50%)", animation: "spinSlow 48s linear infinite" }}>
           <ellipse cx="200" cy="200" rx="196" ry="196" fill="none" stroke="rgba(139,92,246,0.26)" strokeWidth="1.4" strokeDasharray="2 12" />
@@ -90,35 +86,28 @@ export const HeroPortrait = memo(function HeroPortrait() {
           <span key={i} className="absolute rounded-full" style={{ left: p.left + "%", top: p.top + "%", width: p.size, height: p.size, background: "#8B5CF6", opacity: p.op, boxShadow: "0 0 8px 1px rgba(139,92,246,0.5)", animation: `floatA ${p.dur}s ease-in-out infinite`, animationDelay: p.delay + "s" }} />
         ))}
 
-        <div className="absolute inset-x-0 bottom-0 portrait-fog" style={{ height: "38%", background: "linear-gradient(to top, rgba(139,92,246,0.14), transparent)" }} />
+        {/* a couple of small glass fragments catching light near the figure — never wrapping it */}
+        <div className="portrait-shard" style={{ width: 38, height: 52, left: "20%", top: "30%", transform: "rotate(-16deg)", animation: "floatB 13s ease-in-out infinite" }} />
+        <div className="portrait-shard" style={{ width: 24, height: 32, left: "80%", top: "58%", transform: "rotate(11deg)", animation: "floatA 15s ease-in-out infinite", animationDelay: "2s" }} />
+
+        {/* soft contact glow grounding the figure */}
+        <div className="absolute rounded-full blur-2xl" style={{ width: "44%", height: "6%", left: "50%", bottom: "6%", transform: "translateX(-50%)", background: "radial-gradient(ellipse, rgba(139,92,246,0.22), transparent 75%)" }} />
       </div>
 
       {/* ---- the subject ---- */}
       <div className="floating relative h-full" style={{ "--amp": "-12px", "--fdur": "8.5s" }}>
-        <div ref={tiltRef} className="portrait-tilt h-full relative">
-          {/* rim/bloom layer — blurred + purple-shifted duplicate, painted first (behind) */}
-          <img
-            src="/rehan-portrait-720.jpg"
-            srcSet={sources("jpg")}
-            sizes={sizes}
-            alt=""
-            aria-hidden="true"
-            width="1003"
-            height="1254"
-            className="portrait-cutout portrait-rim absolute top-0 left-0 h-full w-auto select-none"
-          />
-          {/* sharp subject — painted on top, fully re-covers the rim layer's own footprint */}
+        <div ref={tiltRef} className="portrait-tilt h-full">
           <picture>
             <source type="image/avif" srcSet={sources("avif")} sizes={sizes} />
             <source type="image/webp" srcSet={sources("webp")} sizes={sizes} />
             <img
-              src="/rehan-portrait-720.jpg"
-              srcSet={sources("jpg")}
+              src="/rehan-cutout-720.png"
+              srcSet={sources("png")}
               sizes={sizes}
               alt="Rehan Nazir — AI Engineer and Automation Specialist"
-              width="1003"
-              height="1254"
-              className="portrait-cutout portrait-sharp relative block h-full w-auto select-none"
+              width="524"
+              height="720"
+              className="portrait-cutout block h-full w-auto select-none"
               fetchPriority="high"
             />
           </picture>
