@@ -1,0 +1,10 @@
+import { chromium } from "playwright";
+const out = "C:/Users/User/AppData/Local/Temp/claude/c--Users-User-Desktop-rehan-portfolio/b3177b9f-09af-400a-876c-b2ddfc1b6b7c/scratchpad";
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, colorScheme: "dark" });
+await page.goto("http://localhost:5188", { waitUntil: "load", timeout: 30000 });
+await page.waitForTimeout(1500);
+await page.mouse.wheel(0, 900);
+await page.waitForTimeout(2000);
+await page.screenshot({ path: `${out}/reel-in-page.png` });
+await browser.close();

@@ -1,11 +1,11 @@
 import { lazy, memo, Suspense, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Activity, ArrowRight, GitBranch } from "lucide-react";
+import { Activity, ArrowRight, Camera, GitBranch } from "lucide-react";
 import { detectCapable, Reveal, SectionTransition, smoothTo, useMagnetic } from "@/lib/motion";
 import { SITE_URL } from "@/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Hero3D } from "./home/Hero3D";
-import { HeroPortrait } from "./home/HeroPortrait";
+import { WhoamiCard } from "./home/WhoamiCard";
 import { ProjectShowcase } from "./home/ProjectShowcase";
 import { TechEcosystem } from "./home/TechEcosystem";
 import { ShowreelSection } from "./home/ShowreelSection";
@@ -17,6 +17,7 @@ const AIArchitecture = lazy(() => import("./home/AIArchitecture"));
 
 /* ===================== HOME ===================== */
 export const Home = memo(function Home({ setPage }) {
+  const PROFILE_PIC = "/rehan.jpeg";
   const workRef = useMagnetic();
   const touchRef = useMagnetic();
   const [aiCapable] = useState(detectCapable);
@@ -50,10 +51,10 @@ export const Home = memo(function Home({ setPage }) {
           }
         })}</script>
       </Helmet>
-      <section id="intro" className="grid-bg relative overflow-hidden" style={{ minHeight: "max(720px, 92vh)" }}>
+      <section id="intro" className="grid-bg relative overflow-hidden">
         <Suspense fallback={<Hero3D />}><HeroWebGL fallback={<Hero3D />} /></Suspense>
         <div className="relative z-10 max-w-6xl mx-auto px-5 pt-20 pb-24 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="lg:self-start">
+          <div>
             <div className="fade-up"><div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs mono text-violet-200"><span className="w-2 h-2 rounded-full" style={{ background: "#34d399", boxShadow: "0 0 10px #34d399" }} />Available · Open to projects worldwide</div></div>
             <h1 className="fade-up text-5xl md:text-6xl font-bold tracking-tight text-white mt-6" style={{ animationDelay: ".05s", lineHeight: 1.05 }}>I'm Rehan</h1>
             <h2 className="fade-up text-5xl md:text-6xl font-bold tracking-tight mt-1" style={{ animationDelay: ".12s", lineHeight: 1.05 }}><span className="grad-text">I build AI systems</span></h2>
@@ -64,8 +65,28 @@ export const Home = memo(function Home({ setPage }) {
               <button ref={touchRef} onClick={() => smoothTo(document.getElementById("contact"), { offset: -80 })} className="magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-slate-200 glass glass-hover">Get in touch</button>
             </div>
           </div>
-          <div className="relative fade-up lg:h-0 lg:self-start" style={{ animationDelay: ".2s" }}>
-            <HeroPortrait />
+          <div className="fade-up flex flex-col gap-5" style={{ animationDelay: ".2s" }}>
+            <div className="glass rounded-3xl p-7 text-center relative overflow-hidden">
+              <div className="absolute inset-0 opacity-50" style={{ background: "radial-gradient(400px 160px at 50% 0%, rgba(139,92,246,0.25), transparent 70%)" }} />
+              <div className="relative text-center flex flex-col items-center">
+                <div className="block mx-auto w-36 h-36 rounded-full relative">
+                  <div className="absolute -inset-1 rounded-full" style={{ background: "linear-gradient(135deg,#7c3aed,#8b5cf6)", animation: "spinSlow 22s linear infinite", opacity: 0.8 }} />
+                  <div className="absolute inset-0 rounded-full overflow-hidden border-2 border-white/10 flex items-center justify-center" style={{ background: "#0c0c16" }}>
+                    {PROFILE_PIC ? (
+                      <picture>
+                        <source type="image/avif" srcSet="/rehan-144.avif 144w, /rehan-288.avif 288w, /rehan-432.avif 432w" sizes="144px" />
+                        <source type="image/webp" srcSet="/rehan-144.webp 144w, /rehan-288.webp 288w, /rehan-432.webp 432w" sizes="144px" />
+                        <img src="/rehan-144.jpg" alt="Rehan Nazir — AI Engineer and Automation Specialist, Lahore Pakistan" width="144" height="144" className="w-full h-full object-cover" fetchPriority="high" />
+                      </picture>
+                    ) : <div className="flex flex-col items-center text-slate-400 px-3 text-center"><Camera className="w-7 h-7 mb-1" /><span className="text-[9px] mono leading-tight">set PROFILE_PIC in code</span></div>}
+                  </div>
+                </div>
+                <h3 className="text-white font-semibold text-lg mt-5">Rehan Nazir</h3>
+                <p className="text-xs mono text-violet-300 mt-0.5">// based in Lahore, Pakistan</p>
+                <p className="text-sm text-slate-400 mt-3 leading-relaxed max-w-xs mx-auto">Helping ideas become intelligent systems through AI engineering and automation.Design. Build. Deploy. AI.</p>
+              </div>
+            </div>
+            <WhoamiCard />
           </div>
         </div>
       </section>
