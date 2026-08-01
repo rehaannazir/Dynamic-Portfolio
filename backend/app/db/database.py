@@ -1,9 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Text, DateTime
-from datetime import datetime, timezone
+from sqlalchemy.orm import DeclarativeBase
 from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
-from config import settings
+from app.core.config import settings
 from typing import AsyncGenerator
 
 
@@ -25,19 +23,6 @@ SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):
     pass
-
-
-class ContactMessage(Base):
-    __tablename__ = "contact_messages"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100))
-    email: Mapped[str] = mapped_column(String(200))
-    details: Mapped[str] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-    )
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

@@ -4,9 +4,9 @@ import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { Reveal } from "@/lib/motion";
 import { SITE_URL } from "@/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { POSTS } from "@/blog/posts";
-import { BlogVisual } from "@/blog/BlogVisual";
-import { prefetchMainArticle } from "@/blog/python-ideal-for-automation/articleLoader";
+import { POSTS } from "@/features/blog/posts";
+import { BlogVisual } from "@/features/blog/BlogVisual";
+import { prefetchMainArticle } from "@/features/blog/python-ideal-for-automation/articleLoader";
 
 /* ===================== BLOG ===================== */
 export function Blog({ openArticle }) {

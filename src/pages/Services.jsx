@@ -3,8 +3,8 @@ import { CircleCheck, Code, Cpu, ExternalLink, Layers, MessageSquare, TrendingUp
 import { Reveal } from "@/lib/motion";
 import { SITE_URL } from "@/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { ShippedSection } from "./services/ShippedSection";
-import { FAQSection } from "./services/FAQSection";
+import { ShippedSection } from "@/features/services/ShippedSection";
+import { FAQSection } from "@/features/services/FAQSection";
 
 /* ===================== SERVICES ===================== */
 export function Services() {

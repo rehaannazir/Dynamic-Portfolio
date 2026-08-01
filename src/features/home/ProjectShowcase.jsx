@@ -1,6 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { useScrub } from "@/lib/motion";
-import { BlogVisual } from "@/blog/BlogVisual";
+import { BlogVisual } from "@/features/blog/BlogVisual";
 
 /* ===================== PROJECT SHOWCASE ===================== */
 /* Each project is presented as a cinematic product row: an animated architecture/pipeline

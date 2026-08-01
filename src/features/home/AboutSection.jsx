@@ -68,7 +68,9 @@ export function AboutSection() {
         {/* Left: floating terminal panel — scroll parallax + idle float (separate nodes) */}
         <Reveal variant="left" duration={1.7}>
           <div ref={panelRef}>
-          <div className="relative float-soft" style={{height:400}}>
+          {/* Desktop / tablet-landscape: floating dashboard composition (needs the extra
+              horizontal room a 2-column row gives it — see the stacked fallback below). */}
+          <div className="hidden lg:block relative float-soft" style={{height:400}}>
             {/* GIT ACTIVITY — top left */}
             <div className="absolute left-0 top-0 z-20 glass rounded-xl p-3" style={{width:162,boxShadow:"0 10px 36px rgba(0,0,0,0.55)"}}>
               <div className="flex items-center justify-between mb-2">
@@ -120,6 +122,61 @@ export function AboutSection() {
               {[["POST","/api/agent"],["GET","/api/rag","200"],["POST","/api/embed"]].map(([m,p,s],i)=>(
                 <div key={i} className="flex items-center gap-2 py-1 mono text-[8.5px]">
                   <span style={{color:m==="GET"?"#a78bfa":"#a78bfa",width:30,flexShrink:0}}>{m}</span>
+                  <span className="text-slate-400 flex-1 truncate">{p}</span>
+                  {s&&<span className="text-emerald-400">{s}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Mobile / narrow tablet: same cards, stacked in normal flow — the absolute,
+              fixed-pixel-width composition above only has room to breathe at lg+. */}
+          <div className="lg:hidden flex flex-col gap-3">
+            <div className="glass rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="mono text-[10px] text-slate-400 uppercase tracking-wider">Git Activity</span>
+                <span className="mono text-[10px] text-violet-400">7D</span>
+              </div>
+              <div className="flex gap-px items-end" style={{height:34}}>
+                {barH.map((h,i)=>(
+                  <div key={i} style={{flex:1,height:h*2.4+"px",borderRadius:2,background:`rgba(139,92,246,${0.18+h/18})`,animation:`vpulse ${2+i*0.12}s ease-in-out ${i*0.08}s infinite`}}/>
+                ))}
+              </div>
+              <div className="mono text-xs text-white font-bold mt-2">142 <span className="text-slate-400 font-normal">commits</span></div>
+            </div>
+            <div className="rounded-xl px-3 py-2.5" style={{background:"rgba(14,14,26,0.94)",border:"1px solid rgba(52,211,153,0.22)"}}>
+              <div className="flex items-center gap-2 mb-0.5">
+                <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{background:"rgba(52,211,153,0.18)"}}>
+                  <span className="text-emerald-400 text-[9px] leading-none">✓</span>
+                </div>
+                <span className="mono text-xs text-white font-medium">Deployed to production</span>
+              </div>
+              <span className="mono text-[9px] text-slate-400 ml-6">vercel · 1m 24s · @nyvexa</span>
+            </div>
+            <div className="glass rounded-2xl overflow-hidden">
+              <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70"/><span className="w-2.5 h-2.5 rounded-full bg-green-400/70"/>
+                <span className="mono text-xs text-slate-400 ml-2">~/rehan — zsh</span>
+              </div>
+              <TerminalSequence />
+            </div>
+            <div className="glass rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="mono text-[10px] text-slate-400 uppercase tracking-wider">Inference</span>
+                <span className="mono text-[10px] text-purple-400">Claude</span>
+              </div>
+              <svg viewBox="0 0 120 44" className="w-full">
+                {[[18,10],[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]].map(([x,y],i)=>(
+                  <g key={i}>
+                    <circle cx={x} cy={y} r="3.5" fill={["#a78bfa","#a78bfa","#c084fc","#a78bfa","#a78bfa","#a78bfa","#c084fc"][i]} style={{animation:`vpulse ${2+i*0.3}s ease-in-out ${i*0.22}s infinite`}}/>
+                    {i<6&&<line x1={x} y1={y} x2={[[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]][i][0]} y2={[[60,6],[104,16],[32,34],[82,38],[50,22],[10,38]][i][1]} stroke="rgba(139,92,246,0.22)" strokeWidth="0.8"/>}
+                  </g>
+                ))}
+              </svg>
+            </div>
+            <div className="glass rounded-xl px-3 py-2.5">
+              {[["POST","/api/agent"],["GET","/api/rag","200"],["POST","/api/embed"]].map(([m,p,s],i)=>(
+                <div key={i} className="flex items-center gap-2 py-1 mono text-[10px]">
+                  <span style={{color:"#a78bfa",width:34,flexShrink:0}}>{m}</span>
                   <span className="text-slate-400 flex-1 truncate">{p}</span>
                   {s&&<span className="text-emerald-400">{s}</span>}
                 </div>

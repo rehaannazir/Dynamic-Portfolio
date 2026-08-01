@@ -1,4 +1,4 @@
-from models import Project, ServiceItem, Review, Post
+from app.schemas.portfolio import Project, ServiceItem, Review, Post
 
 PROJECTS: list[Project] = [
     Project(

@@ -4,16 +4,16 @@ import { Activity, ArrowRight, Camera, GitBranch } from "lucide-react";
 import { detectCapable, Reveal, SectionTransition, smoothTo, useMagnetic } from "@/lib/motion";
 import { SITE_URL } from "@/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { Hero3D } from "./home/Hero3D";
-import { WhoamiCard } from "./home/WhoamiCard";
-import { ProjectShowcase } from "./home/ProjectShowcase";
-import { TechEcosystem } from "./home/TechEcosystem";
-import { ShowreelSection } from "./home/ShowreelSection";
-import { AboutSection } from "./home/AboutSection";
+import { Hero3D } from "@/features/home/Hero3D";
+import { WhoamiCard } from "@/features/home/WhoamiCard";
+import { ProjectShowcase } from "@/features/home/ProjectShowcase";
+import { TechEcosystem } from "@/features/home/TechEcosystem";
+import { ShowreelSection } from "@/features/home/ShowreelSection";
+import { AboutSection } from "@/features/home/AboutSection";
 import { ContactSection } from "@/sections/ContactSection";
 
-const HeroWebGL = lazy(() => import("./home/HeroWebGL"));
-const AIArchitecture = lazy(() => import("./home/AIArchitecture"));
+const HeroWebGL = lazy(() => import("@/features/home/HeroWebGL"));
+const AIArchitecture = lazy(() => import("@/features/home/AIArchitecture"));
 
 /* ===================== HOME ===================== */
 export const Home = memo(function Home({ setPage }) {

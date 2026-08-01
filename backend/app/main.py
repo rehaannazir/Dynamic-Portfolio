@@ -6,10 +6,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from config import settings
-from database import init_db
-from routers.contact import router as contact_router
-from routers.portfolio import router as portfolio_router
+from app.core.config import settings
+from app.db.database import init_db
+from app.api.routers.contact import router as contact_router
+from app.api.routers.portfolio import router as portfolio_router
 
 logging.basicConfig(
     level=logging.INFO,

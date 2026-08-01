@@ -2,9 +2,9 @@ import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { SITE_URL } from "@/constants";
-import { POSTS } from "@/blog/posts";
-import { PythonAutomationPost } from "@/blog/python-ideal-for-automation/articleLoader";
-import { RagProductionGuidePost } from "@/blog/rag-production-guide/articleLoader";
+import { POSTS } from "@/features/blog/posts";
+import { PythonAutomationPost } from "@/features/blog/python-ideal-for-automation/articleLoader";
+import { RagProductionGuidePost } from "@/features/blog/rag-production-guide/articleLoader";
 
 /* Mirrors the real article's hero (`minHeight: 88vh`, centered column) so the swap from
    fallback to loaded content resizes nothing already painted above the fold. Content that

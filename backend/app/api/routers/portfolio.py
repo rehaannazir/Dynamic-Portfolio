@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from models import Project, ServiceItem, Review, Post
-from data import PROJECTS, SERVICES, REVIEWS, POSTS, POSTS_BY_SLUG
+from app.schemas.portfolio import Project, ServiceItem, Review, Post
+from app.services.portfolio_data import PROJECTS, SERVICES, REVIEWS, POSTS, POSTS_BY_SLUG
 
 router = APIRouter(prefix="/api", tags=["portfolio"])
 
